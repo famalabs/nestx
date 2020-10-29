@@ -1,0 +1,36 @@
+{
+  "name": "@famalabs/nestx-auth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "@nestjs/common": "^7.4.4",
+    "@nestjs/core": "^7.4.4",
+    "@nestjs/swagger": "^4.6.1",
+    "@typegoose/typegoose": "^7.4.1",
+    "mongoose": "^5.10.10",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^6.6.3",
+    "swagger-ui-express": "^4.1.4"
+  },
+  "dependencies": {
+    "@nestjs/jwt": "^7.1.0",
+    "@nestjs/passport": "^7.1.0",
+    "class-transformer": "^0.3.1",
+    "class-validator": "^0.12.2",
+    "nodemailer": "^6.4.14",
+    "passport": "^0.4.1",
+    "passport-facebook": "^3.0.0",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
+    "uuid": "^8.3.1"
+  }
+}

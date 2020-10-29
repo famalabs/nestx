@@ -1,0 +1,11 @@
+# dependencies
+node_modules/
+
+# bundle
+packages/**/dist
+packages/**/*.d.ts
+packages/**/*.js
+
+# example
+/sample
+

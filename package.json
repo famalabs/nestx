@@ -1,0 +1,30 @@
+{
+  "name": "root",
+  "author": "FamaLabs",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "@famalabs/nestx-auth": "file:packages\\auth",
+    "@famalabs/nestx-core": "file:packages\\core"
+  },
+  "devDependencies": {
+    "@nestjs/common": "^7.4.4",
+    "@nestjs/core": "^7.4.4",
+    "@nestjs/mongoose": "^7.0.2",
+    "@nestjs/swagger": "^4.6.1",
+    "@typegoose/typegoose": "^7.4.1",
+    "@types/express": "^4.17.8",
+    "@types/express-session": "^1.17.0",
+    "@types/mongoose": "^5.7.36",
+    "@types/passport-facebook": "^2.1.10",
+    "@types/passport-google-oauth20": "^2.0.4",
+    "@types/passport-jwt": "^3.0.3",
+    "@types/passport-local": "^1.0.33",
+    "cache-manager": "^3.4.0",
+    "lerna": "^3.22.1",
+    "mongoose": "^5.10.10",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^6.6.3",
+    "swagger-ui-express": "^4.1.4"
+  }
+}
