@@ -2,14 +2,17 @@
   "name": "@famalabs/nestx-core",
   "version": "0.0.1",
   "description": "",
+  "author": "",
+  "license": "MIT",
   "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "MIT",
   "peerDependencies": {
     "@nestjs/common": "^7.4.4",
     "@nestjs/core": "^7.4.4",

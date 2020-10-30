@@ -1,9 +1,6 @@
 import { IsArray, IsInt, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { Where } from './where.dto';
-import { Include } from './include.dto';
-import { ParseString, ref } from '@app/core';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class Filter<T> {
   @IsOptional()

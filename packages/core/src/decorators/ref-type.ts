@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { Transform } from 'class-transformer';
-import { BaseModel } from '@app/core/model';
+import { BaseModel } from '../model';
 import { mongoose } from '@typegoose/typegoose';
 
 export function RefType<T extends BaseModel>(typeFn: () => new(...args: any[]) => T): PropertyDecorator {

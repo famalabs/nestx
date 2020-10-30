@@ -2,7 +2,7 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiQuery as SrcApiQuery, ApiQueryOptions as BaseApiQueryOptions } from '@nestjs/swagger';
 import { DECORATORS } from '@nestjs/swagger/dist/constants';
 import { MediaTypeObject, ReferenceObject, SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
-import { ref } from '@app/core/model';
+import { ref } from '../model';
 import apply = Reflect.apply;
 
 declare type ApiQueryOptions = (BaseApiQueryOptions & { name: string, schema: SchemaObject | ReferenceObject, type?: undefined }) |
