@@ -4,7 +4,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "publish": "lerna run clean && lerna run build && lerna run publish"
+    "publish": "lerna run clean && lerna run build && lerna publish"
   },
   "dependencies": {
     "@famalabs/nestx-auth": "file:packages\\auth",
