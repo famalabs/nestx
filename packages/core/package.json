@@ -16,9 +16,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
-    "prepare": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc"
   },
   "peerDependencies": {
     "@nestjs/common": "^7.4.4",

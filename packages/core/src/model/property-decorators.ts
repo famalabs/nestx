@@ -15,8 +15,8 @@ export function DateStringProperty(metadata?: ApiModelPropertyParameter, validat
   return applyDecorators(
     ApiProperty({ type: String, example: example_date, ...metadata }),
     IsDate(validationOptions),
-    Type(() => Date),
-    Transform((value: Date) => value && value.toISOString(), { toPlainOnly: true }),
+    Type(() => Date) as PropertyDecorator,
+    Transform((value: Date) => value && value.toISOString(), { toPlainOnly: true }) as PropertyDecorator,
   );
 }
 
@@ -25,7 +25,7 @@ export function ArrayProperty(metadata: ApiModelPropertyType, validationOptions?
   return applyDecorators(
     ApiProperty({ isArray: true, ...metadata }),
     IsArray(),
-    Type(() => type),
+    Type(() => type) as PropertyDecorator,
     ValidateNested({ each: true, ...validationOptions }),
     // Transform((value) => (value instanceof Array ? value : [value]).map(e => new type(e))),
   );

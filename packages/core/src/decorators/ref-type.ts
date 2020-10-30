@@ -17,6 +17,6 @@ export function RefType<T extends BaseModel>(typeFn: () => new(...args: any[]) =
         return new type(value);
       }
       return value;
-    }),
+    }) as PropertyDecorator,
   );
 }
