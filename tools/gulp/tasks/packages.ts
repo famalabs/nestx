@@ -1,4 +1,4 @@
-import { source, packagePaths } from '../config';
+import { source } from '../config';
 import { task, watch, series, dest } from 'gulp';
 import { createProject } from 'gulp-typescript';
 import * as sourcemaps from 'gulp-sourcemaps';
@@ -13,7 +13,7 @@ const packages = {
 const modules = Object.keys(packages); //modules is an array with keys of packages folder as item
 
 const distId = process.argv.indexOf('--dist'); //if --dist is provided in gulp build via console
-const dist = distId < 0 ? source : process.argv[distId + 1]; //if the index of --dist is <0 (no --dist param) then dist=source. Otherwise dist=process.argv[distId+1] e.g. gulp build --dist dir1 then dist=dir1
+const dist = distId < 0 ? 'dist' : process.argv[distId + 1]; //if the index of --dist is <0 (no --dist param) then dist=source. Otherwise dist=process.argv[distId+1] e.g. gulp build --dist dir1 then dist=dir1
 
 /**
  * Watches the packages/* folder and
@@ -34,7 +34,7 @@ function buildPackage(packageName: string) {
   return packages[packageName]
     .src()
     .pipe(packages[packageName]())
-    .pipe(dest(`${dist}/${packageName}`));
+    .pipe(dest(`${source}/${packageName}/${dist}`));
 }
 
 /**
