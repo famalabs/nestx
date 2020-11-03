@@ -45,12 +45,9 @@ npm i @famalabs/nestx-core
 
 Any support is welcome. At least you can give us a star :star:
 
-
-
 ## Contributors
 
 This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
-
 
 ## License
 
