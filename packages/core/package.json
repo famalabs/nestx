@@ -16,7 +16,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc"
+    "clean": "rimraf dist",
+    "build": "tsc -p tsconfig.json"
   },
   "peerDependencies": {
     "@nestjs/common": "^7.4.4",
