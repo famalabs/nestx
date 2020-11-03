@@ -7,8 +7,7 @@
     "format": "prettier \"**/*.ts\" --ignore-path ./.prettierignore --write && git status",
     "lint:packages": "eslint 'packages/**/**.ts' --fix --ignore-pattern 'packages/**/*.spec.ts' --no-error-on-unmatched-pattern",
     "test": "echo \"Error: no test specified\" && exit 0",
-    "preversion": "npm run lint:packages && npm run format",
-    "prepare": "lerna run clean && lerna run build",
+    "preversion": "npm run lint:packages && npm run format && lerna run clean && lerna run build",
     "prepublishOnly": "npm test && npm run lint:packages",
     "release": "lerna publish --conventional-commits"
   },
