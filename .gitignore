@@ -9,6 +9,10 @@ packages/**/*.js
 # example
 /sample
 
+# misc
+/packages/**/.npmignore
+/packages/**/LICENSE
+
 # Logs
 logs
 *.log

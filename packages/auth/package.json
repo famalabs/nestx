@@ -9,10 +9,6 @@
     "url": "https://github.com/famalabs/nestx"
   },
   "bugs": "https://github.com/famalabs/nestx/issues",
-  "scripts": {},
-  "files": [
-    "dist"
-  ],
   "publishConfig": {
     "access": "public"
   },

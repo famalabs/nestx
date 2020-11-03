@@ -25,7 +25,7 @@ function cleanOutput() {
  * Cleans empty dirs
  */
 function cleanDirs(done: () => void) {
-  deleteEmpty.sync(`${source}/`);
+  console.log(deleteEmpty.sync(`/${source}/`));
   done();
 }
 
