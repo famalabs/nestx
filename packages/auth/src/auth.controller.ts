@@ -14,26 +14,26 @@ import { ExtractJwt } from 'passport-jwt';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authenticationService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('login')
   @UseGuards(LoginGuard)
   @ApiOperation({ summary: 'Login user' })
   @ApiResponse({ type: LoginResponseDto })
   async login(@Ip() userIp, @Body() credentials: LoginDto): Promise<LoginResponseDto> {
-    return await this.authenticationService.login(credentials, userIp);
+    return await this.authService.login(credentials, userIp);
   }
 
   @Post('signup')
   @ApiOperation({ summary: 'Signup user' })
   async signup(@Body() data: SignupDto): Promise<any> {
-    await this.authenticationService.signup(data);
+    await this.authService.signup(data);
   }
 
   @Get('email/verify/:token')
   @ApiOperation({ summary: 'Verify email' })
   async verifyEmail(@Param() params): Promise<any> {
-    const res = await this.authenticationService.verifyEmail(params.token);
+    const res = await this.authService.verifyEmail(params.token);
     if (res) {
       return 'Email verified';
     }
@@ -43,20 +43,20 @@ export class AuthController {
   @ApiOperation({ summary: 'Resend verification email' })
   @ApiParam({ name: 'email', required: true })
   async resendEmailVerification(@Param() params): Promise<boolean> {
-    return await this.authenticationService.resendVerificationEmail(params.email);
+    return await this.authService.resendVerificationEmail(params.email);
   }
 
   @Get('email/forgot-password/:email')
   @ApiOperation({ summary: 'Forgot password' })
   @ApiParam({ name: 'email', required: true })
   async sendEmailForgotPassword(@Param() params): Promise<boolean> {
-    return await this.authenticationService.sendForgottenPasswordEmail(params.email);
+    return await this.authService.sendForgottenPasswordEmail(params.email);
   }
 
   @Post('email/reset-password')
   @ApiOperation({ summary: 'Reset password' })
   async setNewPassord(@Body() resetPwd: ResetPasswordDto): Promise<any> {
-    return this.authenticationService.resetPassword(resetPwd);
+    return this.authService.resetPassword(resetPwd);
   }
 
   @Get('token')
@@ -72,7 +72,7 @@ export class AuthController {
     @Query('client_id') clientId?: string,
   ): Promise<LoginResponseDto> {
     const oldAccessToken = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
-    return await this.authenticationService.refreshToken(refreshToken, oldAccessToken, clientId, userIp);
+    return await this.authService.refreshToken(refreshToken, oldAccessToken, clientId, userIp);
   }
 
   @Post('logout')
@@ -87,7 +87,7 @@ export class AuthController {
     @Query('from_all') fromAll: boolean = false,
   ): Promise<any> {
     const accessToken = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
-    return await this.authenticationService.logout(req.user['_id'], accessToken, refreshToken, fromAll);
+    return await this.authService.logout(req.user['_id'], accessToken, refreshToken, fromAll);
   }
 
   @Get('me')
@@ -107,7 +107,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Google login/signup redirect' })
   @UseGuards(GoogleGuard)
   googleAuthRedirect(@Req() req) {
-    this.authenticationService.socialAccess(req);
+    this.authService.socialAccess(req);
   }
 
   @Get('/facebook')
@@ -119,6 +119,6 @@ export class AuthController {
   @ApiOperation({ summary: 'Facebook login/signup redirect' })
   @UseGuards(FacebookGuard)
   facebookLoginCallback(@Req() req) {
-    this.authenticationService.socialAccess(req);
+    this.authService.socialAccess(req);
   }
 }

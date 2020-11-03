@@ -1,9 +1,9 @@
-export * from './authentication/auth.module';
-export * from './authentication/auth.service';
-export * from './authentication/auth.controller';
-export * from './authentication/interfaces';
-export * from './authentication/guards';
-export * from './authentication/models';
-export * from './authentication/strategies';
-export * from './authentication/ACLs';
-export { LOGIN_ERRORS, SIGNUP_ERRORS } from './authentication/constants';
+export * from './auth.module';
+export * from './auth.service';
+export * from './auth.controller';
+export * from './interfaces';
+export * from './guards';
+export * from './models';
+export * from './strategies';
+export * from './ACLs';
+export { LOGIN_ERRORS, SIGNUP_ERRORS } from './constants';
