@@ -4,13 +4,17 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "publish": "lerna run clean && lerna run build && lerna publish"
-  },
-  "dependencies": {
-    "@famalabs/nestx-auth": "file:packages\\auth",
-    "@famalabs/nestx-core": "file:packages\\core"
+    "format": "prettier \"**/*.ts\" --ignore-path ./.prettierignore --write && git status",
+    "lint:packages": "eslint 'packages/**/**.ts' --fix --ignore-pattern 'packages/**/*.spec.ts' --no-error-on-unmatched-pattern",
+    "test": "echo \"Error: no test specified\" && exit 0",
+    "preversion": "npm run lint:packages && npm run format",
+    "prepare": "lerna run clean && lerna run build",
+    "prepublishOnly": "npm test && npm run lint:packages",
+    "release": "lerna publish"
   },
   "devDependencies": {
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^11.0.0",
     "@nestjs/common": "^7.4.4",
     "@nestjs/core": "^7.4.4",
     "@nestjs/mongoose": "^7.0.2",
@@ -26,12 +30,38 @@
     "@types/passport-google-oauth20": "^2.0.4",
     "@types/passport-jwt": "^3.0.3",
     "@types/passport-local": "^1.0.33",
+    "@typescript-eslint/eslint-plugin": "^4.6.0",
+    "@typescript-eslint/parser": "^4.6.0",
     "cache-manager": "^3.4.0",
+    "class-transformer": "^0.3.1",
+    "class-validator": "^0.12.2",
+    "cz-conventional-changelog": "^3.3.0",
+    "eslint": "^7.12.1",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-import": "^2.22.1",
+    "husky": "^4.3.0",
     "lerna": "^3.22.1",
     "mongoose": "^5.10.10",
+    "prettier": "^2.1.2",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.6.3",
     "swagger-ui-express": "^4.1.4",
+    "tslint-config-prettier": "^1.18.0",
     "typescript": "^4.0.5"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
   }
 }
