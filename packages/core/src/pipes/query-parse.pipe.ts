@@ -28,5 +28,5 @@ export class QueryParsePipe implements PipeTransform {
 }
 
 function isType(x, type) {
-  return (x === type) || (x instanceof type); // || (x() === type);
+  return x === type || x instanceof type; // || (x() === type);
 }

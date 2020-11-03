@@ -4,5 +4,4 @@ import { Filter, ItemFilter, Where } from './model';
 
 @Controller('core')
 @ApiExtraModels(Filter, Where, ItemFilter)
-export class CoreController {
-}
+export class CoreController {}

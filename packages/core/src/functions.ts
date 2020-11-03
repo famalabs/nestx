@@ -1,6 +1,6 @@
 import { BaseModel } from './model';
 
-export function toModel<T extends BaseModel>(type: new(...args: any[]) => T, obj: any): any {
+export function toModel<T extends BaseModel>(type: new (...args: any[]) => T, obj: any): any {
   if (obj instanceof Array) {
     return obj.map(e => toModel(type, e) as T);
   } else if (obj) {

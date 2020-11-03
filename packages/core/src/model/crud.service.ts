@@ -5,7 +5,6 @@ import { Filter, ItemFilter, Where } from './dto';
 export type IDType = any | string | number;
 
 export interface ICrudService<T> {
-
   find(filter: Filter<T>): Promise<T[]>;
 
   findOne(where: Where<T>): Promise<T>;
@@ -25,13 +24,10 @@ export interface ICrudService<T> {
   delete(where: Where<T>): Promise<number>;
 
   deleteById(id: IDType): Promise<boolean>;
-
 }
 
 export class CrudService<T extends Document> implements ICrudService<T> {
-
-  constructor(protected model: Model<T>) {
-  }
+  constructor(protected model: Model<T>) {}
 
   async find(filter?: Filter<T>): Promise<T[]> {
     console.log('Crud', this.constructor.name, 'find', filter);
@@ -51,7 +47,8 @@ export class CrudService<T extends Document> implements ICrudService<T> {
     console.log('Crud', this.constructor.name, 'findById', id, filter);
     let op = this.model.findById(id);
     op = applyFilter(op, filter);
-    return op.exec()
+    return op
+      .exec()
       .then(res => {
         if (res === null) {
           throw new NotFoundException();
@@ -71,10 +68,9 @@ export class CrudService<T extends Document> implements ICrudService<T> {
   async create(data): Promise<T> {
     console.log('Crud', this.constructor.name, 'create', data);
     const doc = new this.model(data);
-    return doc.save()
-      .catch(err => {
-        throw new UnprocessableEntityException(err.message);
-      });
+    return doc.save().catch(err => {
+      throw new UnprocessableEntityException(err.message);
+    });
   }
 
   async update(where: Where<T>, data): Promise<T[]> {
@@ -87,17 +83,18 @@ export class CrudService<T extends Document> implements ICrudService<T> {
     console.log('Crud', this.constructor.name, 'updateById', id, data);
     const doc = await this.findById(id);
     Object.assign(doc, data);
-    return doc.save()
-      .catch(err => {
-        throw new UnprocessableEntityException(err.message);
-      });
+    return doc.save().catch(err => {
+      throw new UnprocessableEntityException(err.message);
+    });
   }
 
   async replaceById(id: IDType, data): Promise<T> {
     console.log('Crud', this.constructor.name, 'replaceById', id, data);
-    return this.model.findByIdAndUpdate(id, data, {
-      new: true,
-    }).exec()
+    return this.model
+      .findByIdAndUpdate(id, data, {
+        new: true,
+      })
+      .exec()
       .catch(err => {
         throw new NotFoundException();
       });
@@ -105,13 +102,17 @@ export class CrudService<T extends Document> implements ICrudService<T> {
 
   async delete(where: Where<T>): Promise<number> {
     console.log('Crud', this.constructor.name, 'delete', where);
-    return this.model.remove(where).exec()
+    return this.model
+      .remove(where)
+      .exec()
       .then(res => res.deletedCount);
   }
 
   async deleteById(id: IDType): Promise<boolean> {
     console.log('Crud', this.constructor.name, 'deleteById', id);
-    return this.model.findByIdAndRemove(id).exec()
+    return this.model
+      .findByIdAndRemove(id)
+      .exec()
       .then(res => !!res)
       .catch(err => {
         throw new NotFoundException();

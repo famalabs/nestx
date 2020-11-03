@@ -15,7 +15,7 @@ export function ModelResponse(metadata: ModelResponseMetadata): MethodDecorator 
 }
 
 export function ApiModelResponse(metadata: ModelResponseMetadata): MethodDecorator {
-  const status = metadata.status = Number(metadata.status) || 200;
+  const status = (metadata.status = Number(metadata.status) || 200);
   return applyDecorators(
     ModelResponse(metadata),
     ApiOkResponse(metadata),

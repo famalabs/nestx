@@ -1,5 +1,3 @@
 import { ValidatorOptions } from 'class-validator';
 
-export function validationOptions(options: ValidatorOptions) {
-
-}
+export function validationOptions(options: ValidatorOptions) {}

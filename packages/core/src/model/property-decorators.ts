@@ -11,7 +11,10 @@ export interface ApiModelPropertyType extends ApiModelPropertyParameter {
 
 const example_date = new Date().toISOString();
 
-export function DateStringProperty(metadata?: ApiModelPropertyParameter, validationOptions?: ValidationOptions): PropertyDecorator {
+export function DateStringProperty(
+  metadata?: ApiModelPropertyParameter,
+  validationOptions?: ValidationOptions,
+): PropertyDecorator {
   return applyDecorators(
     ApiProperty({ type: String, example: example_date, ...metadata }),
     IsDate(validationOptions),
@@ -20,7 +23,10 @@ export function DateStringProperty(metadata?: ApiModelPropertyParameter, validat
   );
 }
 
-export function ArrayProperty(metadata: ApiModelPropertyType, validationOptions?: ValidationOptions): PropertyDecorator {
+export function ArrayProperty(
+  metadata: ApiModelPropertyType,
+  validationOptions?: ValidationOptions,
+): PropertyDecorator {
   const { type } = metadata;
   return applyDecorators(
     ApiProperty({ isArray: true, ...metadata }),

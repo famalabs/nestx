@@ -1,12 +1,17 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiQuery as SrcApiQuery, ApiQueryOptions as BaseApiQueryOptions } from '@nestjs/swagger';
 import { DECORATORS } from '@nestjs/swagger/dist/constants';
-import { MediaTypeObject, ReferenceObject, SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
+import {
+  MediaTypeObject,
+  ReferenceObject,
+  SchemaObject,
+} from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 import { ref } from '../model';
 import apply = Reflect.apply;
 
-declare type ApiQueryOptions = (BaseApiQueryOptions & { name: string, schema: SchemaObject | ReferenceObject, type?: undefined }) |
-  (Omit<BaseApiQueryOptions, 'name' | 'schema'> & { name?: undefined, schema?: undefined, type: new () => any });
+declare type ApiQueryOptions =
+  | (BaseApiQueryOptions & { name: string; schema: SchemaObject | ReferenceObject; type?: undefined })
+  | (Omit<BaseApiQueryOptions, 'name' | 'schema'> & { name?: undefined; schema?: undefined; type: new () => any });
 
 export function ApiQuery(options: ApiQueryOptions): MethodDecorator {
   let { required, name, schema, type, ...params } = options;
@@ -19,11 +24,13 @@ export function ApiQuery(options: ApiQueryOptions): MethodDecorator {
       // console.log(prop, ref(instance[prop].constructor));
       // if (decorator && !isPrimitive(decorator.type)) {
       if (instance[prop].constructor && !isPrimitive(instance[prop].constructor)) {
-        decorators.push(ApiQuery({
-          ...params,
-          name: prop,
-          schema: ref(instance[prop].constructor),
-        }));
+        decorators.push(
+          ApiQuery({
+            ...params,
+            name: prop,
+            schema: ref(instance[prop].constructor),
+          }),
+        );
       }
     }
     return applyDecorators(...decorators);

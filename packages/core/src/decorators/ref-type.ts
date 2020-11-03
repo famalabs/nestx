@@ -3,9 +3,9 @@ import { Transform } from 'class-transformer';
 import { BaseModel } from '../model';
 import { mongoose } from '@typegoose/typegoose';
 
-export function RefType<T extends BaseModel>(typeFn: () => new(...args: any[]) => T): PropertyDecorator {
+export function RefType<T extends BaseModel>(typeFn: () => new (...args: any[]) => T): PropertyDecorator {
   return applyDecorators(
-    Transform((value) => {
+    Transform(value => {
       const type = typeFn();
       if (value instanceof type) {
         return value;

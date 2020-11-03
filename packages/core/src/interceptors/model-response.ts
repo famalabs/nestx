@@ -12,11 +12,7 @@ export class ResponseInterceptor implements NestInterceptor {
     if (!type) {
       return next.handle();
     } else {
-      return next
-        .handle()
-        .pipe(
-          map((data) => toModel(type, data)),
-        );
+      return next.handle().pipe(map(data => toModel(type, data)));
     }
   }
 }

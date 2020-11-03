@@ -2,7 +2,6 @@ import { BaseModel } from './base.model';
 import { Filter, ItemFilter, Where } from './dto';
 
 export interface ICrudController<T extends BaseModel> {
-
   create(data: T): Promise<T>;
 
   find(filter: Filter<T>): Promise<T[]>;
@@ -14,5 +13,4 @@ export interface ICrudController<T extends BaseModel> {
   updateById(id: T['id'], data: T): Promise<T>;
 
   deleteById(id: T['id']): Promise<boolean>;
-
 }

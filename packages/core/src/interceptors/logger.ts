@@ -7,16 +7,14 @@ export class LoggerInterceptor implements NestInterceptor {
     // console.log(context);
     const target = `${context.getClass().name}.${context.getHandler().name}`;
     const now = Date.now();
-    return next
-      .handle()
-      .pipe(
-        tap(() => {
-          console.log(target, `[${Date.now() - now}ms]`);
-        }),
-        catchError((err) => {
-          console.error(target, err.status, err.message, `[${Date.now() - now}ms]`);
-          return throwError(err);
-        }),
-      );
+    return next.handle().pipe(
+      tap(() => {
+        console.log(target, `[${Date.now() - now}ms]`);
+      }),
+      catchError(err => {
+        console.error(target, err.status, err.message, `[${Date.now() - now}ms]`);
+        return throwError(err);
+      }),
+    );
   }
 }
