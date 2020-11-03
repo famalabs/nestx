@@ -9,7 +9,7 @@
     "preversion": "npm run lint && npm run format",
     "prepare": "npm run build && gulp copy-misc",
     "prepublishOnly": "npm test && npm run lint",
-    "release": "lerna publish --conventional-commits",
+    "release": "lerna publish --conventional-commits --contents dist",
     "postpublish": "npm run clean",
     "clean": "gulp clean:bundle",
     "format": "prettier \"**/*.ts\" --ignore-path ./.prettierignore --write && git status",
