@@ -1,0 +1,11 @@
+# source
+**/*.ts
+*.ts
+
+# definitions
+!**/*.d.ts
+!*.d.ts
+
+# configuration
+package-lock.json
+tsconfig.json
