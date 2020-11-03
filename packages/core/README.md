@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>Auth (@famalabs/nestx)</h1>
+  <h1>Core (@famalabs/nestx)</h1>
 </div>
 <div align="center">
   <strong>for APIs built with NestJs</strong>
