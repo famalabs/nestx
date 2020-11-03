@@ -10,7 +10,7 @@
     "preversion": "npm run lint:packages && npm run format",
     "prepare": "lerna run clean && lerna run build",
     "prepublishOnly": "npm test && npm run lint:packages",
-    "release": "lerna publish"
+    "release": "lerna publish --conventional-commit"
   },
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
