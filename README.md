@@ -33,7 +33,6 @@
 Collection of Nestjs extension libraries.
 
 ## Features
----
 
 - :dart: Core package
 
@@ -42,22 +41,18 @@ Collection of Nestjs extension libraries.
 - :pencil2: Swagger documentation
 
 ## Packages
----
 
-- [**@nestx/core**](https://www.npmjs.com/package/@famalabs/nestx-core) - core package which provides utilities ([docs](https://github.com/famalabs/nestx/core))
-- [**@nestx/auth**](https://www.npmjs.com/package/@famalabs/nestx-auth) - auth package which provides an auth module with 3rd-party logins and access/refresh token operations ([docs](https://github.com/famalabs/nestx/auth))
+- [**@famalabs/nestx-core**](https://www.npmjs.com/package/@famalabs/nestx-core) - core package which provides utilities ([docs](https://github.com/famalabs/nestx/tree/master/packages/core))
+- [**@famalabs/nestx-auth**](https://www.npmjs.com/package/@famalabs/nestx-auth) - auth package which provides an auth module with 3rd-party logins and access/refresh token operations ([docs](https://github.com/famalabs/nestx/tree/master/packages/auth))
 
 ## Support
----
 
 Any support is welcome. At least you can give us a star :star:
 
 ## Contributors
----
 
 This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
 
 ## License
----
 
 [MIT](LICENSE)

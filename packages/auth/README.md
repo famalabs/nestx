@@ -33,7 +33,6 @@
 Auth package which provides an auth module with 3rd-party logins and access/refresh token operations.
 
 ## Features
----
 - :lock: Auth module
 
 - :wrench: Dynamically configurable
@@ -46,22 +45,22 @@ Auth package which provides an auth module with 3rd-party logins and access/refr
 
 
 ## Install
----
+
 ```shell
 npm i @famalabs/nestx-auth
 ```
 
 ## Support
----
+
 Any support is welcome. At least you can give us a star :star:
 
 
 
 ## Contributors
----
+
 This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
 
 
 ## License
----
+
 [MIT](LICENSE)
