@@ -1,5 +1,5 @@
-import { USER_ROLES } from "../ACLs";
-import { IBaseModel } from "../models";
+import { USER_ROLES } from '../ACLs';
+import { IBaseModel } from '../models';
 
 export interface IUser extends IBaseModel {
   email: string;

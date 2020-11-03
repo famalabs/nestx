@@ -1,9 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 
 /** This class is used to guard routes that handle Facebook login and signup.
  *  It uses FacebookStrategy.
  */
 
 @Injectable()
-export class FacebookGuard extends AuthGuard("facebook") {}
+export class FacebookGuard extends AuthGuard('facebook') {}

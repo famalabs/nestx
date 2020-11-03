@@ -1,15 +1,9 @@
-import {
-  CreateQuery,
-  FilterQuery,
-  QueryFindOneAndUpdateOptions,
-  Types,
-  UpdateQuery,
-} from "mongoose";
-import { MongoError } from "mongodb";
-import { BaseModel } from "../models/base.model";
-import { InternalServerErrorException } from "@nestjs/common";
-import { DocumentType, ReturnModelType } from "@typegoose/typegoose";
-import { AnyParamConstructor } from "@typegoose/typegoose/lib/types";
+import { CreateQuery, FilterQuery, QueryFindOneAndUpdateOptions, Types, UpdateQuery } from 'mongoose';
+import { MongoError } from 'mongodb';
+import { BaseModel } from '../models/base.model';
+import { InternalServerErrorException } from '@nestjs/common';
+import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
+import { AnyParamConstructor } from '@typegoose/typegoose/lib/types';
 
 export abstract class BaseService<T extends BaseModel> {
   protected model: ReturnModelType<AnyParamConstructor<T>>;
@@ -46,15 +40,9 @@ export abstract class BaseService<T extends BaseModel> {
     }
   }
 
-  async findOneAndUpdate(
-    conditions = {},
-    update = {},
-    options = {}
-  ): Promise<DocumentType<T>> {
+  async findOneAndUpdate(conditions = {}, update = {}, options = {}): Promise<DocumentType<T>> {
     try {
-      return await this.model
-        .findOneAndUpdate(conditions, update, options)
-        .exec();
+      return await this.model.findOneAndUpdate(conditions, update, options).exec();
     } catch (e) {
       BaseService.throwMongoError(e);
     }
@@ -78,9 +66,7 @@ export abstract class BaseService<T extends BaseModel> {
 
   async deleteById(id: string): Promise<DocumentType<T>> {
     try {
-      return await this.model
-        .findByIdAndDelete(BaseService.toObjectId(id))
-        .exec();
+      return await this.model.findByIdAndDelete(BaseService.toObjectId(id)).exec();
     } catch (e) {
       BaseService.throwMongoError(e);
     }
@@ -97,13 +83,9 @@ export abstract class BaseService<T extends BaseModel> {
   async update(item: T): Promise<DocumentType<T>> {
     try {
       return await this.model
-        .findByIdAndUpdate(
-          BaseService.toObjectId(item._id),
-          { $set: item } as any,
-          {
-            new: true,
-          }
-        )
+        .findByIdAndUpdate(BaseService.toObjectId(item._id), { $set: item } as any, {
+          new: true,
+        })
         .exec();
     } catch (e) {
       BaseService.throwMongoError(e);

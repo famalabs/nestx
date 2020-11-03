@@ -1,21 +1,19 @@
-import { Injectable, Inject, ConflictException } from "@nestjs/common";
-import { ReturnModelType } from "@typegoose/typegoose";
-import { InjectModel } from "@nestjs/mongoose";
-import { AUTH_OPTIONS } from "../constants";
-import { BaseService } from "../shared/base-service";
-import { EmailVerification } from "../models/email-verification.model";
-import * as nodemailer from "nodemailer";
-import {
-  IAuthenticationModuleOptions,
-} from "../interfaces";
-import { IEmailOptions } from "./mail-options.interface";
+import { Injectable, Inject, ConflictException } from '@nestjs/common';
+import { ReturnModelType } from '@typegoose/typegoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { AUTH_OPTIONS } from '../constants';
+import { BaseService } from '../shared/base-service';
+import { EmailVerification } from '../models/email-verification.model';
+import * as nodemailer from 'nodemailer';
+import { IAuthenticationModuleOptions } from '../interfaces';
+import { IEmailOptions } from './mail-options.interface';
 
 @Injectable()
 export class EmailService extends BaseService<EmailVerification> {
   constructor(
     @InjectModel(EmailVerification.name)
     private readonly emailModel: ReturnModelType<typeof EmailVerification>,
-    @Inject(AUTH_OPTIONS) private options: IAuthenticationModuleOptions
+    @Inject(AUTH_OPTIONS) private options: IAuthenticationModuleOptions,
   ) {
     super(emailModel);
   }
@@ -36,10 +34,10 @@ export class EmailService extends BaseService<EmailVerification> {
     const sent = await new Promise<boolean>(async function (resolve, reject) {
       return await transporter.sendMail(mailOptions, async (error, info) => {
         if (error) {
-          console.log("Message sent: %s", error);
+          console.log('Message sent: %s', error);
           return reject(false);
         }
-        console.log("Message sent: %s", info.messageId);
+        console.log('Message sent: %s', info.messageId);
         resolve(true);
       });
     });

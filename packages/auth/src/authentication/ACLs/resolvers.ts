@@ -28,9 +28,7 @@ async function owner(ctx: ACLContext): Promise<boolean> {
   } else {
     // other models
     if (id !== undefined) {
-      const resource = await controller.service
-        .findById(id)
-        .catch((err) => false);
+      const resource = await controller.service.findById(id).catch(err => false);
       return matchId(resource.user, user.id);
     } else {
       const fk = resolveUserFk(req);
@@ -48,7 +46,7 @@ function resolveUserFk(req) {
 }
 
 function matchId(src, target) {
-  if ((src === undefined || src === null) || (target === undefined || target === null)) {
+  if (src === undefined || src === null || target === undefined || target === null) {
     return false;
   }
   return typeof src === typeof target ? src === target : src.toString() === target.toString();

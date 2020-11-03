@@ -1,2 +1,2 @@
-export * from "./acl.decorator";
-export * from "./user.decorator";
+export * from './acl.decorator';
+export * from './user.decorator';

@@ -1,7 +1,7 @@
-import { SignupDto } from "../dto";
-import { IUserResponse } from "./user-response.interface";
-import { User } from "../dto/user";
-export const IUsersService = Symbol("IUsersService");
+import { SignupDto } from '../dto';
+import { IUserResponse } from './user-response.interface';
+import { User } from '../dto/user';
+export const IUsersService = Symbol('IUsersService');
 export interface IUsersService {
   findOne(filter: object): Promise<User>;
   findById(id: string): Promise<User>;

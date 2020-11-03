@@ -1,7 +1,6 @@
 export interface IJwtPayload {
-    sub: string;
-    iat?: number;
-    exp?: number;
-    jti?: string;
-  }
-  
+  sub: string;
+  iat?: number;
+  exp?: number;
+  jti?: string;
+}

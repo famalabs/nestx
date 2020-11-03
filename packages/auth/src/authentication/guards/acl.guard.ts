@@ -4,8 +4,7 @@ import { ACLContext, RESOLVERS } from '../acls';
 
 @Injectable()
 export class ACLGuard implements CanActivate {
-  constructor(private readonly app: INestApplication) {
-  }
+  constructor(private readonly app: INestApplication) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const classType = context.getClass();

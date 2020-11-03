@@ -1,5 +1,5 @@
-import { IUser } from "../interfaces/user.interface";
-import { USER_ROLES } from "../ACLs";
+import { IUser } from '../interfaces/user.interface';
+import { USER_ROLES } from '../ACLs';
 
 export class User implements IUser {
   email: string;

@@ -5,9 +5,8 @@ export interface ILoginResponse {
   refreshToken?: string;
 }
 
-export interface IAccessToken{
+export interface IAccessToken {
   accessToken: string;
   tokenType?: string;
   expiresIn: string | number;
 }
-

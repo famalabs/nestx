@@ -1,6 +1,6 @@
-import { CacheModuleOptions } from "@nestjs/common";
-import { JwtModuleOptions } from "@nestjs/jwt";
-import { IAuthModuleOptions } from "@nestjs/passport";
+import { CacheModuleOptions } from '@nestjs/common';
+import { JwtModuleOptions } from '@nestjs/jwt';
+import { IAuthModuleOptions } from '@nestjs/passport';
 
 export interface IAuthenticationModuleOptions {
   modules: {

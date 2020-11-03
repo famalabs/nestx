@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IUserResponse } from "../interfaces";
+import { ApiProperty } from '@nestjs/swagger';
+import { IUserResponse } from '../interfaces';
 
 export class UserResponseDto implements IUserResponse {
   @ApiProperty()

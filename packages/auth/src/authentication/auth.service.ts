@@ -7,31 +7,26 @@ import {
   UnauthorizedException,
   NotFoundException,
   InternalServerErrorException,
-} from "@nestjs/common";
-import { TokenService } from "./token/token.service";
-import { LoginDto } from "./dto/login.dto";
-import { SignupDto } from "./dto/signup.dto";
-import { Request, response, Response } from "express";
-import { InjectModel } from "@nestjs/mongoose";
-import { ReturnModelType } from "@typegoose/typegoose";
-import {
-  AUTH_OPTIONS,
-  EMAIL_ERRORS,
-  LOGIN_ERRORS,
-  RESET_PASSWORD_ERRORS,
-} from "./constants";
-import { IJwtPayload } from "./interfaces/jwt-payload.interface";
-import { ILoginResponse } from "./interfaces/login-response.interface";
-import { IForgottenPassword } from "./interfaces/forgotten-password.interface";
-import { ForgottenPassword } from "./models/forgotten-password.model";
-import { IUsersService } from "./interfaces/users-service.interface";
-import { User } from "./dto/user";
-import { EmailService } from "./email/email.service";
-import { IAuthenticationModuleOptions } from "./interfaces/authentication-options.interface";
-import { IEmailVerification } from "./interfaces";
-import { IEmailOptions } from "./email/mail-options.interface";
-import { ResetPasswordDto } from "./dto/reset-password.dto";
-import { LoginResponseDto } from "./dto";
+} from '@nestjs/common';
+import { TokenService } from './token/token.service';
+import { LoginDto } from './dto/login.dto';
+import { SignupDto } from './dto/signup.dto';
+import { Request, response, Response } from 'express';
+import { InjectModel } from '@nestjs/mongoose';
+import { ReturnModelType } from '@typegoose/typegoose';
+import { AUTH_OPTIONS, EMAIL_ERRORS, LOGIN_ERRORS, RESET_PASSWORD_ERRORS } from './constants';
+import { IJwtPayload } from './interfaces/jwt-payload.interface';
+import { ILoginResponse } from './interfaces/login-response.interface';
+import { IForgottenPassword } from './interfaces/forgotten-password.interface';
+import { ForgottenPassword } from './models/forgotten-password.model';
+import { IUsersService } from './interfaces/users-service.interface';
+import { User } from './dto/user';
+import { EmailService } from './email/email.service';
+import { IAuthenticationModuleOptions } from './interfaces/authentication-options.interface';
+import { IEmailVerification } from './interfaces';
+import { IEmailOptions } from './email/mail-options.interface';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { LoginResponseDto } from './dto';
 
 @Injectable()
 export class AuthService {
@@ -40,20 +35,12 @@ export class AuthService {
     private readonly emailService: EmailService,
     @Inject(IUsersService) private readonly usersService: IUsersService,
     @InjectModel(ForgottenPassword.name)
-    private readonly forgottenPasswordModel: ReturnModelType<
-      typeof ForgottenPassword
-    >,
-    @Inject(AUTH_OPTIONS) private options: IAuthenticationModuleOptions
+    private readonly forgottenPasswordModel: ReturnModelType<typeof ForgottenPassword>,
+    @Inject(AUTH_OPTIONS) private options: IAuthenticationModuleOptions,
   ) {}
 
-  async login(
-    credentials: LoginDto,
-    ipAddress: string
-  ): Promise<ILoginResponse> {
-    const user = await this.usersService.validateUser(
-      credentials.email,
-      credentials.password
-    );
+  async login(credentials: LoginDto, ipAddress: string): Promise<ILoginResponse> {
+    const user = await this.usersService.validateUser(credentials.email, credentials.password);
     if (!user) {
       throw new NotFoundException(LOGIN_ERRORS.USER_NOT_FOUND);
     }
@@ -74,9 +61,7 @@ export class AuthService {
       clientId: credentials.clientId,
       ipAddress,
     };
-    const refreshToken = await this.tokenService.createRefreshToken(
-      tokenContent
-    );
+    const refreshToken = await this.tokenService.createRefreshToken(tokenContent);
 
     const loginResponse: ILoginResponse = {
       refreshToken: refreshToken.value,
@@ -97,17 +82,15 @@ export class AuthService {
 
   async socialAccess(req: Request) {
     const payload: IJwtPayload = {
-      sub: req.user["_id"],
+      sub: req.user['_id'],
     };
 
-    const loginResponse: ILoginResponse = await this.tokenService.createAccessToken(
-      payload
-    );
+    const loginResponse: ILoginResponse = await this.tokenService.createAccessToken(payload);
 
     // We save the user's refresh token
     const tokenContent = {
-      userId: req.user["_id"],
-      clientId: "",
+      userId: req.user['_id'],
+      clientId: '',
       ipAddress: req.ip,
     };
     const refresh = await this.tokenService.createRefreshToken(tokenContent);
@@ -116,12 +99,7 @@ export class AuthService {
     return loginResponse;
   }
 
-  async logout(
-    userId: string,
-    accessToken: string,
-    refreshToken: string,
-    fromAll: boolean
-  ): Promise<any> {
+  async logout(userId: string, accessToken: string, refreshToken: string, fromAll: boolean): Promise<any> {
     if (fromAll === true) {
       await this.logoutFromAll(userId);
     } else {
@@ -136,19 +114,19 @@ export class AuthService {
       throw new NotFoundException(EMAIL_ERRORS.USER_NOT_FOUND);
     }
     const mailOptions: IEmailOptions = {
-      from: '"Company" <' + this.options.constants.mail.auth.user + ">",
+      from: '"Company" <' + this.options.constants.mail.auth.user + '>',
       to: email,
-      subject: "Verify Email",
-      text: "Verify Email",
+      subject: 'Verify Email',
+      text: 'Verify Email',
       html:
-        "Hi! <br><br> Thanks for your registration<br><br>" +
-        "<a href=" +
+        'Hi! <br><br> Thanks for your registration<br><br>' +
+        '<a href=' +
         this.options.constants.system.host +
-        ":" +
+        ':' +
         this.options.constants.system.port +
-        "/auth/email/verify/" +
+        '/auth/email/verify/' +
         emailRecord.emailToken +
-        ">Click here to activate your account</a>",
+        '>Click here to activate your account</a>',
     };
     const sent = await this.emailService.sendEmail(email, mailOptions);
     return sent;
@@ -192,19 +170,19 @@ export class AuthService {
     const tokenModel = await this.createForgottenPasswordToken(email);
 
     let mailOptions: IEmailOptions = {
-      from: '"Company" <' + this.options.constants.mail.auth.user + ">",
+      from: '"Company" <' + this.options.constants.mail.auth.user + '>',
       to: email,
-      subject: "Frogotten Password",
-      text: "Forgot Password",
+      subject: 'Frogotten Password',
+      text: 'Forgot Password',
       html:
-        "Hi! <br><br> If you requested to reset your password<br><br>" +
-        "<a href=" +
+        'Hi! <br><br> If you requested to reset your password<br><br>' +
+        '<a href=' +
         this.options.constants.system.host +
-        ":" +
+        ':' +
         this.options.constants.system.port +
-        "/auth/email/reset-password/" +
+        '/auth/email/reset-password/' +
         tokenModel.newPasswordToken +
-        ">Click here</a>",
+        '>Click here</a>',
     }; //il link reindirizzerà ad una pagina del client in cui l'utente poi digiterà la propria nuova password
 
     const sent = await this.emailService.sendEmail(email, mailOptions);
@@ -222,14 +200,9 @@ export class AuthService {
     refreshToken: string,
     oldAccessToken: string,
     clientId: string,
-    userIp: string
+    userIp: string,
   ): Promise<LoginResponseDto> {
-    return await this.tokenService.getAccessTokenFromRefreshToken(
-      refreshToken,
-      oldAccessToken,
-      clientId,
-      userIp
-    );
+    return await this.tokenService.getAccessTokenFromRefreshToken(refreshToken, oldAccessToken, clientId, userIp);
   }
 
   private async resetFromToken(token: string, newPassword: string) {
@@ -260,20 +233,16 @@ export class AuthService {
         { email: email },
         {
           email: email,
-          emailToken: (
-            Math.floor(Math.random() * 9000000) + 1000000
-          ).toString(), //Generate 7 digits number
+          emailToken: (Math.floor(Math.random() * 9000000) + 1000000).toString(), //Generate 7 digits number
           timestamp: new Date(),
         },
-        { upsert: true, new: true }
+        { upsert: true, new: true },
       );
       return newDoc;
     }
   }
 
-  private async createForgottenPasswordToken(
-    email: string
-  ): Promise<IForgottenPassword> {
+  private async createForgottenPasswordToken(email: string): Promise<IForgottenPassword> {
     const doc = await this.forgottenPasswordModel.findOne({
       email: email,
     });
@@ -284,12 +253,10 @@ export class AuthService {
         { email: email },
         {
           email: email,
-          newPasswordToken: (
-            Math.floor(Math.random() * 9000000) + 1000000
-          ).toString(), //Generate 7 digits number,
+          newPasswordToken: (Math.floor(Math.random() * 9000000) + 1000000).toString(), //Generate 7 digits number,
           timestamp: new Date(),
         },
-        { upsert: true, new: true }
+        { upsert: true, new: true },
       );
       return newDoc;
     }
