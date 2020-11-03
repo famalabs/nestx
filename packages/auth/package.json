@@ -9,12 +9,10 @@
     "url": "https://github.com/famalabs/nestx"
   },
   "bugs": "https://github.com/famalabs/nestx/issues",
-  "scripts": {
-    "prepack": "cp ../../LICENSE package.json README.md CHANGELOG.md dist/ ",
-    "clean": "rimraf dist",
-    "build": "tsc -p tsconfig.json"
-  },
-  "main": "index.js",
+  "scripts": {},
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
     "access": "public"
   },
