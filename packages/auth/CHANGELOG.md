@@ -5,7 +5,4 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.0.1-alpha.2](https://github.com/famalabs/nestx/compare/v0.0.1-alpha.1...v0.0.1-alpha.2) (2020-11-03)
 
-
-### Bug Fixes
-
-* **core:** export ref type ([1f5558d](https://github.com/famalabs/nestx/commit/1f5558d8c436b26747610fa9becb66be1024ce01))
+**Note:** Version bump only for package @famalabs/nestx-auth
