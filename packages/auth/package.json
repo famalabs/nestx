@@ -10,7 +10,7 @@
   },
   "bugs": "https://github.com/famalabs/nestx/issues",
   "scripts": {
-    "prepack": "cp package.json README.md CHANGELOG.md dist/ ",
+    "prepack": "cp ../../LICENSE package.json README.md CHANGELOG.md dist/ ",
     "clean": "rimraf dist",
     "build": "tsc -p tsconfig.json"
   },
