@@ -10,14 +10,11 @@
   },
   "bugs": "https://github.com/famalabs/nestx/issues",
   "scripts": {
-    "prepack": "cp package.json dist/",
+    "prepack": "cp package.json README.md CHANGELOG.md dist/ ",
     "clean": "rimraf dist",
     "build": "tsc -p tsconfig.json"
   },
-  "main": "dist/index.js",
-  "files": [
-    "dist/*"
-  ],
+  "main": "index.js",
   "publishConfig": {
     "access": "public"
   },
