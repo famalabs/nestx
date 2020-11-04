@@ -4,8 +4,6 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "prebuild": "npm run clean:dev",
-    "build": "gulp build --dist node_modules/@famalabs",
     "prebuild:prod": "npm run clean:prod",
     "build:prod": "gulp build",
     "preversion": "npm run lint && npm run format",
@@ -13,7 +11,6 @@
     "prepublishOnly": "npm test && npm run lint",
     "release": "lerna publish --conventional-commits --contents dist",
     "postpublish": "npm run clean:prod",
-    "clean:dev": "gulp clean:dev",
     "clean:prod": "gulp clean:prod",
     "format": "prettier \"**/*.ts\" --ignore-path ./.prettierignore --write && git status",
     "lint": "npm run lint:packages",

@@ -8,6 +8,7 @@ packages/**/*.js
 
 # example
 /sample
+/test-projects
 
 # misc
 /packages/**/.npmignore

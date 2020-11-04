@@ -11,15 +11,4 @@ function cleanOutputProd() {
   }).pipe(clean());
 }
 
-/**
- * Cleans the build output assets from the root node_modules folders)
- */
-function cleanOutputDev() {
-  return src([`node_modules/@famalabs/`], {
-    read: false,
-    allowEmpty: true,
-  }).pipe(clean());
-}
-
 task('clean:prod', cleanOutputProd);
-task('clean:dev', cleanOutputDev);
