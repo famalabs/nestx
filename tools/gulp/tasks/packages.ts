@@ -31,10 +31,19 @@ function defaultTask() {
  * @param packageName The name of the package
  */
 function buildPackage(packageName: string) {
-  return packages[packageName]
-    .src()
-    .pipe(packages[packageName]())
-    .pipe(dest(`${source}/${packageName}/${dist}`));
+  if (dist === 'dist') {
+    return packages[packageName]
+      .src()
+      .pipe(packages[packageName]())
+      .pipe(dest(`${source}/${packageName}/${dist}`));
+  } else {
+    console.log(dist);
+    console.log(`${dist}/${packageName}`);
+    return packages[packageName]
+      .src()
+      .pipe(packages[packageName]())
+      .pipe(dest(`${dist}/${packageName}`));
+  }
 }
 
 /**
@@ -54,7 +63,7 @@ function buildPackageDev(packageName: string) {
 modules.forEach(packageName => {
   //foreach packageName in modules
   task(packageName, () => buildPackage(packageName)); // create a task that when gulp packageName is invoked from cli then buildPackage(packageName) is executed
-  task(`${packageName}:dev`, () => buildPackageDev(packageName)); //create a task that when gulp packageName:dev is invoked from cli then buildPackageDEv(packageName) is executed
+  task(`${packageName}:dev`, () => buildPackageDev(packageName)); //create a task that when gulp packageName:dev is invoked from cli then buildPackageDev(packageName) is executed
 });
 
 /**
