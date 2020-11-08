@@ -22,8 +22,8 @@ export class EmailService extends BaseService<EmailVerification> {
     const transporter = nodemailer.createTransport({
       host: this.options.constants.mail.host,
       port: this.options.constants.mail.port,
-      secure: true, // true for 465, false for other ports
-      requireTLS: true,
+      secure: this.options.constants.mail.secure,
+      requireTLS: this.options.constants.mail.requireTLS,
 
       auth: {
         user: this.options.constants.mail.auth.user,
