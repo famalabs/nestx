@@ -8,7 +8,6 @@ export interface IUsersService {
   create(item: SignupDto): Promise<User>;
   delete(id: string): Promise<User>;
   update(id: string, item: Partial<User>): Promise<User>;
-
   findOneToValidate(email: string): Promise<User>;
   setPassword(email: string, newPassword: string): Promise<boolean>;
   validateUser(username: string, pass: string): Promise<IUserResponse | null>;

@@ -1,5 +1,5 @@
 export interface IEmailVerification {
-  email: String;
-  emailToken: String;
+  email: string;
+  emailToken: string;
   timestamp: Date;
 }
