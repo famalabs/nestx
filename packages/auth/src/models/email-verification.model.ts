@@ -3,9 +3,9 @@ import { BaseModel } from './base.model';
 import { IEmailVerification } from '../interfaces/email-verification.interface';
 export class EmailVerification extends BaseModel implements IEmailVerification {
   @prop()
-  email: String;
+  email: string;
   @prop()
-  emailToken: String;
+  emailToken: string;
   @prop()
   timestamp: Date;
 }
