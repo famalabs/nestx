@@ -1,5 +1,4 @@
-import { CreateQuery, FilterQuery, QueryFindOneAndUpdateOptions, Types, UpdateQuery } from 'mongoose';
-import { MongoError } from 'mongodb';
+import { CreateQuery, Types } from 'mongoose';
 import { BaseModel } from '../models/base.model';
 import { InternalServerErrorException } from '@nestjs/common';
 import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
@@ -12,8 +11,8 @@ export abstract class BaseService<T extends BaseModel> {
     this.model = model;
   }
 
-  protected static throwMongoError(err: MongoError): void {
-    throw new MongoError(err);
+  protected static throwMongoError(err): void {
+    throw new InternalServerErrorException(err.message);
   }
 
   protected static toObjectId(id: string): Types.ObjectId {
@@ -80,10 +79,10 @@ export abstract class BaseService<T extends BaseModel> {
     }
   }
 
-  async update(item: T): Promise<DocumentType<T>> {
+  async update(id: string, item: Partial<T>): Promise<DocumentType<T>> {
     try {
       return await this.model
-        .findByIdAndUpdate(BaseService.toObjectId(item._id), { $set: item } as any, {
+        .findByIdAndUpdate(BaseService.toObjectId(id), { $set: item } as any, {
           new: true,
         })
         .exec();
