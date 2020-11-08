@@ -11,7 +11,7 @@ import {
 import { TokenService } from './token/token.service';
 import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
-import { Request, response, Response } from 'express';
+import { Request } from 'express';
 import { InjectModel } from '@nestjs/mongoose';
 import { ReturnModelType } from '@typegoose/typegoose';
 import { AUTH_OPTIONS, EMAIL_ERRORS, LOGIN_ERRORS, RESET_PASSWORD_ERRORS } from './constants';
@@ -24,7 +24,7 @@ import { User } from './dto/user';
 import { EmailService } from './email/email.service';
 import { IAuthenticationModuleOptions } from './interfaces/authentication-options.interface';
 import { IEmailVerification } from './interfaces';
-import { IEmailOptions } from './email/mail-options.interface';
+import { IEmailOptions } from './email/mailer-options.interface';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { LoginResponseDto } from './dto';
 
@@ -80,7 +80,7 @@ export class AuthService {
     return user;
   }
 
-  async socialAccess(req: Request) {
+  async socialAccess(req: Request): Promise<ILoginResponse> {
     const payload: IJwtPayload = {
       sub: req.user['_id'],
     };
@@ -99,13 +99,14 @@ export class AuthService {
     return loginResponse;
   }
 
-  async logout(userId: string, accessToken: string, refreshToken: string, fromAll: boolean): Promise<any> {
+  async logout(userId: string, accessToken: string, refreshToken: string, fromAll: boolean): Promise<null> {
     if (fromAll === true) {
       await this.logoutFromAll(userId);
     } else {
       await this.logoutFromOne(refreshToken);
     }
     await this.tokenService.revokeToken(accessToken, userId);
+    return null;
   }
 
   async sendVerificationEmail(email: string): Promise<boolean> {
@@ -129,6 +130,9 @@ export class AuthService {
         '>Click here to activate your account</a>',
     };
     const sent = await this.emailService.sendEmail(email, mailOptions);
+    if (!sent) {
+      throw new InternalServerErrorException(EMAIL_ERRORS.EMAIL_NOT_SENT);
+    }
     return sent;
   }
 
@@ -168,7 +172,6 @@ export class AuthService {
     if (!user) throw new NotFoundException(LOGIN_ERRORS.USER_NOT_FOUND);
 
     const tokenModel = await this.createForgottenPasswordToken(email);
-
     let mailOptions: IEmailOptions = {
       from: '"Company" <' + this.options.constants.mail.auth.user + '>',
       to: email,
@@ -192,7 +195,7 @@ export class AuthService {
     return sent;
   }
 
-  async resetPassword(resetPwd: ResetPasswordDto): Promise<any> {
+  async resetPassword(resetPwd: ResetPasswordDto): Promise<boolean> {
     return await this.resetFromToken(resetPwd.token, resetPwd.newPassword);
   }
 
@@ -205,7 +208,7 @@ export class AuthService {
     return await this.tokenService.getAccessTokenFromRefreshToken(refreshToken, oldAccessToken, clientId, userIp);
   }
 
-  private async resetFromToken(token: string, newPassword: string) {
+  private async resetFromToken(token: string, newPassword: string): Promise<boolean> {
     const doc = await this.forgottenPasswordModel.findOne({
       newPasswordToken: token,
     });
@@ -217,8 +220,8 @@ export class AuthService {
       throw new UnauthorizedException(RESET_PASSWORD_ERRORS.TOKEN_EXPIRED);
     }
     await this.usersService.setPassword(doc.email, newPassword);
-    await doc.remove();
-    return;
+    await this.forgottenPasswordModel.deleteOne({ _id: doc._id });
+    return true;
   }
 
   private async createEmailRecord(email: string): Promise<IEmailVerification> {
@@ -262,12 +265,14 @@ export class AuthService {
     }
   }
 
-  private async logoutFromOne(refreshToken: string): Promise<any> {
+  private async logoutFromOne(refreshToken: string): Promise<null> {
     await this.tokenService.deleteRefreshToken(refreshToken);
+    return null;
   }
 
-  private async logoutFromAll(userId: string): Promise<any> {
+  private async logoutFromAll(userId: string): Promise<null> {
     await this.tokenService.deleteAllRefreshTokenForUser(userId);
+    return null;
   }
 
   private checkTimestampLimit(first: Date, last: Date, limit: number): boolean {

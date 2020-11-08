@@ -26,36 +26,35 @@ export class AuthController {
 
   @Post('signup')
   @ApiOperation({ summary: 'Signup user' })
-  async signup(@Body() data: SignupDto): Promise<any> {
+  async signup(@Body() data: SignupDto): Promise<null> {
     await this.authService.signup(data);
+    return null;
   }
 
   @Get('email/verify/:token')
   @ApiOperation({ summary: 'Verify email' })
-  async verifyEmail(@Param() params): Promise<any> {
+  async verifyEmail(@Param() params): Promise<boolean> {
     const res = await this.authService.verifyEmail(params.token);
-    if (res) {
-      return 'Email verified';
-    }
+    return res;
   }
 
   @Get('email/resend-verification/:email')
   @ApiOperation({ summary: 'Resend verification email' })
   @ApiParam({ name: 'email', required: true })
-  async resendEmailVerification(@Param() params): Promise<boolean> {
+  async resendVerificationEmail(@Param() params): Promise<boolean> {
     return await this.authService.resendVerificationEmail(params.email);
   }
 
   @Get('email/forgot-password/:email')
   @ApiOperation({ summary: 'Forgot password' })
   @ApiParam({ name: 'email', required: true })
-  async sendEmailForgotPassword(@Param() params): Promise<boolean> {
+  async sendForgottenPasswordEmail(@Param() params): Promise<boolean> {
     return await this.authService.sendForgottenPasswordEmail(params.email);
   }
 
   @Post('email/reset-password')
   @ApiOperation({ summary: 'Reset password' })
-  async setNewPassord(@Body() resetPwd: ResetPasswordDto): Promise<any> {
+  async setNewPassord(@Body() resetPwd: ResetPasswordDto): Promise<boolean> {
     return this.authService.resetPassword(resetPwd);
   }
 
@@ -85,7 +84,7 @@ export class AuthController {
     @Req() req,
     @Query('refresh_token') refreshToken: string,
     @Query('from_all') fromAll: boolean = false,
-  ): Promise<any> {
+  ): Promise<null> {
     const accessToken = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
     return await this.authService.logout(req.user['_id'], accessToken, refreshToken, fromAll);
   }
@@ -106,8 +105,8 @@ export class AuthController {
   @Get('google/redirect')
   @ApiOperation({ summary: 'Google login/signup redirect' })
   @UseGuards(GoogleGuard)
-  googleAuthRedirect(@Req() req) {
-    this.authService.socialAccess(req);
+  async googleAuthRedirect(@Req() req): Promise<LoginResponseDto> {
+    return await this.authService.socialAccess(req);
   }
 
   @Get('/facebook')
@@ -118,7 +117,7 @@ export class AuthController {
   @Get('/facebook/redirect')
   @ApiOperation({ summary: 'Facebook login/signup redirect' })
   @UseGuards(FacebookGuard)
-  facebookLoginCallback(@Req() req) {
-    this.authService.socialAccess(req);
+  async facebookLoginCallback(@Req() req): Promise<LoginResponseDto> {
+    return await this.authService.socialAccess(req);
   }
 }
