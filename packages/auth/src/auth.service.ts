@@ -24,7 +24,7 @@ import { User } from './dto/user';
 import { EmailService } from './email/email.service';
 import { IAuthenticationModuleOptions } from './interfaces/authentication-options.interface';
 import { IEmailVerification } from './interfaces';
-import { IEmailOptions } from './email/mailer-options.interface';
+import { IEmailOptions } from './email/mail-options.interface';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { LoginResponseDto } from './dto';
 
