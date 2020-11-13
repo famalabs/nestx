@@ -12,6 +12,7 @@ packages/**/*.js
 
 # misc
 /packages/**/.npmignore
+/packages/**/package-lock.json
 /packages/**/LICENSE
 
 # Logs
