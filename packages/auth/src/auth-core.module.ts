@@ -10,26 +10,44 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { FacebookMiddleware } from './middlewares/facebook.middleware';
 import { RefreshToken } from './models/refresh-token.model';
 import { TokenService } from './token/token.service';
-import { EmailVerification } from './models/email-verification.model';
-import { ForgottenPassword } from './models/forgotten-password.model';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
-import { EmailService } from './email/email.service';
 import { MongooseModule } from '@nestjs/mongoose/dist/mongoose.module';
 import { IAuthenticationModuleOptions } from './interfaces';
 import { AUTH_OPTIONS } from './constants';
-import { JwtGuard } from './guards';
+import { EmailNotification } from './models/email-notification.model';
+import { EmailNotificationService } from './email/email-notification.service';
+import { UserIdentity } from './models/user-identity.model';
+import { UserIdentityService } from './user-identity.service';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: RefreshToken.name, schema: RefreshToken.schema },
-      { name: EmailVerification.name, schema: EmailVerification.schema },
-      { name: ForgottenPassword.name, schema: ForgottenPassword.schema },
+      { name: EmailNotification.name, schema: EmailNotification.schema },
+      { name: UserIdentity.name, schema: UserIdentity.schema },
     ]),
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, FacebookStrategy, GoogleStrategy, TokenService, EmailService],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    FacebookStrategy,
+    GoogleStrategy,
+    TokenService,
+    EmailNotificationService,
+    UserIdentityService,
+  ],
   controllers: [AuthController],
-  exports: [AuthService, LocalStrategy, JwtStrategy, FacebookStrategy, GoogleStrategy, TokenService, EmailService],
+  exports: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    FacebookStrategy,
+    GoogleStrategy,
+    TokenService,
+    EmailNotificationService,
+    UserIdentityService,
+  ],
 })
 export class AuthCoreModule {
   public static forRoot(options: IAuthenticationModuleOptions): DynamicModule {

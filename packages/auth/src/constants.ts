@@ -2,8 +2,9 @@ export const AUTH_OPTIONS = 'AUTH_OPTIONS';
 export const LOGIN_ERRORS = {
   USER_NOT_FOUND: "This user doesn't exists.",
   USER_NOT_VERIFIED: 'Please, verify you mail.',
-  USER_SOCIAL: 'This is a social user. Use your social provider to login.',
-  USER_LOCAL: 'This is a local user. Use your email and password to login.',
+  WRONG_CREDENTIALS: 'Wrong credentials.',
+  USER_NOT_LINKED:
+    'This email address is already being used. If you are the owner of the account then login and link to your third-party provider.',
 };
 export const SIGNUP_ERRORS = {
   USER_ALREADY_EXISTS: 'User already exists.',
@@ -23,6 +24,8 @@ export const RESET_PASSWORD_ERRORS = {
 };
 export const JWT_ERRORS = {
   TOKEN_BLACKLISTED: 'Token not valid.',
+  WRONG_OWNER: 'Wrong owner.',
+  TOKEN_NOT_VALID: 'Token not valid.'
 };
 export const REFRESH_TOKEN_ERRORS = {
   TOKEN_NOT_FOUND: 'Refresh token not found',
