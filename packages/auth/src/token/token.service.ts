@@ -7,7 +7,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { randomBytes } from 'crypto';
-import { Types } from 'mongoose';
 import { ReturnModelType } from '@typegoose/typegoose';
 import { RefreshToken } from '../models/refresh-token.model';
 import { JwtService } from '@nestjs/jwt';
@@ -17,6 +16,7 @@ import { IAccessToken, ILoginResponse } from './../interfaces/login-response.int
 import { BaseService } from '../shared/base-service';
 import { InjectModel } from '@nestjs/mongoose';
 import { IAuthenticationModuleOptions, IRefreshToken } from '../interfaces';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class TokenService extends BaseService<RefreshToken> {
@@ -59,8 +59,14 @@ export class TokenService extends BaseService<RefreshToken> {
     const payload: IJwtPayload = {
       sub: oldPayload.sub,
     };
-    // If yes, create a newAccessToken with oldPayload and revoke the oldOne
-    const accessToken: ILoginResponse = await this.createAccessToken(payload);
+
+    // check if the owner of the oldAccessToken is the same of the refreshToken
+    if (!(token.userId === payload.sub)) {
+      throw new UnauthorizedException(JWT_ERRORS.WRONG_OWNER);
+    }
+
+    // create a newAccessToken with oldPayload and revoke the oldOne
+    const loginResponse: ILoginResponse = await this.createAccessToken(payload);
     await this.revokeToken(oldAccessToken, oldPayload.sub);
 
     // Remove old refresh token and generate a new one
@@ -70,13 +76,16 @@ export class TokenService extends BaseService<RefreshToken> {
       clientId,
       ipAddress,
     });
-    accessToken.refreshToken = refreshTMP.value;
+    loginResponse.refreshToken = refreshTMP.value;
 
-    return accessToken;
+    return loginResponse;
   }
 
   async createAccessToken(payload: IJwtPayload): Promise<IAccessToken> {
-    const accessToken = this.jwtService.sign(payload);
+    const opts = this.options.modules.jwt.signOptions;
+    //this optional setting avoid any collision in token generation
+    opts.jwtid = uuidv4();
+    const accessToken = this.jwtService.sign(payload, opts);
     const token: ILoginResponse = {
       accessToken: accessToken,
       expiresIn: this.options.modules.jwt.signOptions.expiresIn,
@@ -121,7 +130,7 @@ export class TokenService extends BaseService<RefreshToken> {
         ignoreExpiration,
       }) as IJwtPayload;
     } catch (err) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(JWT_ERRORS.TOKEN_NOT_VALID);
     }
   }
 

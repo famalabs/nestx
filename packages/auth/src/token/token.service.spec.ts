@@ -6,30 +6,18 @@ import { RefreshToken } from '../models';
 import { TokenService } from './token.service';
 import { getModelToken } from '@nestjs/mongoose';
 import { TestingModule, Test } from '@nestjs/testing';
-import { AUTH_OPTIONS } from '../constants';
-import { CACHE_MANAGER } from '@nestjs/common';
-import { BaseService } from '../shared/base-service';
+import { AUTH_OPTIONS, REFRESH_TOKEN_ERRORS } from '../constants';
+import { BadRequestException, CACHE_MANAGER } from '@nestjs/common';
+
 const blackList = {};
-const payload: IJwtPayload = {
-  sub: 'userId',
-};
-const loginResponse: ILoginResponse = {
-  accessToken: 'accessToken',
-  expiresIn: '900',
-  tokenType: 'Bearer',
-};
-const tokenContent = {
-  userId: 'userId',
-  clientId: '',
-  ipAddress: '',
-};
-const refreshToken: RefreshToken = {
-  value: 'refreshToken',
-  userId: 'userId',
-  expiresAt: new Date(),
-  clientId: '',
-  ipAddress: '',
-};
+
+class MockRefreshToken implements IRefreshToken {
+  value: string;
+  userId: string;
+  expiresAt: Date;
+  clientId: string;
+  ipAddress: string;
+}
 
 describe('TokenService', () => {
   let service: TokenService;
@@ -45,6 +33,7 @@ describe('TokenService', () => {
           provide: getModelToken(RefreshToken.name),
           // notice that only the functions we call from the model are mocked
           useValue: {
+            findOne: jest.fn(),
             deleteMany: jest.fn(),
           },
         },
@@ -101,23 +90,29 @@ describe('TokenService', () => {
     jest.clearAllMocks();
   });
 
-  describe('createAccessToken', () => {
-    it('should create access Token', async () => {
-      const onSpyJwtSign = jest.spyOn(jwtService, 'sign').mockReturnValue('accessToken');
-      expect(service.createAccessToken(payload)).resolves.toEqual(loginResponse);
+  describe('getAccessTokenFromRefreshToken', () => {
+    it('should not get new access and refresh token with an expired refresh token', async () => {
+      const addMinutes = function (dt, minutes) {
+        return new Date(dt.getTime() + minutes * 60000);
+      };
+      const date = new Date();
+      const oldDate = addMinutes(date, -16);
+
+      const mockRefreshToken = new MockRefreshToken();
+      mockRefreshToken.clientId = 'clientId';
+      mockRefreshToken.value = 'refreshToken';
+      mockRefreshToken.expiresAt = oldDate;
+      mockRefreshToken.userId = 'userId';
+      mockRefreshToken.ipAddress = 'ipAddress';
+
+      const spy = jest.spyOn(service, 'findOne').mockResolvedValue(mockRefreshToken as any);
+
+      await expect(() =>
+        service.getAccessTokenFromRefreshToken(mockRefreshToken.value, 'oldAccessToken', 'clientId', 'ipAddress'),
+      ).rejects.toThrow(BadRequestException);
+      await expect(() =>
+        service.getAccessTokenFromRefreshToken(mockRefreshToken.value, 'oldAccessToken', 'clientId', 'ipAddress'),
+      ).rejects.toThrow(REFRESH_TOKEN_ERRORS.TOKEN_EXPIRED);
     });
   });
-
-  describe('createRefreshToken', () => {
-    it('should create access Token', async () => {
-      const crypto = require('crypto');
-      const spyOnRandomBytes = jest.spyOn(crypto, 'randomBytes').mockReturnValue('refreshToken');
-      const spyOnCreate = jest.spyOn(TokenService.prototype, 'create').mockResolvedValue(null);
-      expect(service.createRefreshToken(tokenContent)).resolves.toBe(refreshToken);
-    });
-  });
-
-  // describe('isBlackListed', () => {
-
-  // })
 });
