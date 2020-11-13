@@ -1,16 +1,15 @@
 import { PassportStrategy } from '@nestjs/passport';
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import * as crypto from 'crypto';
-import { Strategy } from 'passport-facebook';
-import { AUTH_OPTIONS, LOGIN_ERRORS } from './../constants';
-import { User } from '../dto/user';
-import { IUsersService } from '../interfaces/users-service.interface';
+import { Inject, Injectable } from '@nestjs/common';
+import { Profile, Strategy } from 'passport-facebook';
+import { AUTH_OPTIONS } from './../constants';
 import { IAuthenticationModuleOptions } from '../interfaces';
+import { IThirdPartyUser, THIRD_PARTY_PROVIDER } from '../interfaces/third-party-user.interface';
+import { AuthService } from '../auth.service';
 
 @Injectable()
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
   constructor(
-    @Inject(IUsersService) private readonly usersService: IUsersService,
+    private readonly authService: AuthService,
     @Inject(AUTH_OPTIONS) private options: IAuthenticationModuleOptions,
   ) {
     super({
@@ -20,31 +19,20 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       profileFields: ['email'],
     });
   }
-
-  public async validate(_accessToken: string, _refreshToken: string, profile: any): Promise<any> {
-    const user = await this.usersService.findOne({
+  public async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: Profile,
+    done: (error: any, user?: any) => void,
+  ): Promise<any> {
+    const thirdPartyUser: IThirdPartyUser = {
+      externalId: profile.id,
       email: profile.emails[0].value,
-    });
-    if (user) {
-      if (user.isSocial === true && user.socialProvider === 'facebook') {
-        return user;
-      } else {
-        throw new UnauthorizedException(LOGIN_ERRORS.USER_SOCIAL + ` Try to use ${user.socialProvider}.`);
-      }
-    }
-
-    let newUser: User = new User();
-    newUser.email = profile.emails[0].value;
-    newUser.isSocial = true;
-    newUser.isValid = true;
-    newUser.password = crypto.randomBytes(64).toString('hex');
-    newUser.socialProvider = 'facebook';
-    const res = await this.usersService.create(newUser);
-    if (!res) {
-      throw new UnauthorizedException();
-    }
-    return {
-      _id: res._id,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      provider: THIRD_PARTY_PROVIDER.GOOGLE,
     };
+    const user = await this.authService.validateThirdPartyIdentity(thirdPartyUser);
+    return done(null, { _id: user._id });
   }
 }

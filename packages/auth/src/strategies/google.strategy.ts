@@ -1,16 +1,15 @@
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, VerifyCallback } from 'passport-google-oauth20';
-import * as crypto from 'crypto';
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { AUTH_OPTIONS, LOGIN_ERRORS } from './../constants';
-import { IUsersService } from '../interfaces/users-service.interface';
-import { User } from '../dto/user';
+import { Profile, Strategy, VerifyCallback } from 'passport-google-oauth20';
+import { Inject, Injectable } from '@nestjs/common';
+import { AUTH_OPTIONS } from './../constants';
 import { IAuthenticationModuleOptions } from '../interfaces';
+import { IThirdPartyUser, THIRD_PARTY_PROVIDER } from '../interfaces/third-party-user.interface';
+import { AuthService } from '../auth.service';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
-    @Inject(IUsersService) private usersService: IUsersService,
+    private readonly authService: AuthService,
     @Inject(AUTH_OPTIONS) private options: IAuthenticationModuleOptions,
   ) {
     super({
@@ -21,30 +20,15 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     });
   }
 
-  async validate(_accessToken: string, _refreshToken: string, profile: any, _done: VerifyCallback): Promise<any> {
-    const user = await this.usersService.findOne({
+  async validate(accessToken: string, refreshToken: string, profile: Profile, done: VerifyCallback): Promise<any> {
+    const thirdPartyUser: IThirdPartyUser = {
+      externalId: profile.id,
       email: profile.emails[0].value,
-    });
-    if (user) {
-      if (user.isSocial === true && user.socialProvider === 'google') {
-        return user;
-      } else {
-        throw new UnauthorizedException(LOGIN_ERRORS.USER_SOCIAL + ` Try to use ${user.socialProvider}.`);
-      }
-    }
-
-    let newUser: User = new User();
-    newUser.email = profile.emails[0].value;
-    newUser.isSocial = true;
-    newUser.isValid = true;
-    newUser.password = crypto.randomBytes(64).toString('hex');
-    newUser.socialProvider = 'google';
-    const res = await this.usersService.create(newUser);
-    if (!res) {
-      throw new UnauthorizedException();
-    }
-    return {
-      _id: res._id,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      provider: THIRD_PARTY_PROVIDER.GOOGLE,
     };
+    const user = await this.authService.validateThirdPartyIdentity(thirdPartyUser);
+    return done(null, { _id: user._id });
   }
 }

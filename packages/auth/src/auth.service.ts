@@ -1,64 +1,105 @@
 import {
   Injectable,
-  Res,
   Req,
   Inject,
   ConflictException,
   UnauthorizedException,
   NotFoundException,
   InternalServerErrorException,
+  BadRequestException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { TokenService } from './token/token.service';
 import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
-import { Request } from 'express';
-import { InjectModel } from '@nestjs/mongoose';
-import { ReturnModelType } from '@typegoose/typegoose';
-import { AUTH_OPTIONS, EMAIL_ERRORS, LOGIN_ERRORS, RESET_PASSWORD_ERRORS } from './constants';
+import { AUTH_OPTIONS, EMAIL_ERRORS, LOGIN_ERRORS, RESET_PASSWORD_ERRORS, SIGNUP_ERRORS } from './constants';
 import { IJwtPayload } from './interfaces/jwt-payload.interface';
 import { ILoginResponse } from './interfaces/login-response.interface';
-import { IForgottenPassword } from './interfaces/forgotten-password.interface';
-import { ForgottenPassword } from './models/forgotten-password.model';
 import { IUsersService } from './interfaces/users-service.interface';
 import { User } from './dto/user';
-import { EmailService } from './email/email.service';
 import { IAuthenticationModuleOptions } from './interfaces/authentication-options.interface';
-import { IEmailVerification } from './interfaces';
-import { IEmailOptions } from './email/mail-options.interface';
+import { IEmailOptions } from './email/email-options.interface';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { LoginResponseDto } from './dto';
+import { EmailNotificationService } from './email/email-notification.service';
+import { IEmailNotification, NOTIFICATION_CATEGORY } from './interfaces/notification.interface';
+import { v4 as uuidv4 } from 'uuid';
+import { IThirdPartyUser } from './interfaces/third-party-user.interface';
+import * as crypto from 'crypto';
+import { UserIdentityService } from './user-identity.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly tokenService: TokenService,
-    private readonly emailService: EmailService,
+    private readonly emailNotificationService: EmailNotificationService,
+    private readonly userIdentityService: UserIdentityService,
     @Inject(IUsersService) private readonly usersService: IUsersService,
-    @InjectModel(ForgottenPassword.name)
-    private readonly forgottenPasswordModel: ReturnModelType<typeof ForgottenPassword>,
     @Inject(AUTH_OPTIONS) private options: IAuthenticationModuleOptions,
   ) {}
+
+  async signup(data: SignupDto): Promise<User> {
+    const user = await this.usersService.findOne({ email: data.email });
+    if (user) {
+      throw new BadRequestException(SIGNUP_ERRORS.USER_ALREADY_EXISTS);
+    }
+    return await this.usersService.create({ email: data.email, password: data.password });
+  }
 
   async login(credentials: LoginDto, ipAddress: string): Promise<ILoginResponse> {
     const user = await this.usersService.validateUser(credentials.email, credentials.password);
     if (!user) {
-      throw new NotFoundException(LOGIN_ERRORS.USER_NOT_FOUND);
-    }
-    if (user.isValid === false) {
-      throw new UnauthorizedException(LOGIN_ERRORS.USER_NOT_VERIFIED);
-    }
-    if (user.isSocial === true) {
-      throw new UnauthorizedException(LOGIN_ERRORS.USER_SOCIAL);
+      throw new UnauthorizedException(LOGIN_ERRORS.WRONG_CREDENTIALS);
     }
 
+    if (this.options.constants.blockNotVerifiedUser && !user.isVerified) {
+      throw new UnauthorizedException(LOGIN_ERRORS.USER_NOT_VERIFIED);
+    }
+    return await this.createLoginResponse(user._id, credentials.clientId, ipAddress);
+  }
+
+  async validateThirdPartyIdentity(thirdPartyUser: IThirdPartyUser) {
+    //search userIdentity and if found log the owner
+    const userIdentity = await this.userIdentityService.findOne({
+      externalId: thirdPartyUser.externalId,
+      provider: thirdPartyUser.provider,
+    });
+    if (userIdentity) {
+      const user = await this.usersService.findById(userIdentity.userId);
+      return user;
+    }
+
+    //if not found, then search a user with ther thirdPartyUser.email
+    const user = await this.usersService.findOne({ email: thirdPartyUser.email });
+    //if exists then throw a warning to the user
+    if (user) {
+      throw new UnauthorizedException(LOGIN_ERRORS.USER_NOT_LINKED);
+    }
+    //if not found, create new user + new userIdentity and login
+    const randomPassword = crypto.randomBytes(64).toString('hex');
+    const registeredUser = await this.usersService.create({
+      email: thirdPartyUser.email,
+      isSocial: true,
+      isVerified: true,
+      password: randomPassword,
+    });
+    await this.linkIdentity(thirdPartyUser, registeredUser._id);
+    return registeredUser;
+  }
+
+  async thirdPartyLogin(userId: string, ipAddress: string): Promise<ILoginResponse> {
+    return await this.createLoginResponse(userId, 'client id', ipAddress);
+  }
+
+  private async createLoginResponse(userId: string, clientId: string, ipAddress: string): Promise<ILoginResponse> {
     const payload: IJwtPayload = {
-      sub: user._id,
+      sub: userId,
     };
     const accessToken = await this.tokenService.createAccessToken(payload);
 
     const tokenContent = {
-      userId: user._id,
-      clientId: credentials.clientId,
+      userId: userId,
+      clientId: clientId,
       ipAddress,
     };
     const refreshToken = await this.tokenService.createRefreshToken(tokenContent);
@@ -71,36 +112,16 @@ export class AuthService {
     return loginResponse;
   }
 
-  async signup(data: SignupDto): Promise<User> {
-    const user: User = await this.usersService.create(data);
-    const sent = await this.sendVerificationEmail(user.email);
-    if (!sent) {
-      throw new InternalServerErrorException(EMAIL_ERRORS.EMAIL_NOT_SENT);
+  async linkIdentity(thirdPartyUser: IThirdPartyUser, userId: string): Promise<boolean> {
+    const res = await this.userIdentityService.linkIdentity(thirdPartyUser, userId);
+    if (!res) {
+      throw new InternalServerErrorException('Error link UserIdentity');
     }
-    return user;
-  }
-
-  async socialAccess(req: Request): Promise<ILoginResponse> {
-    const payload: IJwtPayload = {
-      sub: req.user['_id'],
-    };
-
-    const loginResponse: ILoginResponse = await this.tokenService.createAccessToken(payload);
-
-    // We save the user's refresh token
-    const tokenContent = {
-      userId: req.user['_id'],
-      clientId: '',
-      ipAddress: req.ip,
-    };
-    const refresh = await this.tokenService.createRefreshToken(tokenContent);
-    loginResponse.refreshToken = refresh.value;
-
-    return loginResponse;
+    return true;
   }
 
   async logout(userId: string, accessToken: string, refreshToken: string, fromAll: boolean): Promise<null> {
-    if (fromAll === true) {
+    if (fromAll) {
       await this.logoutFromAll(userId);
     } else {
       await this.logoutFromOne(refreshToken);
@@ -109,9 +130,9 @@ export class AuthService {
     return null;
   }
 
-  async sendVerificationEmail(email: string): Promise<boolean> {
-    const emailRecord = await this.createEmailRecord(email);
-    if (!emailRecord) {
+  async sendVerificationEmail(email: string, serverAddress: string): Promise<boolean> {
+    const emailNotification = await this.createEmailNotification(email, NOTIFICATION_CATEGORY.ACCOUNT_VERIFICATION);
+    if (!emailNotification) {
       throw new NotFoundException(EMAIL_ERRORS.USER_NOT_FOUND);
     }
     const mailOptions: IEmailOptions = {
@@ -122,28 +143,27 @@ export class AuthService {
       html:
         'Hi! <br><br> Thanks for your registration<br><br>' +
         '<a href=' +
-        this.options.constants.system.host +
-        ':' +
-        this.options.constants.system.port +
+        'clientAddress' +
         '/auth/email/verify/' +
-        emailRecord.emailToken +
+        emailNotification.token +
         '>Click here to activate your account</a>',
-    };
-    const sent = await this.emailService.sendEmail(email, mailOptions);
+    }; //thir redirect to a page on the client that make a post to server /verify
+    const sent = await this.emailNotificationService.notify(email, mailOptions);
     if (!sent) {
       throw new InternalServerErrorException(EMAIL_ERRORS.EMAIL_NOT_SENT);
     }
     return sent;
   }
 
-  async resendVerificationEmail(email: string): Promise<boolean> {
-    const firstEmail = await this.emailService.findOne({
-      email: email,
+  async resendVerificationEmail(email: string, serverAddress: string): Promise<boolean> {
+    const firstEmail = await this.emailNotificationService.findOne({
+      to: email,
+      category: NOTIFICATION_CATEGORY.ACCOUNT_VERIFICATION,
     });
     if (!firstEmail) {
       throw new NotFoundException(EMAIL_ERRORS.USER_NOT_FOUND);
     }
-    const sent = await this.sendVerificationEmail(email);
+    const sent = await this.sendVerificationEmail(email, serverAddress);
     if (!sent) {
       throw new InternalServerErrorException(EMAIL_ERRORS.EMAIL_NOT_SENT);
     }
@@ -151,27 +171,28 @@ export class AuthService {
   }
 
   async verifyEmail(token: string): Promise<boolean> {
-    const email = await this.emailService.findOne({
-      emailToken: token,
+    const emailNotification = await this.emailNotificationService.findOne({
+      token: token,
+      category: NOTIFICATION_CATEGORY.ACCOUNT_VERIFICATION,
     });
-    if (!email) {
+    if (!emailNotification) {
       throw new NotFoundException(EMAIL_ERRORS.EMAIL_WRONG_VERIFY_CODE);
     }
 
     const user = await this.usersService.findOne({
-      email: email.email,
+      email: emailNotification.to,
     });
-    user.isValid = true;
+    user.isVerified = true;
     const updatedUser = await this.usersService.update(user._id, user);
-    await this.emailService.delete({ _id: email._id });
+    await this.emailNotificationService.delete({ _id: emailNotification._id });
     return !!updatedUser;
   }
 
-  async sendForgottenPasswordEmail(email: string): Promise<boolean> {
+  async sendForgottenPasswordEmail(email: string, serverAddress: string): Promise<boolean> {
     const user = await this.usersService.findOne({ email: email });
     if (!user) throw new NotFoundException(LOGIN_ERRORS.USER_NOT_FOUND);
 
-    const tokenModel = await this.createForgottenPasswordToken(email);
+    const emailNotification = await this.createEmailNotification(email, NOTIFICATION_CATEGORY.RESET_CREDENTIALS);
     let mailOptions: IEmailOptions = {
       from: '"Company" <' + this.options.constants.mail.auth.user + '>',
       to: email,
@@ -180,15 +201,13 @@ export class AuthService {
       html:
         'Hi! <br><br> If you requested to reset your password<br><br>' +
         '<a href=' +
-        this.options.constants.system.host +
-        ':' +
-        this.options.constants.system.port +
-        '/auth/email/reset-password/' +
-        tokenModel.newPasswordToken +
+        'clientAddress' +
+        '/auth/email/reset-password?token=' +
+        emailNotification.token +
         '>Click here</a>',
     }; //il link reindirizzerà ad una pagina del client in cui l'utente poi digiterà la propria nuova password
 
-    const sent = await this.emailService.sendEmail(email, mailOptions);
+    const sent = await this.emailNotificationService.notify(email, mailOptions);
     if (!sent) {
       throw new InternalServerErrorException(EMAIL_ERRORS.EMAIL_NOT_SENT);
     }
@@ -197,6 +216,7 @@ export class AuthService {
 
   async resetPassword(resetPwd: ResetPasswordDto): Promise<boolean> {
     return await this.resetFromToken(resetPwd.token, resetPwd.newPassword);
+    //TODO maybe you also want to delete all refresh token for the user who own the token
   }
 
   async refreshToken(
@@ -209,55 +229,37 @@ export class AuthService {
   }
 
   private async resetFromToken(token: string, newPassword: string): Promise<boolean> {
-    const doc = await this.forgottenPasswordModel.findOne({
-      newPasswordToken: token,
+    const notification = await this.emailNotificationService.findOne({
+      category: NOTIFICATION_CATEGORY.RESET_CREDENTIALS,
+      token: token,
     });
-    if (!doc) {
+    if (!notification) {
       throw new UnauthorizedException(RESET_PASSWORD_ERRORS.WRONG_TOKEN);
     }
-    if (!this.checkTimestampLimit(new Date(), doc.timestamp, 15)) {
+    if (!this.checkTimestampLimit(new Date(), notification.createdAt, 15)) {
       //if 15 min after token generation
       throw new UnauthorizedException(RESET_PASSWORD_ERRORS.TOKEN_EXPIRED);
     }
-    await this.usersService.setPassword(doc.email, newPassword);
-    await this.forgottenPasswordModel.deleteOne({ _id: doc._id });
+    await this.usersService.setPassword(notification.to, newPassword);
+    await this.emailNotificationService.deleteById(notification._id);
     return true;
   }
 
-  private async createEmailRecord(email: string): Promise<IEmailVerification> {
-    const doc = await this.emailService.findOne({
-      email: email,
+  private async createEmailNotification(email: string, category: NOTIFICATION_CATEGORY): Promise<IEmailNotification> {
+    const doc = await this.emailNotificationService.findOne({
+      to: email,
+      category: category,
     });
 
-    if (doc && this.checkTimestampLimit(new Date(), doc.timestamp, 15)) {
+    if (doc && this.checkTimestampLimit(new Date(), doc.createdAt, 15)) {
       throw new ConflictException(EMAIL_ERRORS.EMAIL_SENT_RECENTLY);
     } else {
-      const newDoc = await this.emailService.findOneAndUpdate(
-        { email: email },
+      const newDoc = await this.emailNotificationService.findOneAndUpdate(
+        { to: email, category: category },
         {
-          email: email,
-          emailToken: (Math.floor(Math.random() * 9000000) + 1000000).toString(), //Generate 7 digits number
-          timestamp: new Date(),
-        },
-        { upsert: true, new: true },
-      );
-      return newDoc;
-    }
-  }
-
-  private async createForgottenPasswordToken(email: string): Promise<IForgottenPassword> {
-    const doc = await this.forgottenPasswordModel.findOne({
-      email: email,
-    });
-    if (doc && this.checkTimestampLimit(new Date(), doc.timestamp, 15)) {
-      throw new ConflictException(EMAIL_ERRORS.EMAIL_SENT_RECENTLY);
-    } else {
-      const newDoc = await this.forgottenPasswordModel.findOneAndUpdate(
-        { email: email },
-        {
-          email: email,
-          newPasswordToken: (Math.floor(Math.random() * 9000000) + 1000000).toString(), //Generate 7 digits number,
-          timestamp: new Date(),
+          to: email,
+          category: category,
+          token: uuidv4(),
         },
         { upsert: true, new: true },
       );

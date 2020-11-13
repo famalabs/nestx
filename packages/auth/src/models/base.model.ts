@@ -1,23 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { buildSchema, modelOptions, prop } from '@typegoose/typegoose';
+import { buildSchema, prop } from '@typegoose/typegoose';
 import { Schema } from 'mongoose';
 
 export interface IBaseModel {
   createdAt?: Date;
   updatedAt?: Date;
-  _id?: string;
+  _id: string;
 }
 
 export class BaseModel implements IBaseModel {
   @ApiProperty({ type: Date })
   @prop()
-  createdAt?: Date; // provided by schemaOptions.timestamps
+  createdAt?: Date;
   @ApiProperty({ type: Date })
   @prop()
-  updatedAt?: Date; // provided by schemaOptions.timestamps
+  updatedAt?: Date;
   @ApiProperty({ type: String })
-  _id?: string; // _id getter as string
-
+  _id: string;
   static get schema(): Schema {
     return buildSchema(this as any, {
       timestamps: true,
@@ -27,8 +26,10 @@ export class BaseModel implements IBaseModel {
       },
     });
   }
-
   static get modelName(): string {
     return this.name;
+  }
+  get id(): string {
+    return this._id;
   }
 }
