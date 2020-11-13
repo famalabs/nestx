@@ -5,9 +5,7 @@ export interface IUser extends IBaseModel {
   email: string;
   password: string;
   roles: USER_ROLES[];
-  isSocial: boolean;
-  isValid: boolean;
-  socialProvider: string;
+  isVerified: boolean;
   createdAt?: Date;
   updatedAt?: Date;
   _id: string;

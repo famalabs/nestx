@@ -9,6 +9,7 @@ export interface IAuthenticationModuleOptions {
     cache: CacheModuleOptions;
   };
   constants: {
+    blockNotVerifiedUser: boolean;
     jwt: {
       accessTokenTTL: number;
       refreshTokenTTL: number;
@@ -22,10 +23,6 @@ export interface IAuthenticationModuleOptions {
         user: string;
         password: string;
       };
-    };
-    system: {
-      host: string;
-      port: string;
     };
     social: {
       facebook: {

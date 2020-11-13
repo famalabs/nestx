@@ -1,7 +1,11 @@
+import { USER_ROLES } from '../ACLs/constants';
+
 export interface IUserResponse {
-  _id: string;
   email?: string;
-  isSocial?: boolean;
-  isValid?: boolean;
-  socialProvider?: string;
+  password?: string;
+  roles?: USER_ROLES[];
+  isVerified?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  _id: string;
 }
