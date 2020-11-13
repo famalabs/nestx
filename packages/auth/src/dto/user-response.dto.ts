@@ -9,7 +9,7 @@ export class UserResponseDto implements IUserResponse {
   @ApiProperty()
   isSocial?: boolean;
   @ApiProperty()
-  isValid?: boolean;
+  isVerified?: boolean;
   @ApiProperty()
   socialProvider?: string;
 }

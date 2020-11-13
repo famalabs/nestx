@@ -5,9 +5,7 @@ export class User implements IUser {
   email: string;
   password: string;
   roles: USER_ROLES[];
-  isSocial: boolean;
-  isValid: boolean;
-  socialProvider: string;
+  isVerified: boolean;
   createdAt?: Date;
   updatedAt?: Date;
   _id: string;
