@@ -1,10 +1,13 @@
 import { IsOptional, IsString } from 'class-validator';
+import {ApiPropertyOptional} from "@nestjs/swagger";
 
 export class ItemFilter<T> {
+  @ApiPropertyOptional()
   @IsString()
   @IsOptional()
   fields?: string; // select
 
+  @ApiPropertyOptional()
   @IsOptional()
   // @Type(() => Include)
   // include?: Include<T>;
