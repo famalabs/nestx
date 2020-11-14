@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import {CoreModule} from "@famalabs/nestx-core";
 
 @Module({
-  imports: [CoreModule],
+  // imports: [CoreModule],
   controllers: [AppController],
   providers: [AppService],
 })
