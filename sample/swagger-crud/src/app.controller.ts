@@ -1,4 +1,4 @@
-import {Controller, Get, Query} from '@nestjs/common';
+import {Body, Controller, Get, Post, Query} from '@nestjs/common';
 import { AppService } from './app.service';
 import {ApiExtraModels, ApiQuery} from '@nestjs/swagger';
 import {Filter, ref, ApiQuery as CustomApiQuery} from '@famalabs/nestx-core';
@@ -41,5 +41,11 @@ export class AppController {
     test4(@Query() filter: AppFilter) {
         console.log(filter);
         return filter;
+    }
+
+    @Post('test1')
+    test1post(@Body() body: AppFilter) {
+      console.log(body);
+      return body;
     }
 }
