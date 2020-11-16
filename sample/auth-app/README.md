@@ -1,75 +1,75 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+<div align="center">
+  <h1>Auth-app (@famalabs/nestx)</h1>
+</div>
 
-[travis-image]: https://api.travis-ci.org/nestjs/nest.svg?branch=master
-[travis-url]: https://travis-ci.org/nestjs/nest
-[linux-image]: https://img.shields.io/travis/nestjs/nest/master.svg?label=linux
-[linux-url]: https://travis-ci.org/nestjs/nest
-  
-  <p align="center">A progressive <a href="http://nodejs.org" target="blank">Node.js</a> framework for building efficient and scalable server-side applications, heavily inspired by <a href="https://angular.io" target="blank">Angular</a>.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore"><img src="https://img.shields.io/npm/dm/@nestjs/core.svg" alt="NPM Downloads" /></a>
-<a href="https://travis-ci.org/nestjs/nest"><img src="https://api.travis-ci.org/nestjs/nest.svg?branch=master" alt="Travis" /></a>
-<a href="https://travis-ci.org/nestjs/nest"><img src="https://img.shields.io/travis/nestjs/nest/master.svg?label=linux" alt="Linux" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#5" alt="Coverage" /></a>
-<a href="https://gitter.im/nestjs/nestjs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge"><img src="https://badges.gitter.im/nestjs/nestjs.svg" alt="Gitter" /></a>
-<a href="https://opencollective.com/nest#backer"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec"><img src="https://img.shields.io/badge/Donate-PayPal-dc3d53.svg"/></a>
-  <a href="https://twitter.com/nestframework"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+<div align="center">
+  <a href="https://github.com/famalabs/nestx/LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License" />
+  </a>
+  <a href="https://github.com/nestjs/nest">
+    <img src="https://raw.githubusercontent.com/nestjsx/crud/master/img/nest-powered.svg?sanitize=true" alt="Nest Powered" />
+  </a>
+</div>
 
-## Description
+<div align="center">
+  <sub>Built by
+  <a href="https://github.com/famalabs">@Fama Labs</a> and
+  <a href="https://github.com/famalabs/nestx/graphs/contributors">
+    Contributors
+  </a>
+</div>
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+<br />
 
-## Installation
+Sample app that wants to show you how to use [@famalabs/nestx-auth](https://github.com/famalabs/nestx/tree/master/packages/auth) package with MongoDB and Redis 
 
-```bash
-$ npm install
+## Getting started
+
+### Requirements
+- NodeJs
+- NPM
+- MongoDB
+- Redis
+
+### Install
+```shell
+git clone https://github.com/famalabs/nestx.git
+cd sample/nest-app
+npm install
+```
+Once the dependencies are install, you have to create an .env file with the same structure of the env.sample file.
+After that you are ready! :rocket:
+```shell
+npm run start
 ```
 
-## Running the app
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+### Project structure
+```shell
+src/
+├── common/  # BaseService and BaseModel for db
+├── users
+│   ├── models
+|   |   └── user.model # Implements the IUser from @famalabs/nestx-auth
+│   └── user.module.ts/  # The user module
+├── app-auth/  
+│    ├── app-auth.module # A global module that define some custom provider that are needed by the package
+│    ├── auth-options # The config options for @famalabs/nestx-auth
+│    ├── auth-users.service # Implements the IUserService from @famalabs/nestx-auth
+│    └── notification-sender.service # Implements the INotificationSender from famalabs/nestx-auth
+├── app.controller
+├── app.service
+├── app.module
+└── main.ts
 ```
 
 ## Support
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Any support is welcome. At least you can give us a star :star:
 
-## Stay in touch
+## Contributors
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
 
 ## License
 
-  Nest is [MIT licensed](LICENSE).
+[MIT](LICENSE)
