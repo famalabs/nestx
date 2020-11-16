@@ -30,7 +30,6 @@ interface UserDoc extends Document {
   email: string;
   password: string;
   roles: USER_ROLES[];
-  isSocial: boolean;
   isVerified: boolean;
   socialProvider: string;
   createdAt?: Date;
@@ -41,7 +40,6 @@ const userLocal: Partial<UserDoc> = {
   email: 'user@email.com',
   password: 'myPassword',
   roles: [],
-  isSocial: false,
   isVerified: true,
   socialProvider: 'local',
   createdAt: date,
@@ -52,7 +50,6 @@ const userLocalNotVerified: Partial<UserDoc> = {
   email: 'user@email.com',
   password: 'myPassword',
   roles: [],
-  isSocial: false,
   isVerified: false,
   socialProvider: 'local',
   createdAt: date,
@@ -63,7 +60,6 @@ const userGoogle: Partial<UserDoc> = {
   email: 'user@email.com',
   password: 'myPassword',
   roles: [],
-  isSocial: true,
   isVerified: true,
   socialProvider: 'local',
   createdAt: date,

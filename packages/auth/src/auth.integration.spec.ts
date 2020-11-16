@@ -39,6 +39,7 @@ import { APP_FILTER } from '@nestjs/core';
 import { THIRD_PARTY_PROVIDER } from './interfaces/third-party-user.interface';
 import { NOTIFICATION_CATEGORY } from './interfaces/notification.interface';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+
 const mongoURI = 'mongodb://localhost:27017/test';
 const jwtModuleOptions: JwtModuleOptions = {
   secret: 'secret',
@@ -72,17 +73,27 @@ const authOptions: IAuthenticationModuleOptions = {
         user: '',
         password: '',
       },
+      links: {
+        emailVerification: '',
+        forgotPassword: '',
+      },
     },
     social: {
       facebook: {
         callbackURL: '',
         clientID: '',
         clientSecret: '',
+        linkIdentity: {
+          callbackURL: 'string',
+        },
       },
       google: {
         callbackURL: '',
         clientID: '',
         clientSecret: '',
+        linkIdentity: {
+          callbackURL: 'string',
+        },
       },
     },
   },

@@ -75,15 +75,14 @@ export class AuthService {
     if (user) {
       throw new UnauthorizedException(LOGIN_ERRORS.USER_NOT_LINKED);
     }
-    //if not found, create new user + new userIdentity and login
+    //if not found, create new user + new userIdentity
     const randomPassword = crypto.randomBytes(64).toString('hex');
     const registeredUser = await this.usersService.create({
       email: thirdPartyUser.email,
-      isSocial: true,
       isVerified: true,
       password: randomPassword,
     });
-    await this.linkIdentity(thirdPartyUser, registeredUser._id);
+    await this.userIdentityService.linkIdentity(thirdPartyUser, registeredUser._id);
     return registeredUser;
   }
 
@@ -112,14 +111,6 @@ export class AuthService {
     return loginResponse;
   }
 
-  async linkIdentity(thirdPartyUser: IThirdPartyUser, userId: string): Promise<boolean> {
-    const res = await this.userIdentityService.linkIdentity(thirdPartyUser, userId);
-    if (!res) {
-      throw new InternalServerErrorException('Error link UserIdentity');
-    }
-    return true;
-  }
-
   async logout(userId: string, accessToken: string, refreshToken: string, fromAll: boolean): Promise<null> {
     if (fromAll) {
       await this.logoutFromAll(userId);
@@ -143,8 +134,8 @@ export class AuthService {
       html:
         'Hi! <br><br> Thanks for your registration<br><br>' +
         '<a href=' +
-        'clientAddress' +
-        '/auth/email/verify/' +
+        this.options.constants.mail.links.emailVerification +
+        '?token=' +
         emailNotification.token +
         '>Click here to activate your account</a>',
     }; //thir redirect to a page on the client that make a post to server /verify
@@ -193,7 +184,7 @@ export class AuthService {
     if (!user) throw new NotFoundException(LOGIN_ERRORS.USER_NOT_FOUND);
 
     const emailNotification = await this.createEmailNotification(email, NOTIFICATION_CATEGORY.RESET_CREDENTIALS);
-    let mailOptions: IEmailOptions = {
+    const mailOptions: IEmailOptions = {
       from: '"Company" <' + this.options.constants.mail.auth.user + '>',
       to: email,
       subject: 'Frogotten Password',
@@ -201,8 +192,8 @@ export class AuthService {
       html:
         'Hi! <br><br> If you requested to reset your password<br><br>' +
         '<a href=' +
-        'clientAddress' +
-        '/auth/email/reset-password?token=' +
+        this.options.constants.mail.links.forgotPassword +
+        '?token=' +
         emailNotification.token +
         '>Click here</a>',
     }; //il link reindirizzerà ad una pagina del client in cui l'utente poi digiterà la propria nuova password

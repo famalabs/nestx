@@ -18,6 +18,8 @@ import { EmailNotification } from './models/email-notification.model';
 import { EmailNotificationService } from './email/email-notification.service';
 import { UserIdentity } from './models/user-identity.model';
 import { UserIdentityService } from './user-identity.service';
+import { FacebookLinkStrategy } from './strategies/facebook-link.strategy';
+import { GoogleLinkStrategy } from './strategies/google-link.strategy';
 
 @Module({
   imports: [
@@ -33,6 +35,8 @@ import { UserIdentityService } from './user-identity.service';
     JwtStrategy,
     FacebookStrategy,
     GoogleStrategy,
+    FacebookLinkStrategy,
+    GoogleLinkStrategy,
     TokenService,
     EmailNotificationService,
     UserIdentityService,
@@ -44,6 +48,8 @@ import { UserIdentityService } from './user-identity.service';
     JwtStrategy,
     FacebookStrategy,
     GoogleStrategy,
+    FacebookLinkStrategy,
+    GoogleLinkStrategy,
     TokenService,
     EmailNotificationService,
     UserIdentityService,
