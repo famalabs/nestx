@@ -124,7 +124,7 @@ export class TokenService extends BaseService<RefreshToken> {
     await this.delete({ value: value });
   }
 
-  private async validateToken(token: string, ignoreExpiration: boolean = false): Promise<IJwtPayload> {
+  async validateToken(token: string, ignoreExpiration = false): Promise<IJwtPayload> {
     try {
       return this.jwtService.verify(token, {
         ignoreExpiration,
