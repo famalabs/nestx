@@ -29,6 +29,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       provider: THIRD_PARTY_PROVIDER.GOOGLE,
     };
     const user = await this.authService.validateThirdPartyIdentity(thirdPartyUser);
-    return done(null, { _id: user._id });
+    return { _id: user._id };
   }
 }
