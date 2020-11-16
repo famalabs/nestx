@@ -22,12 +22,21 @@ const dist = distId < 0 ? 'dist' : process.argv[distId + 1]; //if the index of -
 function defaultTask() {
   log.info('Watching files..');
   modules.forEach(packageName => {
-    watch([`${source}/${packageName}/**/*.ts`, `${source}/${packageName}/*.ts`], series(packageName));
+    watch(
+      [
+        `${source}/${packageName}/src/**/*.ts`,
+        `${source}/${packageName}/src/*.ts`,
+        `!${source}/${packageName}/${dist}/**`,
+        `!${source}/${packageName}/${dist}/**`,
+        `!${source}/${packageName}/node_modules/**`,
+      ],
+      series(packageName),
+    );
   });
 }
 
 /**
- * Builds the given package in dist/packageName
+ * Builds the given package in packageName/dist
  * @param packageName The name of the package
  */
 function buildPackage(packageName: string) {
