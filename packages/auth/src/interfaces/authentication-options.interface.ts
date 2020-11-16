@@ -23,17 +23,27 @@ export interface IAuthenticationModuleOptions {
         user: string;
         password: string;
       };
+      links: {
+        emailVerification: string;
+        forgotPassword: string;
+      };
     };
     social: {
       facebook: {
         callbackURL: string;
         clientID: string;
         clientSecret: string;
+        linkIdentity: {
+          callbackURL: string;
+        };
       };
       google: {
         callbackURL: string;
         clientID: string;
         clientSecret: string;
+        linkIdentity: {
+          callbackURL: string;
+        };
       };
     };
   };
