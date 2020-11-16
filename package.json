@@ -4,6 +4,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "build:watch": "gulp default",
     "prebuild:prod": "npm run clean:prod",
     "build:prod": "gulp build",
     "preversion": "npm run lint && npm run format",
