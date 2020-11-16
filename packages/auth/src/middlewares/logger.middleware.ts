@@ -5,7 +5,7 @@ import { Request } from 'express';
 export class LoggerMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: Function) {
     try {
-      var offuscateRequest = JSON.parse(JSON.stringify(req.body));
+      const offuscateRequest = JSON.parse(JSON.stringify(req.body));
       if (offuscateRequest && offuscateRequest.password) offuscateRequest.password = '*******';
       if (offuscateRequest != {})
         console.log(
