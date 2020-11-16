@@ -7,8 +7,6 @@ export class UserResponseDto implements IUserResponse {
   @ApiProperty()
   email?: string;
   @ApiProperty()
-  isSocial?: boolean;
-  @ApiProperty()
   isVerified?: boolean;
   @ApiProperty()
   socialProvider?: string;
