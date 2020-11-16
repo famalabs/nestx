@@ -15,13 +15,8 @@ export interface IAuthenticationModuleOptions {
       refreshTokenTTL: number;
     };
     mail: {
-      host: string;
-      port: number;
-      secure: boolean;
-      requireTLS: boolean;
       auth: {
         user: string;
-        password: string;
       };
       links: {
         emailVerification: string;

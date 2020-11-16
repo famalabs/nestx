@@ -1,32 +1,30 @@
 import {
   Injectable,
-  Req,
   Inject,
   ConflictException,
   UnauthorizedException,
   NotFoundException,
   InternalServerErrorException,
   BadRequestException,
-  UnprocessableEntityException,
 } from '@nestjs/common';
-import { TokenService } from './token/token.service';
-import { LoginDto } from './dto/login.dto';
-import { SignupDto } from './dto/signup.dto';
 import { AUTH_OPTIONS, EMAIL_ERRORS, LOGIN_ERRORS, RESET_PASSWORD_ERRORS, SIGNUP_ERRORS } from './constants';
-import { IJwtPayload } from './interfaces/jwt-payload.interface';
-import { ILoginResponse } from './interfaces/login-response.interface';
-import { IUsersService } from './interfaces/users-service.interface';
 import { User } from './dto/user';
-import { IAuthenticationModuleOptions } from './interfaces/authentication-options.interface';
-import { IEmailOptions } from './email/email-options.interface';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { LoginResponseDto } from './dto';
-import { EmailNotificationService } from './email/email-notification.service';
-import { IEmailNotification, NOTIFICATION_CATEGORY } from './interfaces/notification.interface';
-import { v4 as uuidv4 } from 'uuid';
-import { IThirdPartyUser } from './interfaces/third-party-user.interface';
-import * as crypto from 'crypto';
+import { LoginDto, LoginResponseDto, ResetPasswordDto, SignupDto } from './dto';
 import { UserIdentityService } from './user-identity.service';
+import { TokenService } from './token/token.service';
+import { EmailNotificationService, IEmailOptions } from './notification/email';
+import {
+  IAuthenticationModuleOptions,
+  IEmailNotification,
+  IJwtPayload,
+  ILoginResponse,
+  INotificationSender,
+  IThirdPartyUser,
+  IUsersService,
+  NOTIFICATION_CATEGORY,
+} from './interfaces';
+import { v4 as uuidv4 } from 'uuid';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -35,6 +33,7 @@ export class AuthService {
     private readonly emailNotificationService: EmailNotificationService,
     private readonly userIdentityService: UserIdentityService,
     @Inject(IUsersService) private readonly usersService: IUsersService,
+    @Inject(INotificationSender) private readonly sender: INotificationSender,
     @Inject(AUTH_OPTIONS) private options: IAuthenticationModuleOptions,
   ) {}
 
@@ -139,7 +138,7 @@ export class AuthService {
         emailNotification.token +
         '>Click here to activate your account</a>',
     }; //thir redirect to a page on the client that make a post to server /verify
-    const sent = await this.emailNotificationService.notify(email, mailOptions);
+    const sent = await this.sender.notify(email, mailOptions);
     if (!sent) {
       throw new InternalServerErrorException(EMAIL_ERRORS.EMAIL_NOT_SENT);
     }
@@ -198,7 +197,7 @@ export class AuthService {
         '>Click here</a>',
     }; //il link reindirizzerà ad una pagina del client in cui l'utente poi digiterà la propria nuova password
 
-    const sent = await this.emailNotificationService.notify(email, mailOptions);
+    const sent = await this.sender.notify(email, mailOptions);
     if (!sent) {
       throw new InternalServerErrorException(EMAIL_ERRORS.EMAIL_NOT_SENT);
     }

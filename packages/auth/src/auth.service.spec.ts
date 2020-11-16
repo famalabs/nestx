@@ -1,25 +1,31 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { TokenService } from './token/token.service';
-import { IUsersService } from './interfaces/users-service.interface';
-import { AUTH_OPTIONS, EMAIL_ERRORS, LOGIN_ERRORS, RESET_PASSWORD_ERRORS, SIGNUP_ERRORS } from './constants';
+import { AUTH_OPTIONS, EMAIL_ERRORS, LOGIN_ERRORS, RESET_PASSWORD_ERRORS } from './constants';
 import {
-  BadRequestException,
   ConflictException,
+  Injectable,
   InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { IAccessToken, IAuthenticationModuleOptions, IJwtPayload, IRefreshToken, User } from './interfaces';
+import {
+  IAccessToken,
+  IAuthenticationModuleOptions,
+  IEmailNotification,
+  IJwtPayload,
+  INotificationSender,
+  IRefreshToken,
+  IUsersService,
+  NOTIFICATION_CATEGORY,
+} from './interfaces';
 import { USER_ROLES } from './ACLs';
 import { Document } from 'mongoose';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { LoginDto, LoginResponseDto, SignupDto } from './dto';
+import { LoginDto, LoginResponseDto, ResetPasswordDto, SignupDto, User } from './dto';
 import * as mocks from 'node-mocks-http';
 import { EmailNotification } from './models';
-import { IEmailNotification, NOTIFICATION_CATEGORY } from './interfaces/notification.interface';
-import { EmailNotificationService } from './email/email-notification.service';
 import { UserIdentityService } from './user-identity.service';
+import { EmailNotificationService } from './notification';
 
 const addMinutes = function (dt, minutes) {
   return new Date(dt.getTime() + minutes * 60000);
@@ -159,11 +165,22 @@ const userGoogleTokenContent = {
 };
 const address = 'http://localhost:3000';
 
+@Injectable()
+export class MockSender implements INotificationSender {
+  notify(to: string): Promise<boolean>;
+  notify(to: string, options: any): Promise<boolean>;
+  notify(to: string, options: any, template: string): Promise<boolean>;
+  async notify(to: any, options?: any, template?: any) {
+    return true;
+  }
+}
+
 describe('AuthService', () => {
   let service: AuthService;
   let tokenService: TokenService;
   let emailNotificationService: EmailNotificationService;
   let usersService: IUsersService;
+  let sender: INotificationSender;
   let options: IAuthenticationModuleOptions;
 
   beforeEach(async () => {
@@ -206,6 +223,10 @@ describe('AuthService', () => {
           },
         },
         {
+          provide: INotificationSender,
+          useClass: MockSender,
+        },
+        {
           provide: AUTH_OPTIONS,
           useValue: {
             constants: {
@@ -213,6 +234,10 @@ describe('AuthService', () => {
               mail: {
                 auth: {
                   user: 'user@email.com',
+                },
+                links: {
+                  emailVerification: 'http://localhost:3000',
+                  forgotPassword: 'http://localhost:3000',
                 },
               },
               system: {
@@ -229,6 +254,7 @@ describe('AuthService', () => {
     emailNotificationService = module.get<EmailNotificationService>(EmailNotificationService);
     tokenService = module.get<TokenService>(TokenService);
     usersService = module.get<IUsersService>(IUsersService);
+    sender = module.get<INotificationSender>(INotificationSender);
     options = module.get<IAuthenticationModuleOptions>(AUTH_OPTIONS);
   });
 
@@ -283,7 +309,7 @@ describe('AuthService', () => {
         .spyOn(emailNotificationService, 'findOne')
         .mockResolvedValue(mockOldForgottenPasswordDoc as any);
       jest.spyOn(emailNotificationService, 'findOneAndUpdate').mockResolvedValue(mockForgottenPasswordDoc as any);
-      jest.spyOn(emailNotificationService, 'notify').mockResolvedValue(false);
+      jest.spyOn(sender, 'notify').mockResolvedValue(false);
       await expect(() => service.sendForgottenPasswordEmail(userLocal.email, address)).rejects.toThrow(
         InternalServerErrorException,
       );
@@ -334,7 +360,7 @@ describe('AuthService', () => {
       const spyOnModelFindAndUpdate = jest
         .spyOn(emailNotificationService, 'findOneAndUpdate')
         .mockResolvedValue(mockVerificationEmailDoc as any);
-      const spyOnEmailServiceSend = jest.spyOn(emailNotificationService, 'notify').mockResolvedValue(false);
+      const spyOnEmailServiceSend = jest.spyOn(sender, 'notify').mockResolvedValue(false);
 
       await expect(() => service.sendVerificationEmail(userLocal.email, address)).rejects.toThrow(
         InternalServerErrorException,

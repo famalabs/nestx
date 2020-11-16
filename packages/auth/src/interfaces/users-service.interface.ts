@@ -1,4 +1,3 @@
-import { CreateQuery } from 'mongoose';
 import { User } from '../dto/user';
 export const IUsersService = Symbol('IUsersService');
 export interface IUsersService {

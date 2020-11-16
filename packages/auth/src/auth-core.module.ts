@@ -15,11 +15,11 @@ import { MongooseModule } from '@nestjs/mongoose/dist/mongoose.module';
 import { IAuthenticationModuleOptions } from './interfaces';
 import { AUTH_OPTIONS } from './constants';
 import { EmailNotification } from './models/email-notification.model';
-import { EmailNotificationService } from './email/email-notification.service';
 import { UserIdentity } from './models/user-identity.model';
 import { UserIdentityService } from './user-identity.service';
 import { FacebookLinkStrategy } from './strategies/facebook-link.strategy';
 import { GoogleLinkStrategy } from './strategies/google-link.strategy';
+import { EmailNotificationService } from './notification/email';
 
 @Module({
   imports: [

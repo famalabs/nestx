@@ -18,27 +18,29 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import * as request from 'supertest';
-import { IAuthenticationModuleOptions, ILoginResponse, IUser, IUsersService, User } from './interfaces';
+import {
+  IAuthenticationModuleOptions,
+  ILoginResponse,
+  INotificationSender,
+  IUser,
+  IUsersService,
+  NOTIFICATION_CATEGORY,
+  THIRD_PARTY_PROVIDER,
+} from './interfaces';
 import { BaseService } from './shared/base-service';
-import { BaseModel, EmailNotification, RefreshToken } from './models';
+import { BaseModel, EmailNotification, RefreshToken, UserIdentity } from './models';
 import { mongoose, prop } from '@typegoose/typegoose';
 import { USER_ROLES } from './ACLs/constants';
 import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import { AUTH_OPTIONS, JWT_ERRORS, LOGIN_ERRORS, REFRESH_TOKEN_ERRORS, SIGNUP_ERRORS } from './constants';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { IAuthModuleOptions, PassportModule } from '@nestjs/passport';
-import { AuthService, LocalStrategy, JwtStrategy, FacebookStrategy, GoogleStrategy, GoogleGuard } from '.';
-import { EmailNotificationService } from './email/email-notification.service';
 import { TokenService } from './token/token.service';
-import { UserIdentity } from './models/user-identity.model';
-import { EmailDto, LoginDto, NotificationTokenDto, SignupDto } from './dto';
-import { UserIdentityService } from './user-identity.service';
-import { FacebookGuard, JwtGuard } from './guards';
+import { EmailDto, LoginDto, NotificationTokenDto, ResetPasswordDto, SignupDto } from './dto';
+import { FacebookGuard, GoogleGuard, JwtGuard } from './guards';
 import { Request, Response } from 'express';
 import { APP_FILTER } from '@nestjs/core';
-import { THIRD_PARTY_PROVIDER } from './interfaces/third-party-user.interface';
-import { NOTIFICATION_CATEGORY } from './interfaces/notification.interface';
-import { ResetPasswordDto } from './dto/reset-password.dto';
+import { AuthService, UserIdentityService, EmailNotificationService, LocalStrategy, JwtStrategy } from '.';
 
 const mongoURI = 'mongodb://localhost:27017/test';
 const jwtModuleOptions: JwtModuleOptions = {
@@ -65,13 +67,8 @@ const authOptions: IAuthenticationModuleOptions = {
       refreshTokenTTL: 30,
     },
     mail: {
-      host: '',
-      port: 1,
-      secure: false,
-      requireTLS: false,
       auth: {
         user: '',
-        password: '',
       },
       links: {
         emailVerification: '',
@@ -160,6 +157,16 @@ export class MockUsersService extends BaseService<DocumentType<MockUser>> implem
   }
 }
 
+@Injectable()
+export class MockSender implements INotificationSender {
+  notify(to: string): Promise<boolean>;
+  notify(to: string, options: any): Promise<boolean>;
+  notify(to: string, options: any, template: string): Promise<boolean>;
+  async notify(to: any, options?: any, template?: any) {
+    return true;
+  }
+}
+
 @Controller('/test')
 export class TestController {
   @Get('protected-jwt')
@@ -195,6 +202,7 @@ describe('Auth Module integration', () => {
   let authController: AuthController;
   let emailNotificationService: EmailNotificationService;
   let tokenService: TokenService;
+  let sender: INotificationSender;
   let app: INestApplication;
   let server;
 
@@ -221,6 +229,7 @@ describe('Auth Module integration', () => {
         UserIdentityService,
         { provide: AUTH_OPTIONS, useValue: authOptions },
         { provide: IUsersService, useClass: MockUsersService },
+        { provide: INotificationSender, useClass: MockSender },
         {
           provide: APP_FILTER,
           useClass: HttpExceptionFilter,
@@ -237,6 +246,7 @@ describe('Auth Module integration', () => {
     authService = authModule.get<AuthService>(AuthService);
     authController = authModule.get<AuthController>(AuthController);
     usersService = authModule.get<IUsersService>(IUsersService);
+    sender = authModule.get<INotificationSender>(INotificationSender);
     userIdentityService = authModule.get<UserIdentityService>(UserIdentityService);
     emailNotificationService = authModule.get<EmailNotificationService>(EmailNotificationService);
     tokenService = authModule.get<TokenService>(TokenService);
@@ -379,7 +389,7 @@ describe('Auth Module integration', () => {
   });
   describe('/auth/signup (POST)', () => {
     it('should signup user', async done => {
-      jest.spyOn(emailNotificationService, 'notify').mockResolvedValue(Promise.resolve(true));
+      jest.spyOn(sender, 'notify').mockResolvedValue(Promise.resolve(true));
       const data: SignupDto = { email: 'user@email.com', password: 'myPassword' };
 
       const res = await request(server).post('/auth/signup').send(data).set('Accept', 'application/json');
@@ -709,7 +719,7 @@ describe('Auth Module integration', () => {
   });
   describe('signup & verify email', () => {
     it('should create an emailNotification for the new user and verify', async done => {
-      jest.spyOn(emailNotificationService, 'notify').mockResolvedValue(Promise.resolve(true));
+      jest.spyOn(sender, 'notify').mockResolvedValue(Promise.resolve(true));
       const data: SignupDto = { email: 'user@email.com', password: 'myPassword' };
       await request(server).post('/auth/signup').send(data).set('Accept', 'application/json');
       const savedUser = await usersService.findOne({ email: data.email });
@@ -731,8 +741,7 @@ describe('Auth Module integration', () => {
   });
   describe('forgot & reset password', () => {
     it('should create an emailNotification for the user and reset password', async done => {
-      jest.spyOn(emailNotificationService, 'notify').mockResolvedValue(Promise.resolve(true));
-
+      jest.spyOn(sender, 'notify').mockResolvedValue(Promise.resolve(true));
       const user = new MockUser();
       user.email = 'user@email.com';
       user.password = 'myPassword';
