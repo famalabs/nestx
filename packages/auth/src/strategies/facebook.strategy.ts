@@ -30,9 +30,9 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       email: profile.emails[0].value,
       accessToken: accessToken,
       refreshToken: refreshToken,
-      provider: THIRD_PARTY_PROVIDER.GOOGLE,
+      provider: THIRD_PARTY_PROVIDER.FACEBOOK,
     };
     const user = await this.authService.validateThirdPartyIdentity(thirdPartyUser);
-    return done(null, { _id: user._id });
+    return { _id: user._id };
   }
 }
