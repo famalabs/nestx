@@ -15,7 +15,7 @@ export class EmailSenderService implements INotificationSender {
       requireTLS: false,
       auth: {
         user: process.env.MAIL_AUTH_USER,
-        pass: process.env.MAIL_AUTH_PASSWORD,
+        pass: process.env.MAIL_AUTH_PASS,
       },
     });
 

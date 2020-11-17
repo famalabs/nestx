@@ -16,7 +16,7 @@ async function bootstrap() {
 bootstrap();
 
 function createSwaggerDoc(app: INestApplication) {
-  const globalPrefix: string = '/api';
+  const globalPrefix = '/api';
   const swaggerOptions = new DocumentBuilder()
     .setTitle('01-nestx-auth')
     .setDescription('The nestx-auth sample app API description')

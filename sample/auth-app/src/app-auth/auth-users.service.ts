@@ -27,9 +27,6 @@ export class AuthUsersService extends BaseService<DocumentType<User>> implements
 
   async validateUser(username: string, pass: string): Promise<User | null> {
     const user: User = await this.findOneToValidate(username);
-    if (!user) {
-      throw new NotFoundException(LOGIN_ERRORS.USER_NOT_FOUND);
-    }
     if (user && (await bcrypt.compare(pass, user.password))) {
       return user;
     }
