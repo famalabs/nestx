@@ -438,9 +438,24 @@ describe('AuthService', () => {
         email: 'user@email.com',
         password: 'myPassword',
       };
+      const user: Partial<User> = {
+        email: 'user@email.com',
+        password: 'myOtherPassword',
+        roles: [],
+        isVerified: true,
+        createdAt: date,
+        updatedAt: date,
+        _id: '1234',
+      };
+
+      jest.spyOn(usersService, 'findOne').mockResolvedValue(user as any);
       const onSpyUsersService = jest.spyOn(usersService, 'validateUser').mockResolvedValue(null);
-      await expect(() => service.login(credentials, userIp)).rejects.toThrow(UnauthorizedException);
-      await expect(() => service.login(credentials, userIp)).rejects.toThrow(LOGIN_ERRORS.WRONG_CREDENTIALS);
+      await expect(() => service.validateUser(credentials.email, credentials.password)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(() => service.validateUser(credentials.email, credentials.password)).rejects.toThrow(
+        LOGIN_ERRORS.WRONG_CREDENTIALS,
+      );
       expect(onSpyUsersService).toHaveBeenCalledWith(credentials.email, credentials.password);
     });
     it('should not login not verified user', async () => {

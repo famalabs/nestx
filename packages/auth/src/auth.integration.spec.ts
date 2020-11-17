@@ -307,8 +307,30 @@ describe('Auth Module integration', () => {
       const credentials: LoginDto = { email: 'notRegistered@email.com', password: user.password, clientId: 'test' };
 
       const res = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
+      expect(res.body.message).toBe(LOGIN_ERRORS.USER_NOT_FOUND);
+      done();
+    });
+    it('should warning user to login with third party identity', async done => {
+      const user = new MockUser();
+      user.email = 'user@anotherEmail.com';
+      user.password = 'myPassword';
+      user.isVerified = true;
+      user.roles = [];
+      const registeredUser = await usersService.create(user);
+
+      const userIdentity = new UserIdentity();
+      userIdentity.externalId = 'googleId';
+      userIdentity.email = 'user@gmail.com';
+      userIdentity.provider = THIRD_PARTY_PROVIDER.GOOGLE;
+      userIdentity.userId = registeredUser._id;
+      await userIdentityService.create(userIdentity);
+
+      const credentials: LoginDto = { email: userIdentity.email, password: user.password, clientId: 'test' };
+
+      const res = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
       expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
-      expect(res.body.message).toBe(LOGIN_ERRORS.WRONG_CREDENTIALS);
+      expect(res.body.message).toBe(LOGIN_ERRORS.IDENTITY_LINKED);
       done();
     });
   });

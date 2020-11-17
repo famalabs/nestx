@@ -51,7 +51,7 @@ export class AuthService {
       //if user exists then validate it
       const valid = await this.usersService.validateUser(email, password);
       if (!valid) {
-        throw new NotFoundException(LOGIN_ERRORS.WRONG_CREDENTIALS);
+        throw new UnauthorizedException(LOGIN_ERRORS.WRONG_CREDENTIALS);
       }
     } else {
       //else user not exists. check if there is an identity with the same email
@@ -61,7 +61,7 @@ export class AuthService {
         throw new UnauthorizedException(LOGIN_ERRORS.IDENTITY_LINKED);
       }
       //else no user exists
-      throw new UnauthorizedException(LOGIN_ERRORS.USER_NOT_FOUND);
+      throw new NotFoundException(LOGIN_ERRORS.USER_NOT_FOUND);
     }
     //if user exists and is valid
     return user;
@@ -103,7 +103,7 @@ export class AuthService {
     }
     return await this.createLoginResponse(user._id, credentials.clientId, ipAddress);
   }
-  
+
   async thirdPartyLogin(userId: string, ipAddress: string): Promise<ILoginResponse> {
     return await this.createLoginResponse(userId, 'client id', ipAddress);
   }
