@@ -45,19 +45,29 @@ export class AuthService {
     return await this.usersService.create({ email: data.email, password: data.password });
   }
 
-  async login(credentials: LoginDto, ipAddress: string): Promise<ILoginResponse> {
-    const user = await this.usersService.validateUser(credentials.email, credentials.password);
-    if (!user) {
-      throw new UnauthorizedException(LOGIN_ERRORS.WRONG_CREDENTIALS);
+  async validateUser(email: string, password: string): Promise<User> {
+    const user = await this.usersService.findOne({ email: email });
+    if (user) {
+      //if user exists then validate it
+      const valid = await this.usersService.validateUser(email, password);
+      if (!valid) {
+        throw new NotFoundException(LOGIN_ERRORS.WRONG_CREDENTIALS);
+      }
+    } else {
+      //else user not exists. check if there is an identity with the same email
+      const identity = await this.userIdentityService.findOne({ email: email });
+      //if exists then throw a warning to the user
+      if (identity) {
+        throw new UnauthorizedException(LOGIN_ERRORS.IDENTITY_LINKED);
+      }
+      //else no user exists
+      throw new UnauthorizedException(LOGIN_ERRORS.USER_NOT_FOUND);
     }
-
-    if (this.options.constants.blockNotVerifiedUser && !user.isVerified) {
-      throw new UnauthorizedException(LOGIN_ERRORS.USER_NOT_VERIFIED);
-    }
-    return await this.createLoginResponse(user._id, credentials.clientId, ipAddress);
+    //if user exists and is valid
+    return user;
   }
 
-  async validateThirdPartyIdentity(thirdPartyUser: IThirdPartyUser) {
+  async validateThirdPartyIdentity(thirdPartyUser: IThirdPartyUser): Promise<User> {
     //search userIdentity and if found log the owner
     const userIdentity = await this.userIdentityService.findOne({
       externalId: thirdPartyUser.externalId,
@@ -74,6 +84,7 @@ export class AuthService {
     if (user) {
       throw new UnauthorizedException(LOGIN_ERRORS.USER_NOT_LINKED);
     }
+
     //if not found, create new user + new userIdentity
     const randomPassword = crypto.randomBytes(64).toString('hex');
     const registeredUser = await this.usersService.create({
@@ -85,6 +96,14 @@ export class AuthService {
     return registeredUser;
   }
 
+  async login(credentials: LoginDto, ipAddress: string): Promise<ILoginResponse> {
+    const user = await this.usersService.validateUser(credentials.email, credentials.password);
+    if (this.options.constants.blockNotVerifiedUser && !user.isVerified) {
+      throw new UnauthorizedException(LOGIN_ERRORS.USER_NOT_VERIFIED);
+    }
+    return await this.createLoginResponse(user._id, credentials.clientId, ipAddress);
+  }
+  
   async thirdPartyLogin(userId: string, ipAddress: string): Promise<ILoginResponse> {
     return await this.createLoginResponse(userId, 'client id', ipAddress);
   }

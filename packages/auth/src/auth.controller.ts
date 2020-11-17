@@ -157,8 +157,8 @@ export class AuthController {
   @Get('connect/google/redirect')
   @ApiOperation({ summary: 'Google link identity redirect' })
   @UseGuards(GoogleLinkGuard)
-  async linkGoogleIdentityRedirect(@Req() req, @Res() res) {
-    console.log('controller req.user ->', req.user);
+  async linkGoogleIdentityRedirect(@Req() req) {
+    return;
   }
 
   @Get('connect/facebook')
@@ -173,6 +173,6 @@ export class AuthController {
   @ApiOperation({ summary: 'Facebook link identity redirect' })
   @UseGuards(FacebookLinkGuard)
   async linkFacebookIdentityCallback(@Req() req) {
-    console.log('controller req.user ->', req.user);
+    return;
   }
 }

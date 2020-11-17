@@ -70,6 +70,7 @@ export class AuthCoreModule {
 
   public configure(consumer: MiddlewareConsumer) {
     consumer.apply(FacebookMiddleware).forRoutes('auth/facebook/*');
+    consumer.apply(FacebookMiddleware).forRoutes('auth/connect/facebook/*');
     consumer.apply(LoggerMiddleware).forRoutes(AuthController);
   }
 }
