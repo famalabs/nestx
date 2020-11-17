@@ -17,10 +17,11 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientSecret: options.constants.social.google.clientSecret,
       callbackURL: options.constants.social.google.callbackURL,
       scope: ['email', 'profile'],
+      passReqToCallback: false,
     });
   }
 
-  async validate(accessToken: string, refreshToken: string, profile: Profile, done: VerifyCallback): Promise<any> {
+  async validate(accessToken: string, refreshToken: string, profile: Profile): Promise<any> {
     const thirdPartyUser: IThirdPartyUser = {
       externalId: profile.id,
       email: profile.emails[0].value,

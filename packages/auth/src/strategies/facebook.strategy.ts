@@ -17,13 +17,13 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       clientSecret: options.constants.social.facebook.clientSecret,
       callbackURL: options.constants.social.facebook.callbackURL,
       profileFields: ['email'],
+      passReqToCallback: false,
     });
   }
   public async validate(
     accessToken: string,
     refreshToken: string,
     profile: Profile,
-    done: (error: any, user?: any) => void,
   ): Promise<any> {
     const thirdPartyUser: IThirdPartyUser = {
       externalId: profile.id,
