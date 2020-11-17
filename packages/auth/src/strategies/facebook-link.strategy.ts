@@ -28,7 +28,6 @@ export class FacebookLinkStrategy extends PassportStrategy(Strategy, 'facebook-l
     accessToken: string,
     refreshToken: string,
     profile: Profile,
-    done: (error: any, user?: any) => void,
   ): Promise<any> {
     const thirdPartyUser: IThirdPartyUser = {
       externalId: profile.id,

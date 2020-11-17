@@ -29,7 +29,6 @@ export class GoogleLinkStrategy extends PassportStrategy(Strategy, 'google-link'
     accessToken: string,
     refreshToken: string,
     profile: Profile,
-    done: VerifyCallback,
   ): Promise<any> {
     const thirdPartyUser: IThirdPartyUser = {
       externalId: profile.id,
