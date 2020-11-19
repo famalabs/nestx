@@ -1,12 +1,12 @@
-import {Filter} from './filter.dto';
-import {ApiPropertyOptional} from "@nestjs/swagger";
-import {IsString} from "class-validator";
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class AppQuery {
-    @ApiPropertyOptional()
-    test: number;
+  @ApiPropertyOptional()
+  @Type(() => Number)
+  test: number;
 
-    constructor(obj: Partial<AppQuery>) {
-        Object.assign(this, obj);
-    }
+  constructor(obj: Partial<AppQuery>) {
+    Object.assign(this, obj);
+  }
 }
