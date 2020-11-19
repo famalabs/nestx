@@ -7,43 +7,49 @@ import {
   SchemaObject,
 } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 import { ref } from '../model';
-import apply = Reflect.apply;
 
 declare type ApiQueryOptions =
   | (BaseApiQueryOptions & { name: string; schema: SchemaObject | ReferenceObject; type?: undefined })
   | (Omit<BaseApiQueryOptions, 'name' | 'schema'> & { name?: undefined; schema?: undefined; type: new () => any });
 
 export function ApiQuery(options: ApiQueryOptions): MethodDecorator {
-  let { required, name, schema, type, ...params } = options;
+  const { name, type } = options;
   if (name === undefined) {
     const instance = new type();
+    const keys = Reflect.getMetadata(DECORATORS.API_MODEL_PROPERTIES_ARRAY, instance);
+    // console.log(type, keys);
     const decorators = [];
-    for (const prop in instance) {
-      // console.log(prop);
-      // const decorator = Reflect.getMetadata(DECORATORS.API_MODEL_PROPERTIES, instance, prop);
-      // console.log(prop, ref(instance[prop].constructor));
-      // if (decorator && !isPrimitive(decorator.type)) {
-      if (instance[prop].constructor && !isPrimitive(instance[prop].constructor)) {
+    for (const key of keys) {
+      const prop = key.substr(1); // remove leading ':'
+      const decorator = Reflect.getMetadata(DECORATORS.API_MODEL_PROPERTIES, instance, prop);
+      const { type: prop_type, ...params } = decorator;
+      // console.log(prop, decorator, prop_type, isPrimitive(prop_type));
+      if (prop_type && !isPrimitive(prop_type)) {
         decorators.push(
-          ApiQuery({
+          SrcApiQuery({
             ...params,
             name: prop,
-            schema: ref(instance[prop].constructor),
+            style: 'deepObject',
+            explode: true,
+            schema: ref(prop_type),
+          }),
+        );
+      } else {
+        decorators.push(
+          SrcApiQuery({
+            ...params,
+            name: prop,
+            type: prop_type,
           }),
         );
       }
     }
     return applyDecorators(...decorators);
   } else {
-    required = required === true; // required false by default
-    const content = schema ? { 'application/json': { schema } } : undefined;
+    // required = required === true; // required false by default
     return applyDecorators(
       SrcApiQuery({
-        ...params,
-        name,
-        required,
-        content,
-        // schema: schema as SchemaObject,
+        ...options as BaseApiQueryOptions,
       }),
       // FixQueryParam(),
     );

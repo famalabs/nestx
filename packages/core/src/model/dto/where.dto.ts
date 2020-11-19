@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { SerializeOptions, ValidationPipe } from '@nestjs/common';
 
 export class Where<T> {
   // @ApiProperty({
