@@ -1,6 +1,6 @@
 {
   "name": "@famalabs/nestx-auth",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0-alpha.3",
   "license": "MIT",
   "description": "Fama Labs - Nestjs extension libraries collection (@auth) ",
   "author": " Fama Labs <info@famalabs.com>",
