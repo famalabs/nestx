@@ -40,7 +40,6 @@ export class User extends BaseModel implements IUser {
   @prop({ type: String, enum: USER_ROLES })
   roles: USER_ROLES[];
 
-
   @prop({ required: true, default: false })
   isVerified!: boolean;
 

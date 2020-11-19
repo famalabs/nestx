@@ -18,4 +18,3 @@ export interface IEmailNotification extends INotification {
   createdAt?: Date;
   updatedAt?: Date;
 }
-

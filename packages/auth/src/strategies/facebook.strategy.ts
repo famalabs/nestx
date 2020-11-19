@@ -20,11 +20,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       passReqToCallback: false,
     });
   }
-  public async validate(
-    accessToken: string,
-    refreshToken: string,
-    profile: Profile,
-  ): Promise<any> {
+  public async validate(accessToken: string, refreshToken: string, profile: Profile): Promise<any> {
     const thirdPartyUser: IThirdPartyUser = {
       externalId: profile.id,
       email: profile.emails[0].value,

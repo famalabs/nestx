@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Post, Query, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  ValidationPipe,
+} from '@nestjs/common';
 import { AppService } from './app.service';
 import { ApiExtraModels, ApiQuery } from '@nestjs/swagger';
 import { ref, ApiQuery as CustomApiQuery, Filter } from '@famalabs/nestx-core';
@@ -8,8 +15,7 @@ import { AppQuery } from './app-query.dto';
 @ApiExtraModels(AppFilter, Filter)
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {
-  }
+  constructor(private readonly appService: AppService) {}
 
   @Get()
   getHello(): string {
@@ -46,8 +52,11 @@ export class AppController {
 
   @Get('test2b')
   @CustomApiQuery({ type: AppFilter })
-  test2b(@Query(new ValidationPipe({ transform: true, expectedType: AppFilter })) filter) {
-  // test2b(@Query() filter) {
+  test2b(
+    @Query(new ValidationPipe({ transform: true, expectedType: AppFilter }))
+    filter,
+  ) {
+    // test2b(@Query() filter) {
     console.log(filter);
     return filter;
   }
@@ -60,16 +69,21 @@ export class AppController {
 
   @Get('test2d')
   @CustomApiQuery({ type: Filter })
-  test2d(@Query(new ValidationPipe({ transform: true, expectedType: Filter })) filter) {
+  test2d(
+    @Query(new ValidationPipe({ transform: true, expectedType: Filter }))
+    filter,
+  ) {
     console.log(filter);
     return filter;
   }
 
   @Get('test3')
-  @ApiQuery({ name: 'where', content: { 'application/json': { schema: ref(AppQuery) } } })
+  @ApiQuery({
+    name: 'where',
+    content: { 'application/json': { schema: ref(AppQuery) } },
+  })
   test3(@Query() filter: AppFilter) {
     console.log(filter);
     return filter;
   }
-
 }

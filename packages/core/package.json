@@ -1,6 +1,6 @@
 {
   "name": "@famalabs/nestx-core",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0-alpha.1",
   "description": "Fama Labs - Nestjs extension libraries collection (@core) ",
   "author": " Fama Labs <info@famalabs.com>",
   "license": "MIT",

@@ -8,6 +8,6 @@ export class AppFilter extends Filter<AppQuery> {
   @ApiPropertyOptional({ type: AppQuery })
   @IsOptional()
   @Type(() => AppQuery)
-  @Transform(value => new AppQuery(value))
+  @Transform((value) => new AppQuery(value))
   where?: AppQuery;
 }

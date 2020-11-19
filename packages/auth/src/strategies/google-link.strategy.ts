@@ -24,12 +24,7 @@ export class GoogleLinkStrategy extends PassportStrategy(Strategy, 'google-link'
     } as StrategyOptionsWithRequest);
   }
 
-  async validate(
-    req: any,
-    accessToken: string,
-    refreshToken: string,
-    profile: Profile,
-  ): Promise<any> {
+  async validate(req: any, accessToken: string, refreshToken: string, profile: Profile): Promise<any> {
     const thirdPartyUser: IThirdPartyUser = {
       externalId: profile.id,
       email: profile.emails[0].value,

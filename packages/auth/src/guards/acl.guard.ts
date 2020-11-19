@@ -39,7 +39,7 @@ async function resolveACL(user, acl, ctx) {
       name = role;
       if (RESOLVERS[role]) {
         allow = await RESOLVERS[role](ctx);
-      } else if (user && user.roles instanceof Array) { 
+      } else if (user && user.roles instanceof Array) {
         allow = user.roles.indexOf(role) >= 0;
       }
     } else if (typeof role === 'function') {

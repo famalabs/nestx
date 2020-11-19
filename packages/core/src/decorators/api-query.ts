@@ -49,7 +49,7 @@ export function ApiQuery(options: ApiQueryOptions): MethodDecorator {
     // required = required === true; // required false by default
     return applyDecorators(
       SrcApiQuery({
-        ...options as BaseApiQueryOptions,
+        ...(options as BaseApiQueryOptions),
       }),
       // FixQueryParam(),
     );
