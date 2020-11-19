@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.4](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.0...v0.1.0-alpha.4) (2020-11-19)
+
+
+### Bug Fixes
+
+* empty catch block ([4d851de](https://github.com/famalabs/nestx/commit/4d851def38fcb1f2882b7ab20dc313334fe35526))
+
+
+### Features
+
+* acl ([387a70a](https://github.com/famalabs/nestx/commit/387a70a8a38c9463ac37d6437d31ba9442e51b5c))
+
+
+
+
+
 # [0.1.0-alpha.3](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.0...v0.1.0-alpha.3) (2020-11-19)
 
 
