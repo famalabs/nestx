@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
-import { User } from '../users/models/user.model';
+import { User } from '../users/user.model';
 import * as bcrypt from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
 import { IUsersService, LOGIN_ERRORS } from '@famalabs/nestx-auth';

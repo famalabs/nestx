@@ -30,7 +30,6 @@ import {
 import { BaseService } from './shared/base-service';
 import { BaseModel, EmailNotification, RefreshToken, UserIdentity } from './models';
 import { mongoose, prop } from '@typegoose/typegoose';
-import { USER_ROLES } from './ACLs/constants';
 import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import { AUTH_OPTIONS, JWT_ERRORS, LOGIN_ERRORS, REFRESH_TOKEN_ERRORS, SIGNUP_ERRORS } from './constants';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
@@ -106,8 +105,8 @@ class MockUser extends BaseModel implements IUser {
   })
   password!: string;
 
-  @prop({ type: String, enum: USER_ROLES })
-  roles: USER_ROLES[];
+  @prop()
+  roles!: string[];
 
   @prop({ required: true, default: false })
   isVerified!: boolean;

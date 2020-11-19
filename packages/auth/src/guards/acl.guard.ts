@@ -13,7 +13,7 @@ export class ACLGuard implements CanActivate {
     const handlerAcl = Reflect.getMetadata(DECORATORS.ACL, handler) || [];
     const acl = [...handlerAcl, ...classAcl];
     if (acl.length === 0) {
-      return true;
+      return false;
     }
     const [req, res, next] = context.getArgs();
     const user = req.user;
@@ -39,7 +39,7 @@ async function resolveACL(user, acl, ctx) {
       name = role;
       if (RESOLVERS[role]) {
         allow = await RESOLVERS[role](ctx);
-      } else if (user && user.roles instanceof Array) {
+      } else if (user && user.roles instanceof Array) { 
         allow = user.roles.indexOf(role) >= 0;
       }
     } else if (typeof role === 'function') {

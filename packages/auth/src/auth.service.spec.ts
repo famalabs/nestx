@@ -19,7 +19,6 @@ import {
   IUsersService,
   NOTIFICATION_CATEGORY,
 } from './interfaces';
-import { USER_ROLES } from './ACLs';
 import { Document } from 'mongoose';
 import { LoginDto, LoginResponseDto, ResetPasswordDto, SignupDto, User } from './dto';
 import * as mocks from 'node-mocks-http';
@@ -35,7 +34,7 @@ const oldDate = addMinutes(date, -16);
 interface UserDoc extends Document {
   email: string;
   password: string;
-  roles: USER_ROLES[];
+  roles: string[];
   isVerified: boolean;
   socialProvider: string;
   createdAt?: Date;

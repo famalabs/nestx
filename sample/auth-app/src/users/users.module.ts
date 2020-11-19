@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { User } from './models/user.model';
+import { User } from './user.model';
 import { MongooseModule } from '@nestjs/mongoose';
+import { UsersController } from './users.controller';
 
 /**
  * In your app you can add your imports,controllers and providers.
@@ -8,7 +9,7 @@ import { MongooseModule } from '@nestjs/mongoose';
  */
 @Module({
   imports: [MongooseModule.forFeature([{ name: User.name, schema: User.schema }])],
-  controllers: [],
+  controllers: [UsersController],
   providers: [],
   exports: [MongooseModule],
 })

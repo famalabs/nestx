@@ -3,7 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { LoginResponseDto } from '@famalabs/nestx-auth/dto';
-import { User } from './../src/users/models/user.model';
+import { User } from '../src/users/user.model';
 import { EmailService } from '@famalabs/nestx-auth/email/email.service';
 let loginResponse: LoginResponseDto;
 let user: User;

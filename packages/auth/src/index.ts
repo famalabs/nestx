@@ -1,4 +1,4 @@
-export * from './ACLs';
+export * from './acl';
 export * from './decorators';
 export * from './guards';
 export * from './interfaces';
@@ -11,3 +11,4 @@ export * from './auth.service';
 export * from './auth.controller';
 export * from './user-identity.service';
 export * from './constants';
+export * from './getInstance/instance.middleware';

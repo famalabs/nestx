@@ -26,8 +26,11 @@ import { User } from './decorators';
 import { NotificationTokenDto, EmailDto } from './dto';
 import { GoogleLinkGuard } from './guards/google-link.guard';
 import { FacebookLinkGuard } from './guards/facebook-link.guard';
+import { ACL, ROLE, ACLGuard } from './acl';
 
 @ApiTags('Auth')
+// @UseGuards(ACLGuard)
+// @ACL(ROLE.ANY)
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
