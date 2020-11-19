@@ -11,7 +11,9 @@ export class LoggerMiddleware implements NestMiddleware {
         console.log(
           new Date().toString() + ' - [Request] ' + req.originalUrl + ' - ' + JSON.stringify(offuscateRequest),
         );
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
     next();
   }
 }
