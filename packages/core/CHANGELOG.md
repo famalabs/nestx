@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.0](https://github.com/famalabs/nestx/compare/v0.0.1-alpha.18...v0.1.0-alpha.0) (2020-11-19)
+
+
+### Bug Fixes
+
+* **core:** added swagger core ([249821a](https://github.com/famalabs/nestx/commit/249821a1233f56137e24d2d181fcc5e2171775d9))
+* **core:** root api query ([fff7e86](https://github.com/famalabs/nestx/commit/fff7e8626444472f949b59e4e57410be8982d6c8))
+
+
+
+
+
+
 ## [0.0.1-alpha.18](https://github.com/famalabs/nestx/compare/v0.0.1-alpha.17...v0.0.1-alpha.18) (2020-11-04)
 
 **Note:** Version bump only for package @famalabs/nestx-core
