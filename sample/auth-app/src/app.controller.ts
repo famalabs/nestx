@@ -1,23 +1,20 @@
-import { JwtGuard, ACL, ACLGuard, ROLE } from '@famalabs/nestx-auth';
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { ACL, GRANT } from '@famalabs/nestx-auth';
+import { Controller, Get } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { AppService } from './app.service';
 
-@Controller()
+@Controller('app')
 export class AppController {
-  constructor(private readonly appService: AppService) {}
-
   @Get('public')
-  @ACL('admin')
+  @ACL(GRANT.ANY)
+  @ApiBearerAuth() // test for public route with an expired or invalid token provided TODO test
   public(): string {
-    return this.appService.getPublic();
+    return 'Hello from public route!';
   }
 
-  @Get('protected-jwt')
+  @Get('private')
+  @ACL(GRANT.AUTHENTICATED)
   @ApiBearerAuth()
-  @ACL(ROLE.ANY)
-  @UseGuards(JwtGuard, ACLGuard) //-> middleware TODO
-  protectedJwt(): string {
-    return this.appService.getJwt();
+  private(): string {
+    return 'Hello from private route!';
   }
 }

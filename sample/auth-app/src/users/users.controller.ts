@@ -1,21 +1,22 @@
-import { JwtGuard, ACL, ACLGuard } from '@famalabs/nestx-auth';
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { ACL, ROLES, GRANT } from '@famalabs/nestx-auth';
+import { Controller, Get } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { USER_ROLES } from './user.model';
 
 @ApiTags('users')
 @Controller('user')
 export class UsersController {
-  @Get('public')
-  @UseGuards(ACLGuard)
-  @ACL('admin')
+  @Get('private-admin')
+  @ACL(GRANT.AUTHENTICATED)
+  @ROLES(USER_ROLES.ADMIN)
   public(): string {
-    return 'hello from public';
+    return 'Hello from private admin route!';
   }
 
-  @Get('protected-jwt')
+  @Get('private')
+  @ACL(GRANT.AUTHENTICATED)
   @ApiBearerAuth()
-  @UseGuards(JwtGuard, ACLGuard)
-  protectedJwt(): string {
-    return 'hello from protected';
+  protectedPrivate(): string {
+    return 'Hello from private route!';
   }
 }

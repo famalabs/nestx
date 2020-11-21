@@ -1,25 +1,32 @@
-import { Schema } from 'mongoose';
-import { buildSchema, prop } from '@typegoose/typegoose';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import { modelOptions } from '@typegoose/typegoose';
+import { Expose, Exclude } from 'class-transformer/decorators';
 
-export abstract class BaseModel {
-  @prop()
-  createdDate?: Date;
-  @prop()
-  updatedDate?: Date;
-  _id: string;
-  static get schema(): Schema {
-    return buildSchema(this as any, {
-      timestamps: true,
-      toJSON: {
-        getters: true,
-        virtuals: true,
-      },
-    });
+export interface IBaseModel {
+  createdAt?: Date;
+  updatedAt?: Date;
+  id: string;
+}
+export type IDType = any | string | number;
+
+@modelOptions({ schemaOptions: { timestamps: true } })
+export class BaseModel {
+  @ApiProperty({ type: String })
+  @Expose()
+  public get id() {
+    return this._id && this._id.toString();
   }
-  static get modelName(): string {
-    return this.name;
+
+  public set id(value) {
+    this._id = value;
   }
-  get id(): string {
-    return this._id;
-  }
+
+  @ApiHideProperty()
+  @Exclude()
+  _id: IDType;
+
+  @ApiProperty({ type: Date })
+  createdAt?: Date;
+  @ApiProperty({ type: Date })
+  updatedAt?: Date;
 }

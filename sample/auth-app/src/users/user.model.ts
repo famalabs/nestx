@@ -1,9 +1,8 @@
-import { IUser } from '@famalabs/nestx-auth';
+import { BaseModel, IUser } from '@famalabs/nestx-auth';
 import { prop, pre } from '@typegoose/typegoose';
 import * as bcrypt from 'bcrypt';
 import { IsEmail } from 'class-validator';
 import * as mongoose from 'mongoose';
-import { BaseModel } from '../common/base.model';
 
 export enum USER_ROLES {
   ADMIN = 'ADMIN',

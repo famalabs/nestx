@@ -1,11 +1,8 @@
-import { Controller, Post, Body, Get, Param, UseGuards, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { BookDto } from './dto/book.dto';
-import { IBook } from './interfaces/book.interface';
 import { BooksService } from './books.service';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { ACLGuard, ACL, JwtGuard, ROLE, ReqInstanceData } from '@famalabs/nestx-auth';
-import { Filter, ItemFilter, ref, Where } from '@famalabs/nestx-core';
-import { Book } from './models/book.model';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ACL, GRANT, ReqInstanceData } from '@famalabs/nestx-auth';
 
 @ApiTags('books')
 @Controller('books')
@@ -13,22 +10,16 @@ export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
   @Post()
-  @ACL(ROLE.ANY)
+  @ApiBearerAuth()
+  @ACL(GRANT.AUTHENTICATED)
   async create(@Body() data: BookDto) {
     this.booksService.create(data);
   }
 
-  @Get()
-  @ApiQuery({ name: 'where', schema: ref(Where) })
-  async find(@Query() filter: Filter<Book>): Promise<IBook[]> {
-    return this.booksService.find(filter);
-  }
-
   @Get(':id')
-  @ACL(ROLE.OWNER)
+  @ACL(GRANT.AUTHENTICATED, GRANT.OWNER)
   @ApiBearerAuth()
-  @UseGuards(JwtGuard, ACLGuard)
-  findOne(@Param('id') id: string, @ReqInstanceData() instance: BookDto, filter: ItemFilter<Book>) {
+  findOne(@Param('id') id: string, @ReqInstanceData() instance: BookDto) {
     return instance;
   }
 }
