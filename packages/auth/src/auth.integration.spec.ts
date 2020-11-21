@@ -29,7 +29,7 @@ import {
 } from './interfaces';
 import { BaseService } from './shared/base-service';
 import { BaseModel, EmailNotification, RefreshToken, UserIdentity } from './models';
-import { mongoose, prop } from '@typegoose/typegoose';
+import { mongoose, prop, buildSchema } from '@typegoose/typegoose';
 import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import { AUTH_OPTIONS, JWT_ERRORS, LOGIN_ERRORS, REFRESH_TOKEN_ERRORS, SIGNUP_ERRORS } from './constants';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
@@ -38,8 +38,18 @@ import { TokenService } from './token/token.service';
 import { EmailDto, LoginDto, NotificationTokenDto, ResetPasswordDto, SignupDto } from './dto';
 import { FacebookGuard, GoogleGuard, JwtGuard } from './guards';
 import { Request, Response } from 'express';
-import { APP_FILTER } from '@nestjs/core';
-import { AuthService, UserIdentityService, EmailNotificationService, LocalStrategy, JwtStrategy } from '.';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import {
+  AuthService,
+  UserIdentityService,
+  EmailNotificationService,
+  LocalStrategy,
+  JwtStrategy,
+  ACLGuard,
+  ACLModule,
+  ACLManager,
+} from '.';
+import { ACL, GRANT } from './acl';
 
 const mongoURI = 'mongodb://localhost:27017/test';
 const jwtModuleOptions: JwtModuleOptions = {
@@ -169,6 +179,7 @@ export class MockSender implements INotificationSender {
 @Controller('/test')
 export class TestController {
   @Get('protected-jwt')
+  @ACL(GRANT.ANY)
   @UseGuards(JwtGuard)
   protectedJwt() {
     return { value: 'Hello World!' };
@@ -210,14 +221,15 @@ describe('Auth Module integration', () => {
       imports: [
         DbModule,
         MongooseModule.forFeature([
-          { name: RefreshToken.name, schema: RefreshToken.schema },
-          { name: EmailNotification.name, schema: EmailNotification.schema },
-          { name: UserIdentity.name, schema: UserIdentity.schema },
-          { name: MockUser.name, schema: MockUser.schema },
+          { name: RefreshToken.name, schema: buildSchema(RefreshToken) },
+          { name: EmailNotification.name, schema: buildSchema(EmailNotification) },
+          { name: UserIdentity.name, schema: buildSchema(UserIdentity) },
+          { name: MockUser.name, schema: buildSchema(MockUser) },
         ]),
         PassportModule.register(authOptions.modules.passport),
         JwtModule.register(authOptions.modules.jwt),
         CacheModule.register(authOptions.modules.cache),
+        ACLModule.register(new ACLManager()),
       ],
       providers: [
         AuthService,
@@ -232,6 +244,10 @@ describe('Auth Module integration', () => {
         {
           provide: APP_FILTER,
           useClass: HttpExceptionFilter,
+        },
+        {
+          provide: APP_GUARD,
+          useClass: ACLGuard,
         },
       ],
       controllers: [AuthController, TestController],
@@ -284,7 +300,7 @@ describe('Auth Module integration', () => {
       user.isVerified = true;
       user.roles = [];
       await usersService.create(user);
-      const credentials: LoginDto = { email: user.email, password: user.password, clientId: 'test' };
+      const credentials: LoginDto = { email: user.email, password: user.password };
 
       const res = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
       expect(res.status).toBe(201);
@@ -303,7 +319,7 @@ describe('Auth Module integration', () => {
       user.isVerified = true;
       user.roles = [];
       await usersService.create(user);
-      const credentials: LoginDto = { email: 'notRegistered@email.com', password: user.password, clientId: 'test' };
+      const credentials: LoginDto = { email: 'notRegistered@email.com', password: user.password };
 
       const res = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
       expect(res.status).toBe(HttpStatus.NOT_FOUND);
@@ -325,7 +341,7 @@ describe('Auth Module integration', () => {
       userIdentity.userId = registeredUser._id;
       await userIdentityService.create(userIdentity);
 
-      const credentials: LoginDto = { email: userIdentity.email, password: user.password, clientId: 'test' };
+      const credentials: LoginDto = { email: userIdentity.email, password: user.password };
 
       const res = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
       expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
@@ -351,7 +367,7 @@ describe('Auth Module integration', () => {
 
       //unable to mock google strategy and to mock Req in controller so i call the service methods directly
       const validateUserIdentity = await authService.validateThirdPartyIdentity(userIdentity);
-      const getResponse = await authService.thirdPartyLogin(registeredUser._id, '127.0.0.1');
+      const getResponse = await authService.thirdPartyLogin(registeredUser._id, registeredUser.roles);
 
       expect(validateUserIdentity._id).toEqual(registeredUser._id);
       expect(getResponse).toEqual({
@@ -446,7 +462,7 @@ describe('Auth Module integration', () => {
       user.isVerified = true;
       user.roles = [];
       await usersService.create(user);
-      const credentials: LoginDto = { email: user.email, password: user.password, clientId: 'test' };
+      const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
 
       //save accessToken
@@ -475,7 +491,7 @@ describe('Auth Module integration', () => {
       user.isVerified = true;
       user.roles = [];
       const registeredUser = await usersService.create(user);
-      const credentials: LoginDto = { email: user.email, password: user.password, clientId: 'test' };
+      const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
 
       //save accessToken
@@ -501,7 +517,7 @@ describe('Auth Module integration', () => {
       user.isVerified = true;
       user.roles = [];
       await usersService.create(user);
-      const credentials: LoginDto = { email: user.email, password: user.password, clientId: 'test' };
+      const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
 
       //save tokens
@@ -510,7 +526,7 @@ describe('Auth Module integration', () => {
       const refreshToken = loginResponse.refreshToken;
       const res = await request(server)
         .get('/auth/token')
-        .query({ refresh_token: refreshToken, client_id: 'test' })
+        .query({ refresh_token: refreshToken })
         .set('Authorization', 'Bearer ' + accessToken);
 
       expect(res.body).toEqual({
@@ -536,7 +552,7 @@ describe('Auth Module integration', () => {
       user.isVerified = true;
       user.roles = [];
       await usersService.create(user);
-      const credentials: LoginDto = { email: user.email, password: user.password, clientId: 'test' };
+      const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
 
       //save tokens
@@ -545,7 +561,7 @@ describe('Auth Module integration', () => {
       const refreshToken = 'notExist';
       const res = await request(server)
         .get('/auth/token')
-        .query({ refresh_token: refreshToken, client_id: 'test' })
+        .query({ refresh_token: refreshToken })
         .set('Authorization', 'Bearer ' + accessToken);
 
       expect(res.status).toEqual(HttpStatus.NOT_FOUND);
@@ -560,7 +576,7 @@ describe('Auth Module integration', () => {
       user.isVerified = true;
       user.roles = [];
       const registeredUser = await usersService.create(user);
-      const credentials: LoginDto = { email: user.email, password: user.password, clientId: 'test' };
+      const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
 
       //save tokens
@@ -572,7 +588,7 @@ describe('Auth Module integration', () => {
 
       const res = await request(server)
         .get('/auth/token')
-        .query({ refresh_token: refreshToken, client_id: 'test' })
+        .query({ refresh_token: refreshToken })
         .set('Authorization', 'Bearer ' + accessToken);
 
       expect(res.status).toEqual(HttpStatus.UNAUTHORIZED);
@@ -587,7 +603,7 @@ describe('Auth Module integration', () => {
       user.isVerified = true;
       user.roles = [];
       await usersService.create(user);
-      const credentials: LoginDto = { email: user.email, password: user.password, clientId: 'test' };
+      const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
 
       //save tokens
@@ -597,7 +613,7 @@ describe('Auth Module integration', () => {
 
       const res = await request(server)
         .get('/auth/token')
-        .query({ refresh_token: refreshToken, client_id: 'test' })
+        .query({ refresh_token: refreshToken })
         .set('Authorization', 'Bearer ' + accessToken);
 
       expect(res.status).toEqual(HttpStatus.UNAUTHORIZED);
@@ -612,7 +628,7 @@ describe('Auth Module integration', () => {
       user.isVerified = true;
       user.roles = [];
       const registeredUser = await usersService.create(user);
-      const credentials: LoginDto = { email: user.email, password: user.password, clientId: 'test' };
+      const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
       //save tokens
       const loginResponse: ILoginResponse = loginRes.body;
@@ -629,7 +645,6 @@ describe('Auth Module integration', () => {
       const maliciousCredentials: LoginDto = {
         email: maliciousUser.email,
         password: maliciousUser.password,
-        clientId: 'test',
       };
 
       const maliciousloginRes = await request(server)
@@ -647,7 +662,7 @@ describe('Auth Module integration', () => {
        * */
       const res = await request(server)
         .get('/auth/token')
-        .query({ refresh_token: maliciousRefreshToken, client_id: 'test' })
+        .query({ refresh_token: maliciousRefreshToken })
         .set('Authorization', 'Bearer ' + accessToken);
       expect(res.status).toEqual(HttpStatus.UNAUTHORIZED);
       expect(res.body.message).toEqual(JWT_ERRORS.WRONG_OWNER);
@@ -663,7 +678,7 @@ describe('Auth Module integration', () => {
       user.isVerified = true;
       user.roles = [];
       const registeredUser = await usersService.create(user);
-      const credentials: LoginDto = { email: user.email, password: user.password, clientId: 'test' };
+      const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
 
       //save accessToken
@@ -690,15 +705,15 @@ describe('Auth Module integration', () => {
       user.isVerified = true;
       user.roles = [];
       const registeredUser = await usersService.create(user);
-      const credentials: LoginDto = { email: user.email, password: user.password, clientId: 'test' };
+      const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
       //save accessToken
       const loginResponse: ILoginResponse = loginRes.body;
       const accessToken = loginResponse.accessToken;
       const refreshToken = loginResponse.refreshToken;
 
-      //login the same user from another device (--> clientId in credentials2)
-      const credentials2: LoginDto = { email: user.email, password: user.password, clientId: 'another device' };
+      //login the same user again
+      const credentials2: LoginDto = { email: user.email, password: user.password };
       await request(server).post('/auth/login').send(credentials2).set('Accept', 'application/json');
 
       const res = await request(server)
@@ -720,7 +735,7 @@ describe('Auth Module integration', () => {
       user.isVerified = true;
       user.roles = [];
       const registeredUser = await usersService.create(user);
-      const credentials: LoginDto = { email: user.email, password: user.password, clientId: 'test' };
+      const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
 
       //save accessToken
