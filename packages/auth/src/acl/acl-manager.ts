@@ -1,18 +1,16 @@
-import { RESOLVERS } from './resolvers';
+import { DynamicResolvers, RolesResolver } from './resolvers';
 import { Resolver, ACLResolvers } from './types';
 
-export type RoleMatcher = (user: any, role: string) => Promise<boolean>;
-
 export class ACLManager {
-  private _matchRole: RoleMatcher;
+  private _rolesResolver?: Resolver;
   private _dynamicResolvers?: ACLResolvers<any>;
 
-  constructor(roleMatcher: RoleMatcher, resolvers: ACLResolvers<any> = RESOLVERS) {
-    this._dynamicResolvers = resolvers;
-    this._matchRole = roleMatcher;
+  constructor(rolesResolver: Resolver = RolesResolver, dynamicResolvers: ACLResolvers<any> = DynamicResolvers) {
+    this._rolesResolver = rolesResolver;
+    this._dynamicResolvers = dynamicResolvers;
   }
 
-  public getResolver(name: string): Resolver | null {
+  public getDynamicResolver(name: string): Resolver | null {
     const resolver = this.dynamicResolvers.get(name);
     return resolver ?? null;
   }
@@ -32,11 +30,11 @@ export class ACLManager {
     this._dynamicResolvers = resolvers;
   }
 
-  public get matchRole(): RoleMatcher {
-    return this._matchRole;
+  public get rolesResolver(): Resolver {
+    return this._rolesResolver;
   }
 
-  public set matchRole(matcher: RoleMatcher) {
-    this._matchRole = matcher;
+  public set rolesResolver(resolver: Resolver) {
+    this._rolesResolver = resolver;
   }
 }

@@ -1,109 +1,118 @@
-import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, Inject, Logger } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core/injector/module-ref';
-import { DECORATORS } from '../ACLs/constants';
 import { Request } from 'express';
-import { ACLContext, ACL_MANAGER } from './types';
+import { ACLContext, ACLType, ACL_MANAGER, RolesType } from './types';
 import { ACLManager } from './acl-manager';
+import { DECORATORS } from './constants';
 
 @Injectable()
 export class ACLGuard implements CanActivate {
+  private readonly logger = new Logger(ACLGuard.name);
+
   constructor(@Inject(ACL_MANAGER) private readonly aclManager: ACLManager, private readonly moduleRef: ModuleRef) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const classType = context.getClass();
     const handler = context.getHandler();
 
-    const acls = this.createACLs(context);
-    console.log(acls);
+    const acl = this.getMetadataInfo<ACLType>(context, DECORATORS.ACL);
+    const roles = this.getMetadataInfo<RolesType>(context, DECORATORS.ROLES);
 
-    //if no acl -> block
-    if (acls.length === 0) {
+    if (acl.length === 0) {
       return false;
     }
 
-    const ctx = await this.buildACLContext(context);
+    const ctx = await this.buildACLContext(context, acl, roles);
 
-    //debug log
-    console.log(ctx.controller);
-    // eslint-disable-next-line prefer-const
-    for (let [key, value] of this.aclManager.dynamicResolvers) {
-      console.log(key + ' = ' + value);
-    }
-    console.log(ctx.user);
-
-    // test print -> before resolveACL
-    console.log('ACLGuard', classType.name, handler.name, 'user:', ctx.user && ctx.user.id, 'acl:', acls);
-
-    // build permissions from current user, acl, ctx
-    const permissions = await this.resolveACLWithContext(acls, ctx);
-
-    // test print -> after resolveACL
-    console.log(
-      'ACLGuard',
-      classType.name,
-      handler.name,
-      'user:',
-      ctx.user && ctx.user.id,
-      'permissions:',
-      permissions,
+    this.logger.debug(
+      `[BEFORE] ACLGuard class:${classType.name}, handler:${handler.name}, user:${ctx.user && ctx.user.id}, instance:${
+        ctx.instance
+      }`,
     );
 
-    //set permissions
-    ctx.req.permissions = permissions;
+    const permissions = await this.resolvePermissions(ctx);
 
-    //if not permissions block user
-    if (!permissions) {
+    this.logger.debug(
+      `[AFTER] ACLGuard class:${classType.name}, handler:${handler.name}, user:${ctx.user && ctx.user.id}, instance:${
+        ctx.instance
+      }`,
+    );
+
+    ctx.req['permissions'] = permissions;
+    this.logger.debug(`Request passed with these permissions:[${permissions}]`);
+    // if (!permissions) {
+    //   return false;
+    // }
+
+    const nOfRoles = roles ? roles.length : 0;
+    if (permissions.length !== acl.length + nOfRoles) {
       return false;
     }
 
     return true;
   }
 
-  private createACLs(ctx: ExecutionContext): Array<any> {
+  private getMetadataInfo<T>(ctx: ExecutionContext, name: any): Array<T> {
     const classType = ctx.getClass();
     const handler = ctx.getHandler();
 
-    // get class-level acl
-    const classAcl = Reflect.getMetadata(DECORATORS.ACL, classType) || [];
-    // get route-level acl
-    const handlerAcl = Reflect.getMetadata(DECORATORS.ACL, handler) || [];
-    //build acl array
-    return [...handlerAcl, ...classAcl];
+    // get class-level metadata
+    const classMetadata = Reflect.getMetadata(name, classType) || [];
+    // get route-level metadata
+    const handlerMetadata = Reflect.getMetadata(name, handler) || [];
+
+    //build metadata array
+    return Array<T>(...classMetadata, ...handlerMetadata);
   }
 
-  private async buildACLContext(ctx: ExecutionContext): Promise<ACLContext> {
+  private async buildACLContext(
+    ctx: ExecutionContext,
+    acl: Array<ACLType>,
+    roles: Array<RolesType>,
+  ): Promise<ACLContext> {
     const classType = ctx.getClass();
     const handler = ctx.getHandler();
     const req = ctx.switchToHttp().getRequest<Request>();
     const user = req.user;
     const instance = req['instance'];
     const controller = await this.moduleRef.get(classType, { strict: false }); // get controller reference
-    const aclCtx: ACLContext = { controller, handler, user, instance, req };
+    const aclCtx: ACLContext = { controller, handler, user, instance, req, acl, roles };
     return aclCtx;
   }
 
-  private async resolveACLWithContext(acls: Array<any>, ctx: ACLContext): Promise<Array<any> | null> {
+  private async resolvePermissions(ctx: ACLContext): Promise<Array<any> | null> {
     const permissions = []; // permissions
-    const user = ctx.user;
-    for (const role of acls) {
+    const acl = ctx.acl;
+    const roles = ctx.roles;
+
+    this.logger.debug(`RESOLVING ACL [${acl}] ...`);
+    for (const role of acl) {
+      this.logger.debug(`START EXEC FOR ${role}`);
+
       let name; // role name
       let allow = false;
 
       if (typeof role === 'string') {
         name = role;
-        const resolver = this.aclManager.getResolver(role);
+        const resolver = this.aclManager.getDynamicResolver(name);
         if (resolver !== null) {
           allow = await resolver(ctx);
-        } else if (user) {
-          allow = await this.aclManager.matchRole(user, role);
         }
       } else if (typeof role === 'function') {
         name = role.name;
         allow = await role(ctx);
       }
-      console.log('resolveACL', role, 'allow', allow);
       if (allow) {
         permissions.push(name); // permission object
+      }
+      this.logger.debug(`END EXEC FOR ${role}, ALLOW: ${allow}`);
+    }
+
+    if (ctx.user && roles) {
+      this.logger.debug(`RESOLVING ROLES [${roles}] ...`);
+      const allow = await this.aclManager.rolesResolver(ctx);
+      if (allow) {
+        permissions.push(...roles);
       }
     }
     return permissions.length > 0 ? permissions : null;

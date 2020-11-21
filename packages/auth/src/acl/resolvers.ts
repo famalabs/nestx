@@ -1,15 +1,16 @@
 import { ACLResolvers, ACLContext } from '.';
+import { Resolver } from './types';
 
-export enum ROLE {
+export enum GRANT {
   ANY = 'ANY',
   AUTHENTICATED = 'AUTHENTICATED',
   OWNER = 'OWNER',
 }
 
-export const RESOLVERS: ACLResolvers<ROLE> = new Map([
-  [ROLE.ANY, any],
-  [ROLE.AUTHENTICATED, authenticated],
-  [ROLE.OWNER, owner],
+export const DynamicResolvers: ACLResolvers<GRANT> = new Map([
+  [GRANT.ANY, any],
+  [GRANT.AUTHENTICATED, authenticated],
+  [GRANT.OWNER, owner],
 ]);
 
 function any(ctx: ACLContext): boolean {
@@ -23,26 +24,19 @@ function authenticated(ctx: ACLContext): boolean {
 function owner(ctx: ACLContext): boolean {
   //extract ctx info
   const { controller, handler, user, instance, req } = ctx;
-  console.log(instance);
 
   //if no req.user
   if (!user) {
     return false;
   }
 
-  const paramsId = resolveId(req);
-  const isUser = matchId(paramsId, user._id);
-  if (isUser) {
-    return true;
-  } else {
-    // the id in params reference to an entity that is not the user
-    // check ownership
-    return matchId(instance.user, user._id);
-  }
-}
-
-function resolveId(req) {
-  return req.params.id;
+  // const isUserModel = usersPaths.includes(req.route.path);
+  // const paramsId = resolveId(req);
+  // if (isUserModel) {
+  //   return matchId(paramsId, user.id);
+  // } else {
+  return matchId(instance.user, user.id);
+  // }
 }
 
 function matchId(src, target) {
@@ -51,3 +45,11 @@ function matchId(src, target) {
   }
   return typeof src === typeof target ? src === target : src.toString() === target.toString();
 }
+
+export const RolesResolver: Resolver = function (ctx: ACLContext): boolean {
+  const user = ctx.user;
+  const roles = ctx.roles;
+  let allow = true;
+  roles.forEach(role => (allow = allow && user.roles.indexOf(role) >= 0));
+  return allow;
+};

@@ -5,7 +5,7 @@ import { ACLManager } from './acl-manager';
 @Global()
 @Module({})
 export class ACLModule {
-  public static forRoot(aclManager: ACLManager): DynamicModule {
+  public static register(aclManager: ACLManager): DynamicModule {
     return {
       module: ACLModule,
       providers: [
