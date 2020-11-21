@@ -32,12 +32,7 @@ export class TokenService extends BaseService<RefreshToken> {
     this.refreshTokenTtl = options.constants.jwt.refreshTokenTTL;
   }
 
-  async getAccessTokenFromRefreshToken(
-    refreshToken: string,
-    oldAccessToken: string,
-    clientId: string,
-    ipAddress: string,
-  ): Promise<ILoginResponse> {
+  async getAccessTokenFromRefreshToken(refreshToken: string, oldAccessToken: string): Promise<ILoginResponse> {
     // check if refresh token exist in database and is still valid
     const token = await this.findOne({ value: refreshToken });
     if (!token) {
@@ -61,21 +56,18 @@ export class TokenService extends BaseService<RefreshToken> {
     };
 
     // check if the owner of the oldAccessToken is the same of the refreshToken
-    if (!(token.userId === payload.sub)) {
+    if (!(token.userId === payload.sub.userId)) {
       throw new UnauthorizedException(JWT_ERRORS.WRONG_OWNER);
     }
 
     // create a newAccessToken with oldPayload and revoke the oldOne
     const loginResponse: ILoginResponse = await this.createAccessToken(payload);
-    await this.revokeToken(oldAccessToken, oldPayload.sub);
+    await this.revokeToken(oldAccessToken, oldPayload.sub.userId);
 
     // Remove old refresh token and generate a new one
     await this.delete(token._id);
-    const refreshTMP = await this.createRefreshToken({
-      userId: oldPayload.sub,
-      clientId,
-      ipAddress,
-    });
+    const userId = oldPayload.sub.userId;
+    const refreshTMP = await this.createRefreshToken(userId);
     loginResponse.refreshToken = refreshTMP.value;
 
     return loginResponse;
@@ -94,18 +86,10 @@ export class TokenService extends BaseService<RefreshToken> {
     return token;
   }
 
-  async createRefreshToken(tokenContent: {
-    userId: string;
-    clientId: string;
-    ipAddress: string;
-  }): Promise<IRefreshToken> {
-    const { userId, clientId, ipAddress } = tokenContent;
-
+  async createRefreshToken(userId: string): Promise<IRefreshToken> {
     const refreshToken = new RefreshToken();
     refreshToken.userId = userId;
     refreshToken.value = randomBytes(64).toString('hex');
-    refreshToken.clientId = clientId;
-    refreshToken.ipAddress = ipAddress;
     const date = new Date();
     refreshToken.expiresAt = new Date(date.setDate(date.getDate() + this.refreshTokenTtl));
     await this.create(refreshToken);

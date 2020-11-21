@@ -29,6 +29,6 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       provider: THIRD_PARTY_PROVIDER.FACEBOOK,
     };
     const user = await this.authService.validateThirdPartyIdentity(thirdPartyUser);
-    return { _id: user._id };
+    return { id: user._id };
   }
 }

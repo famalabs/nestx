@@ -15,8 +15,6 @@ class MockRefreshToken implements IRefreshToken {
   value: string;
   userId: string;
   expiresAt: Date;
-  clientId: string;
-  ipAddress: string;
 }
 
 describe('TokenService', () => {
@@ -99,19 +97,17 @@ describe('TokenService', () => {
       const oldDate = addMinutes(date, -16);
 
       const mockRefreshToken = new MockRefreshToken();
-      mockRefreshToken.clientId = 'clientId';
       mockRefreshToken.value = 'refreshToken';
       mockRefreshToken.expiresAt = oldDate;
       mockRefreshToken.userId = 'userId';
-      mockRefreshToken.ipAddress = 'ipAddress';
 
       const spy = jest.spyOn(service, 'findOne').mockResolvedValue(mockRefreshToken as any);
 
       await expect(() =>
-        service.getAccessTokenFromRefreshToken(mockRefreshToken.value, 'oldAccessToken', 'clientId', 'ipAddress'),
+        service.getAccessTokenFromRefreshToken(mockRefreshToken.value, 'oldAccessToken'),
       ).rejects.toThrow(BadRequestException);
       await expect(() =>
-        service.getAccessTokenFromRefreshToken(mockRefreshToken.value, 'oldAccessToken', 'clientId', 'ipAddress'),
+        service.getAccessTokenFromRefreshToken(mockRefreshToken.value, 'oldAccessToken'),
       ).rejects.toThrow(REFRESH_TOKEN_ERRORS.TOKEN_EXPIRED);
     });
   });

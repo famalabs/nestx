@@ -46,7 +46,7 @@ export class FacebookLinkStrategy extends PassportStrategy(Strategy, 'facebook-l
       throw new UnauthorizedException(JWT_ERRORS.TOKEN_BLACKLISTED);
     }
     const payload = await this.tokenService.validateToken(userToken, false);
-    const userId = payload.sub;
+    const userId = payload.sub.userId;
 
     // check if identity exists
     const identity = await this.userIdentityService.findOne({
@@ -58,6 +58,6 @@ export class FacebookLinkStrategy extends PassportStrategy(Strategy, 'facebook-l
     //link identity
     await this.userIdentityService.linkIdentity(thirdPartyUser, userId);
 
-    return { _id: userId };
+    return { id: userId };
   }
 }

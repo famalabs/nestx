@@ -1,4 +1,4 @@
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { ExtractJwt, Strategy, VerifyCallback } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
 import { IJwtPayload } from '../interfaces/jwt-payload.interface';
@@ -8,7 +8,7 @@ import { TokenService } from '../token/token.service';
 import { Request } from 'express';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     private readonly tokenService: TokenService,
     @Inject(AUTH_OPTIONS) private options: IAuthenticationModuleOptions,
@@ -21,14 +21,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(request: Request, payload: IJwtPayload) {
+  async validate(request: Request, payload: IJwtPayload, done: Function) {
     const accessToken = ExtractJwt.fromAuthHeaderAsBearerToken()(request);
     const isBlacklisted = await this.tokenService.isBlackListed(accessToken);
     if (isBlacklisted) {
       throw new UnauthorizedException(JWT_ERRORS.TOKEN_BLACKLISTED);
     }
-    return {
-      _id: payload.sub,
-    };
+    done(null, { id: payload.sub.userId, roles:payload.sub.roles?payload.sub.roles:[] });
   }
 }
