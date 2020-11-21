@@ -26,11 +26,12 @@ import { User } from './decorators';
 import { NotificationTokenDto, EmailDto } from './dto';
 import { GoogleLinkGuard } from './guards/google-link.guard';
 import { FacebookLinkGuard } from './guards/facebook-link.guard';
-import { ACL, ROLE, ACLGuard } from './acl';
+import { ACL, GRANT, ACLGuard } from './acl';
 
+@ACL(GRANT.ANY)
 @ApiTags('Auth')
-// @UseGuards(ACLGuard)
-// @ACL(ROLE.ANY)
+// metti tutto any cosi passa sempre e mantieni il jwt guard con i googleLinkGuard e facebookLinkGuard
+// se app usera il middleware del token per sfruttare poi ACLGuard allora semplicemente nei casi in cui verrà passato un header jwt verrà fatto il controllo due volte in sole tre route
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -39,16 +40,15 @@ export class AuthController {
   @UseGuards(LoginGuard)
   @ApiOperation({ summary: 'Login user' })
   @ApiResponse({ type: LoginResponseDto })
-  async login(@Ip() userIp, @Body() credentials: LoginDto): Promise<LoginResponseDto> {
-    return await this.authService.login(credentials, userIp);
+  async login(@Body() credentials: LoginDto): Promise<LoginResponseDto> {
+    return await this.authService.login(credentials);
   }
 
   @Post('signup')
   @ApiOperation({ summary: 'Signup user' })
-  async signup(@Body() data: SignupDto, @Req() req): Promise<boolean> {
+  async signup(@Body() data: SignupDto): Promise<boolean> {
     await this.authService.signup(data);
-    const address = req.protocol + '://' + req.get('host');
-    return await this.authService.sendVerificationEmail(data.email, address);
+    return await this.authService.sendVerificationEmail(data.email);
   }
 
   @Post('email/verify')
@@ -60,16 +60,14 @@ export class AuthController {
 
   @Post('email/resend-verification')
   @ApiOperation({ summary: 'Resend verification email' })
-  async resendVerificationEmail(@Req() req, @Body() email: EmailDto): Promise<boolean> {
-    const address = req.protocol + '://' + req.get('host');
-    return await this.authService.resendVerificationEmail(email.value, address);
+  async resendVerificationEmail(@Body() email: EmailDto): Promise<boolean> {
+    return await this.authService.resendVerificationEmail(email.value);
   }
 
   @Post('email/forgot-password')
   @ApiOperation({ summary: 'Forgot password' })
-  async sendForgottenPasswordEmail(@Req() req, @Body() email: EmailDto): Promise<boolean> {
-    const address = req.protocol + '://' + req.get('host');
-    return await this.authService.sendForgottenPasswordEmail(email.value, address);
+  async sendForgottenPasswordEmail(@Body() email: EmailDto): Promise<boolean> {
+    return await this.authService.sendForgottenPasswordEmail(email.value);
   }
 
   @Post('email/reset-password')
@@ -81,22 +79,16 @@ export class AuthController {
   @Get('token')
   @ApiBearerAuth()
   @ApiQuery({ name: 'refresh_token', required: true })
-  @ApiQuery({ name: 'client_id', required: true })
   @ApiOperation({ summary: 'Refresh token' })
   @ApiResponse({ type: LoginResponseDto })
-  async token(
-    @Req() req,
-    @Ip() userIp,
-    @Query('refresh_token') refreshToken: string,
-    @Query('client_id') clientId: string,
-  ): Promise<LoginResponseDto> {
+  async token(@Req() req, @Query('refresh_token') refreshToken: string): Promise<LoginResponseDto> {
     const oldAccessToken = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
-    return await this.authService.refreshToken(refreshToken, oldAccessToken, clientId, userIp);
+    return await this.authService.refreshToken(refreshToken, oldAccessToken);
   }
 
   @Post('logout')
-  @UseGuards(JwtGuard)
   @ApiBearerAuth()
+  @UseGuards(JwtGuard)
   @ApiQuery({ name: 'refresh_token', required: true })
   @ApiQuery({ name: 'from_all', required: true, type: Boolean })
   @ApiOperation({ summary: 'Logout' })
@@ -110,13 +102,13 @@ export class AuthController {
     }
     const accessToken = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
     const flag = fromAll === 'true';
-    return await this.authService.logout(req.user['_id'], accessToken, refreshToken, flag);
+    return await this.authService.logout(req.user['id'], accessToken, refreshToken, flag);
   }
 
   @Get('me')
+  @UseGuards(JwtGuard)
   @ApiOperation({ summary: 'Me route' })
   @ApiBearerAuth()
-  @UseGuards(JwtGuard)
   async me(@Req() req): Promise<any> {
     return req.user;
   }
@@ -131,22 +123,22 @@ export class AuthController {
   @Get('google/redirect')
   @ApiOperation({ summary: 'Google login/signup redirect' })
   @UseGuards(GoogleGuard)
-  async googleAuthRedirect(@User() user, @Ip() ipAddress): Promise<LoginResponseDto> {
-    return await this.authService.thirdPartyLogin(user._id, ipAddress);
+  async googleAuthRedirect(@User() user): Promise<LoginResponseDto> {
+    return await this.authService.thirdPartyLogin(user.id, user.roles);
   }
 
-  @Get('/facebook')
+  @Get('facebook')
   @ApiOperation({ summary: 'Facebook login/signup' })
   @UseGuards(FacebookGuard)
   async facebookLogin(@Req() req, @Res() res) {
     return;
   }
 
-  @Get('/facebook/redirect')
+  @Get('facebook/redirect')
   @ApiOperation({ summary: 'Facebook login/signup redirect' })
   @UseGuards(FacebookGuard)
-  async facebookLoginCallback(@User() user, @Ip() ipAddress): Promise<LoginResponseDto> {
-    return await this.authService.thirdPartyLogin(user._id, ipAddress);
+  async facebookLoginCallback(@User() user): Promise<LoginResponseDto> {
+    return await this.authService.thirdPartyLogin(user.id, user.roles);
   }
 
   @Get('connect/google')

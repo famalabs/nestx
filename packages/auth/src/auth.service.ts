@@ -96,30 +96,27 @@ export class AuthService {
     return registeredUser;
   }
 
-  async login(credentials: LoginDto, ipAddress: string): Promise<ILoginResponse> {
+  async login(credentials: LoginDto): Promise<ILoginResponse> {
     const user = await this.usersService.validateUser(credentials.email, credentials.password);
     if (this.options.constants.blockNotVerifiedUser && !user.isVerified) {
       throw new UnauthorizedException(LOGIN_ERRORS.USER_NOT_VERIFIED);
     }
-    return await this.createLoginResponse(user._id, credentials.clientId, ipAddress);
+    return await this.createLoginResponse(user._id, user.roles);
   }
 
-  async thirdPartyLogin(userId: string, ipAddress: string): Promise<ILoginResponse> {
-    return await this.createLoginResponse(userId, 'client id', ipAddress);
+  async thirdPartyLogin(userId: string, roles:string[]): Promise<ILoginResponse> {
+    return await this.createLoginResponse(userId,roles);
   }
 
-  private async createLoginResponse(userId: string, clientId: string, ipAddress: string): Promise<ILoginResponse> {
+  private async createLoginResponse(userId: string, roles: string[]): Promise<ILoginResponse> {
     const payload: IJwtPayload = {
-      sub: userId,
+      sub: {
+        userId: userId,
+        roles: roles,
+      },
     };
     const accessToken = await this.tokenService.createAccessToken(payload);
-
-    const tokenContent = {
-      userId: userId,
-      clientId: clientId,
-      ipAddress,
-    };
-    const refreshToken = await this.tokenService.createRefreshToken(tokenContent);
+    const refreshToken = await this.tokenService.createRefreshToken(userId);
 
     const loginResponse: ILoginResponse = {
       refreshToken: refreshToken.value,
@@ -139,7 +136,7 @@ export class AuthService {
     return null;
   }
 
-  async sendVerificationEmail(email: string, serverAddress: string): Promise<boolean> {
+  async sendVerificationEmail(email: string): Promise<boolean> {
     const emailNotification = await this.createEmailNotification(email, NOTIFICATION_CATEGORY.ACCOUNT_VERIFICATION);
     if (!emailNotification) {
       throw new NotFoundException(EMAIL_ERRORS.USER_NOT_FOUND);
@@ -164,7 +161,7 @@ export class AuthService {
     return sent;
   }
 
-  async resendVerificationEmail(email: string, serverAddress: string): Promise<boolean> {
+  async resendVerificationEmail(email: string): Promise<boolean> {
     const firstEmail = await this.emailNotificationService.findOne({
       to: email,
       category: NOTIFICATION_CATEGORY.ACCOUNT_VERIFICATION,
@@ -172,7 +169,7 @@ export class AuthService {
     if (!firstEmail) {
       throw new NotFoundException(EMAIL_ERRORS.USER_NOT_FOUND);
     }
-    const sent = await this.sendVerificationEmail(email, serverAddress);
+    const sent = await this.sendVerificationEmail(email);
     if (!sent) {
       throw new InternalServerErrorException(EMAIL_ERRORS.EMAIL_NOT_SENT);
     }
@@ -193,11 +190,11 @@ export class AuthService {
     });
     user.isVerified = true;
     const updatedUser = await this.usersService.update(user._id, user);
-    await this.emailNotificationService.delete({ _id: emailNotification._id });
+    await this.emailNotificationService.deleteById(emailNotification._id);
     return !!updatedUser;
   }
 
-  async sendForgottenPasswordEmail(email: string, serverAddress: string): Promise<boolean> {
+  async sendForgottenPasswordEmail(email: string): Promise<boolean> {
     const user = await this.usersService.findOne({ email: email });
     if (!user) throw new NotFoundException(LOGIN_ERRORS.USER_NOT_FOUND);
 
@@ -228,13 +225,8 @@ export class AuthService {
     //TODO maybe you also want to delete all refresh token for the user who own the token
   }
 
-  async refreshToken(
-    refreshToken: string,
-    oldAccessToken: string,
-    clientId: string,
-    userIp: string,
-  ): Promise<LoginResponseDto> {
-    return await this.tokenService.getAccessTokenFromRefreshToken(refreshToken, oldAccessToken, clientId, userIp);
+  async refreshToken(refreshToken: string, oldAccessToken: string): Promise<LoginResponseDto> {
+    return await this.tokenService.getAccessTokenFromRefreshToken(refreshToken, oldAccessToken);
   }
 
   private async resetFromToken(token: string, newPassword: string): Promise<boolean> {
