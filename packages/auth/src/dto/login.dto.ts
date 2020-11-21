@@ -10,8 +10,4 @@ export class LoginDto implements ILogin {
   @ApiProperty({ example: 'myPassword' })
   @IsString()
   password: string;
-
-  @ApiPropertyOptional()
-  @IsString()
-  clientId?: string;
 }

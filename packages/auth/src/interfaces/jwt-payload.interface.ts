@@ -1,5 +1,5 @@
 export interface IJwtPayload {
-  sub: string;
+  sub: { userId: string; roles: string[] };
   iat?: number;
   exp?: number;
   jti?: string;

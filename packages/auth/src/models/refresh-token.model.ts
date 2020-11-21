@@ -11,10 +11,4 @@ export class RefreshToken extends BaseModel implements IRefreshToken {
 
   @prop({ required: true })
   expiresAt!: Date;
-
-  @prop({ required: true })
-  clientId!: string;
-
-  @prop({ required: true })
-  ipAddress!: string;
 }

@@ -2,10 +2,7 @@ import { IRefreshToken } from './../interfaces/refresh-token.interface';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RefreshTokenDto implements IRefreshToken {
-  _id?: string;
-
-  @ApiProperty({ required: true })
-  clientId: string;
+  id?: string;
 
   @ApiProperty({ required: true })
   value!: string;
@@ -16,6 +13,4 @@ export class RefreshTokenDto implements IRefreshToken {
   @ApiProperty({ required: true })
   expiresAt: Date;
 
-  @ApiProperty({ required: true })
-  ipAddress!: string;
 }

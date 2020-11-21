@@ -5,5 +5,5 @@ export interface IUserResponse {
   isVerified?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  _id: string;
+  id: string;
 }

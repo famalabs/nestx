@@ -3,7 +3,7 @@ import { IUserResponse } from '../interfaces';
 
 export class UserResponseDto implements IUserResponse {
   @ApiProperty()
-  _id: string;
+  id: string;
   @ApiProperty()
   email?: string;
   @ApiProperty()

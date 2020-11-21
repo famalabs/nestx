@@ -14,9 +14,6 @@ export class UserIdentity extends BaseModel implements IThirdPartyUser {
   refreshToken?: string;
   @prop({ required: true, enum: THIRD_PARTY_PROVIDER })
   provider: THIRD_PARTY_PROVIDER;
-
-  //workaround for reference to a model that the package doesn't own
-  //user model is defined by the app!
   @prop({ required: true })
   userId: string;
 }

@@ -3,7 +3,7 @@ export enum NOTIFICATION_CATEGORY {
   RESET_CREDENTIALS = 'reset_credential',
 }
 export interface INotification {
-  _id?: string;
+  id?: string;
   to: string;
   category: NOTIFICATION_CATEGORY;
   createdAt?: Date;
@@ -11,7 +11,7 @@ export interface INotification {
 }
 
 export interface IEmailNotification extends INotification {
-  _id?: string;
+  id?: string;
   to: string;
   category: NOTIFICATION_CATEGORY;
   token: string;
