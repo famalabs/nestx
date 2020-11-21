@@ -6,7 +6,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 export class AppController {
   @Get('public')
   @ACL(GRANT.ANY)
-  @ApiBearerAuth() // test for public route with an expired or invalid token provided TODO test
+  //@ApiBearerAuth() // test for public route with an expired or invalid token provided TODO test
   public(): string {
     return 'Hello from public route!';
   }

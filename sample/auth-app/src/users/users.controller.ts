@@ -8,6 +8,7 @@ import { USER_ROLES } from './user.model';
 export class UsersController {
   @Get('private-admin')
   @ACL(GRANT.AUTHENTICATED)
+  @ApiBearerAuth()
   @ROLES(USER_ROLES.ADMIN)
   public(): string {
     return 'Hello from private admin route!';
