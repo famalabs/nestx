@@ -12,3 +12,4 @@ export * from './auth.controller';
 export * from './user-identity.service';
 export * from './constants';
 export * from './getInstance/instance.middleware';
+export * from './middlewares/token.middleware';

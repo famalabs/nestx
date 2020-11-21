@@ -20,13 +20,16 @@ import { UserIdentityService } from './user-identity.service';
 import { FacebookLinkStrategy } from './strategies/facebook-link.strategy';
 import { GoogleLinkStrategy } from './strategies/google-link.strategy';
 import { EmailNotificationService } from './notification/email';
+import { ACLGuard, ACLManager, ACLModule } from './acl';
+import { APP_GUARD } from '@nestjs/core';
+import { buildSchema } from '@typegoose/typegoose';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: RefreshToken.name, schema: RefreshToken.schema },
-      { name: EmailNotification.name, schema: EmailNotification.schema },
-      { name: UserIdentity.name, schema: UserIdentity.schema },
+      { name: RefreshToken.name, schema: buildSchema(RefreshToken) },
+      { name: EmailNotification.name, schema: buildSchema(EmailNotification) },
+      { name: UserIdentity.name, schema: buildSchema(UserIdentity) },
     ]),
   ],
   providers: [
@@ -56,15 +59,22 @@ import { EmailNotificationService } from './notification/email';
   ],
 })
 export class AuthCoreModule {
-  public static forRoot(options: IAuthenticationModuleOptions): DynamicModule {
+  public static forRoot(options: IAuthenticationModuleOptions, aclManager: ACLManager): DynamicModule {
     return {
       module: AuthCoreModule,
       imports: [
         PassportModule.register(options.modules.passport),
         JwtModule.register(options.modules.jwt),
         CacheModule.register(options.modules.cache),
+        ACLModule.register(aclManager),
       ],
-      providers: [{ provide: AUTH_OPTIONS, useValue: options }],
+      providers: [
+        { provide: AUTH_OPTIONS, useValue: options },
+        {
+          provide: APP_GUARD,
+          useClass: ACLGuard,
+        },
+      ],
     };
   }
 
