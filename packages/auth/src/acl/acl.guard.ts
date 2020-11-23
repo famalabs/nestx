@@ -45,7 +45,7 @@ export class ACLGuard implements CanActivate {
     // }
 
     const nOfRoles = roles ? roles.length : 0;
-    if (permissions.length !== acl.length + nOfRoles) {
+    if (permissions && permissions.length !== acl.length + nOfRoles) {
       return false;
     }
 

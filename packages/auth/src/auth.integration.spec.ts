@@ -117,7 +117,7 @@ class MockUser extends BaseModel implements IUser {
   })
   password!: string;
 
-  @prop()
+  @prop({ type: () => [String] })
   roles!: string[];
 
   @prop({ required: true, default: false })
