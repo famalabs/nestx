@@ -1,17 +1,5 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  Ip,
-  Param,
-  Post,
-  Query,
-  Req,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
-import { ApiBearerAuth, ApiQuery, ApiOperation, ApiTags, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { BadRequestException, Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiQuery, ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { GoogleGuard } from './guards/google.guard';
 import { FacebookGuard } from './guards/facebook.guard';
 import { LoginDto } from './dto/login.dto';
@@ -21,12 +9,11 @@ import { SignupDto } from './dto/signup.dto';
 import { LoginGuard } from './guards/login.guard';
 import { JwtGuard } from './guards/jwt.guard';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { ExtractJwt } from 'passport-jwt';
 import { User } from './decorators';
 import { NotificationTokenDto, EmailDto } from './dto';
 import { GoogleLinkGuard } from './guards/google-link.guard';
 import { FacebookLinkGuard } from './guards/facebook-link.guard';
-import { ACL, GRANT, ACLGuard } from './acl';
+import { ACL, GRANT } from './acl';
 
 @ACL(GRANT.ANY)
 @ApiTags('Auth')
@@ -82,7 +69,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Refresh token' })
   @ApiResponse({ type: LoginResponseDto })
   async token(@Req() req, @Query('refresh_token') refreshToken: string): Promise<LoginResponseDto> {
-    const oldAccessToken = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+    const oldAccessToken = this.authService.tokenFromRequestExtractor(req);
     return await this.authService.refreshToken(refreshToken, oldAccessToken);
   }
 
@@ -100,7 +87,7 @@ export class AuthController {
     if (fromAll !== 'false' && fromAll !== 'true') {
       throw new BadRequestException('from_all invalid value');
     }
-    const accessToken = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+    const accessToken = this.authService.tokenFromRequestExtractor(req);
     const flag = fromAll === 'true';
     return await this.authService.logout(req.user['id'], accessToken, refreshToken, flag);
   }

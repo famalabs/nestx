@@ -41,7 +41,7 @@ export class FacebookLinkStrategy extends PassportStrategy(Strategy, 'facebook-l
     if (userToken === undefined) throw new BadRequestException("Missing user's token.");
 
     //check if token is blacklisted and extract userId from the payload
-    const isBlacklisted = await this.tokenService.isBlackListed(accessToken);
+    const isBlacklisted = await this.tokenService.isBlackListed(userToken);
     if (isBlacklisted) {
       throw new UnauthorizedException(JWT_ERRORS.TOKEN_BLACKLISTED);
     }
@@ -58,6 +58,6 @@ export class FacebookLinkStrategy extends PassportStrategy(Strategy, 'facebook-l
     //link identity
     await this.userIdentityService.linkIdentity(thirdPartyUser, userId);
 
-    return { id: userId };
+    return { id: userId, roles: payload.sub.roles };
   }
 }

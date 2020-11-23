@@ -2,6 +2,8 @@ import { CacheModuleOptions } from '@nestjs/common';
 import { JwtModuleOptions } from '@nestjs/jwt';
 import { IAuthModuleOptions } from '@nestjs/passport';
 
+export type JwtFromRequestFunction = (req: any) => string | null;
+
 export interface IAuthenticationModuleOptions {
   modules: {
     passport: IAuthModuleOptions;
@@ -13,6 +15,7 @@ export interface IAuthenticationModuleOptions {
     jwt: {
       accessTokenTTL: number;
       refreshTokenTTL: number;
+      tokenFromRequestExtractor: JwtFromRequestFunction;
     };
     mail: {
       auth: {

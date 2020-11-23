@@ -1,10 +1,10 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { ExecutionContext, Inject, Injectable } from '@nestjs/common';
 import { AuthGuard, IAuthModuleOptions } from '@nestjs/passport';
-import { ExtractJwt } from 'passport-jwt';
-
+import { AUTH_OPTIONS } from '../constants';
+import { IAuthenticationModuleOptions } from '../interfaces';
 @Injectable()
 export class GoogleLinkGuard extends AuthGuard('google-link') {
-  constructor() {
+  constructor(@Inject(AUTH_OPTIONS) private readonly options: IAuthenticationModuleOptions) {
     super({
       accessType: 'offline',
     });
@@ -15,7 +15,8 @@ export class GoogleLinkGuard extends AuthGuard('google-link') {
    */
   getAuthenticateOptions(context: ExecutionContext): IAuthModuleOptions {
     const request = context.switchToHttp().getRequest();
-    const nestx_token = ExtractJwt.fromAuthHeaderAsBearerToken()(request);
+
+    const nestx_token = this.options.constants.jwt.tokenFromRequestExtractor(request);
     return {
       state: `nestx_token=${nestx_token}`,
     };

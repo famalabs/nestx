@@ -8,7 +8,7 @@ export class AuthModule {
   public static forRoot(options: IAuthenticationModuleOptions, aclManager: ACLManager): DynamicModule {
     return {
       module: AuthModule,
-      imports: [AuthCoreModule.forRoot(options,aclManager)],
+      imports: [AuthCoreModule.forRoot(options, aclManager)],
       exports: [AuthCoreModule],
     };
   }

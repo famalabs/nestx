@@ -13,7 +13,7 @@ import { myACLManager } from 'src/acl-manager';
 
 @Global()
 @Module({
-  imports: [AuthModule.forRoot(authOptions,myACLManager), UsersModule],
+  imports: [AuthModule.forRoot(authOptions, myACLManager), UsersModule],
   providers: [
     { provide: IUsersService, useClass: AuthUsersService },
     { provide: INotificationSender, useClass: EmailSenderService },

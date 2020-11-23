@@ -30,6 +30,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       provider: THIRD_PARTY_PROVIDER.GOOGLE,
     };
     const user = await this.authService.validateThirdPartyIdentity(thirdPartyUser);
-    return { id: user._id };
+    return { id: user._id, roles: user.roles };
   }
 }

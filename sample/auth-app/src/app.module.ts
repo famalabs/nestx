@@ -35,3 +35,27 @@ export class AppModule implements NestModule {
     consumer.apply(TokenMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL });
   }
 }
+
+// @Module({
+//   imports: [
+//     MongooseModule.forRoot(process.env.MONGO_URI, {
+//       autoIndex: true,
+//       useNewUrlParser: true,
+//       useUnifiedTopology: true,
+//       useFindAndModify: false,
+//       useCreateIndex: true,
+//     }),
+//     UsersModule,
+//     AppAuthModule,
+//     BooksModule,
+//   ],
+//   controllers: [AppController],
+//   providers: [
+//     {
+//       provide: APP_FILTER,
+//       useClass: HttpExceptionFilter,
+//     },
+
+//   ],
+// })
+// export class AppModule {}

@@ -4,6 +4,7 @@ import { IAuthModuleOptions } from '@nestjs/passport';
 import { CacheModuleOptions } from '@nestjs/common';
 import * as redisStore from 'cache-manager-redis-store';
 import { IAuthenticationModuleOptions } from '@famalabs/nestx-auth';
+import { ExtractJwt } from 'passport-jwt';
 /**
  * This object is used to pass options to @famalabs/nestx-auth
  * You must implement IAuthenticationModuleOptions
@@ -32,6 +33,7 @@ export const authOptions: IAuthenticationModuleOptions = {
   constants: {
     blockNotVerifiedUser: false,
     jwt: {
+      tokenFromRequestExtractor: ExtractJwt.fromAuthHeaderAsBearerToken(),
       accessTokenTTL: parseInt(process.env.ACCESS_TOKEN_TTL, 10) || 60 * 15, // 15 mins
       refreshTokenTTL: parseInt(process.env.REFRESH_TOKEN_TTL, 10) || 30, // 30 Days
     },

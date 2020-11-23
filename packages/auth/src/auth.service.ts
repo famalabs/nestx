@@ -25,6 +25,7 @@ import {
 } from './interfaces';
 import { v4 as uuidv4 } from 'uuid';
 import * as crypto from 'crypto';
+import { Request } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -43,6 +44,10 @@ export class AuthService {
       throw new BadRequestException(SIGNUP_ERRORS.USER_ALREADY_EXISTS);
     }
     return await this.usersService.create({ email: data.email, password: data.password });
+  }
+
+  tokenFromRequestExtractor(req: Request) {
+    return this.options.constants.jwt.tokenFromRequestExtractor(req);
   }
 
   async validateUser(email: string, password: string): Promise<User> {
@@ -104,8 +109,8 @@ export class AuthService {
     return await this.createLoginResponse(user._id, user.roles);
   }
 
-  async thirdPartyLogin(userId: string, roles:string[]): Promise<ILoginResponse> {
-    return await this.createLoginResponse(userId,roles);
+  async thirdPartyLogin(userId: string, roles: string[]): Promise<ILoginResponse> {
+    return await this.createLoginResponse(userId, roles);
   }
 
   private async createLoginResponse(userId: string, roles: string[]): Promise<ILoginResponse> {

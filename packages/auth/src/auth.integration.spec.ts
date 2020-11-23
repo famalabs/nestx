@@ -18,6 +18,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import * as request from 'supertest';
+import { ExtractJwt } from 'passport-jwt';
 import {
   IAuthenticationModuleOptions,
   ILoginResponse,
@@ -74,6 +75,7 @@ const authOptions: IAuthenticationModuleOptions = {
     jwt: {
       accessTokenTTL: 900,
       refreshTokenTTL: 30,
+      tokenFromRequestExtractor: ExtractJwt.fromAuthHeaderAsBearerToken(),
     },
     mail: {
       auth: {
