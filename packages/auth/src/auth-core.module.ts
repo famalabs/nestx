@@ -1,4 +1,4 @@
-import { Module, MiddlewareConsumer, DynamicModule, CacheModule } from '@nestjs/common';
+import { Module, MiddlewareConsumer, DynamicModule, CacheModule, RequestMethod, NestModule } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategies/local.strategy';
@@ -43,6 +43,8 @@ import { buildSchema } from '@typegoose/typegoose';
     TokenService,
     EmailNotificationService,
     UserIdentityService,
+    //JwtGuard
+    //ACLGuard
   ],
   controllers: [AuthController],
   exports: [
@@ -56,9 +58,11 @@ import { buildSchema } from '@typegoose/typegoose';
     TokenService,
     EmailNotificationService,
     UserIdentityService,
+    //JwtGuard
+    //ACLGuard
   ],
 })
-export class AuthCoreModule {
+export class AuthCoreModule implements NestModule {
   public static forRoot(options: IAuthenticationModuleOptions, aclManager: ACLManager): DynamicModule {
     return {
       module: AuthCoreModule,
@@ -75,12 +79,38 @@ export class AuthCoreModule {
           useClass: ACLGuard,
         },
       ],
+      exports: [{ provide: AUTH_OPTIONS, useValue: options }],
     };
   }
 
+  // export class AuthCoreModule {
+  //   public static forRoot(options: IAuthenticationModuleOptions, aclManager: ACLManager): DynamicModule {
+  //     return {
+  //       module: AuthCoreModule,
+  //       imports: [
+  //         PassportModule.register(options.modules.passport),
+  //         JwtModule.register(options.modules.jwt),
+  //         CacheModule.register(options.modules.cache),
+  //       ],
+  //       providers: [
+  //         { provide: AUTH_OPTIONS, useValue: options },
+  //         {
+  //           provide: ACL_MANAGER,
+  //           useValue: aclManager,
+  //         },
+  //         {
+  //           provide: APP_GUARD,
+  //           useClass: SuperGuard,
+  //         },
+  //       ],
+  //     };
+  //   }
+
   public configure(consumer: MiddlewareConsumer) {
     consumer.apply(FacebookMiddleware).forRoutes('auth/facebook/*');
+
     consumer.apply(FacebookMiddleware).forRoutes('auth/connect/facebook/*');
+
     consumer.apply(LoggerMiddleware).forRoutes(AuthController);
   }
 }
