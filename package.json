@@ -83,7 +83,7 @@
     }
   },
   "lint-staged": {
-    "**/*.ts": "prettier --write"
+    "*": "prettier --write --ignore-unknown"
   },
   "commitlint": {
     "extends": [
