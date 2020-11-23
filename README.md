@@ -43,7 +43,26 @@ Collection of Nestjs extension libraries.
 ## Packages
 
 - [**@famalabs/nestx-core**](https://www.npmjs.com/package/@famalabs/nestx-core) - core package which provides utilities ([docs](https://github.com/famalabs/nestx/tree/master/packages/core))
-- [**@famalabs/nestx-auth**](https://www.npmjs.com/package/@famalabs/nestx-auth) - auth package which provides an auth module with 3rd-party logins and access/refresh token operations ([docs](https://github.com/famalabs/nestx/tree/master/packages/auth))
+- [**@famalabs/nestx-auth**](https://www.npmjs.com/package/@famalabs/nestx-auth) - auth package which provides an auth module with 3rd-party logins, access/refresh token operations and ACL ([docs](https://github.com/famalabs/nestx/tree/master/packages/auth))
+
+## Get Started
+
+To get started, you need to:
+
+1. Clone the repository
+
+```shell
+git clone https://github.com/famalabs/nestx.git <project_name>
+```
+
+2. Install dependencies
+
+```
+cd <project_name>
+npm install
+```
+
+Note: There is a `postinstall` script that run after `npm install` has finished. It will bootstrap and hoisting dependencies in the monorepo.
 
 ## Support
 
