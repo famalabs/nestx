@@ -1,7 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext, Inject, Logger } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core/injector/module-ref';
 import { Request } from 'express';
-import { ACLContext, ACLType, ACL_MANAGER, RolesType } from './types';
+import { ACLContext, ACLType, ACL_MANAGER, Resolver } from './types';
 import { ACLManager } from './acl-manager';
 import { DECORATORS } from './constants';
 
@@ -16,13 +16,12 @@ export class ACLGuard implements CanActivate {
     const handler = context.getHandler();
 
     const acl = this.getMetadataInfo<ACLType>(context, DECORATORS.ACL);
-    const roles = this.getMetadataInfo<RolesType>(context, DECORATORS.ROLES);
 
     if (acl.length === 0) {
       return false;
     }
 
-    const ctx = await this.buildACLContext(context, acl, roles);
+    const ctx = await this.buildACLContext(context, acl);
 
     this.logger.debug(
       `[BEFORE] ACLGuard class:${classType.name}, handler:${handler.name}, user:${ctx.user && ctx.user.id}, instance:${
@@ -40,12 +39,7 @@ export class ACLGuard implements CanActivate {
 
     ctx.req['permissions'] = permissions;
     this.logger.debug(`Request passed with these permissions:[${permissions}]`);
-    // if (!permissions) {
-    //   return false;
-    // }
-
-    const nOfRoles = roles ? roles.length : 0;
-    if (permissions && permissions.length !== acl.length + nOfRoles) {
+    if (!permissions) {
       return false;
     }
 
@@ -65,25 +59,20 @@ export class ACLGuard implements CanActivate {
     return Array<T>(...classMetadata, ...handlerMetadata);
   }
 
-  private async buildACLContext(
-    ctx: ExecutionContext,
-    acl: Array<ACLType>,
-    roles: Array<RolesType>,
-  ): Promise<ACLContext> {
+  private async buildACLContext(ctx: ExecutionContext, acl: Array<ACLType>): Promise<ACLContext> {
     const classType = ctx.getClass();
     const handler = ctx.getHandler();
     const req = ctx.switchToHttp().getRequest<Request>();
     const user = req.user;
     const instance = req['instance'];
     const controller = await this.moduleRef.get(classType, { strict: false }); // get controller reference
-    const aclCtx: ACLContext = { controller, handler, user, instance, req, acl, roles };
+    const aclCtx: ACLContext = { controller, handler, user, instance, req, acl };
     return aclCtx;
   }
 
   private async resolvePermissions(ctx: ACLContext): Promise<Array<any> | null> {
     const permissions = []; // permissions
     const acl = ctx.acl;
-    const roles = ctx.roles;
 
     this.logger.debug(`RESOLVING ACL [${acl}] ...`);
     for (const role of acl) {
@@ -93,28 +82,65 @@ export class ACLGuard implements CanActivate {
       let allow = false;
 
       if (typeof role === 'string') {
+        //if string find the specified resolver or the fallback rolesResolver
         name = role;
-        const resolver = this.aclManager.getDynamicResolver(name);
-        if (resolver !== null) {
-          allow = await resolver(ctx);
-        }
+        allow = await this.execResolver(ctx, name);
+      } else if (Array.isArray(role)) {
+        //if it is an Array then exec all resolvers with and logic
+        name = role;
+        allow = await this.execArrayResolver(role, ctx);
       } else if (typeof role === 'function') {
+        //if it is a resolver then execute it
         name = role.name;
         allow = await role(ctx);
       }
+
       if (allow) {
-        permissions.push(name); // permission object
+        if (Array.isArray(name)) {
+          name.forEach(element => {
+            if (typeof element === 'string') permissions.push(element);
+            if (typeof element === 'function') permissions.push(element.name);
+          });
+        } else {
+          permissions.push(name); // permission object
+        }
       }
-      this.logger.debug(`END EXEC FOR ${role}, ALLOW: ${allow}`);
+      this.logger.debug(`END EXEC FOR ${role}, ALLOW:${allow}`);
     }
 
-    if (ctx.user && roles) {
-      this.logger.debug(`RESOLVING ROLES [${roles}] ...`);
-      const allow = await this.aclManager.rolesResolver(ctx);
-      if (allow) {
-        permissions.push(...roles);
-      }
-    }
     return permissions.length > 0 ? permissions : null;
+  }
+
+  private async execResolver(ctx: ACLContext, name: string): Promise<boolean> {
+    const resolver = this.aclManager.getDynamicResolver(name);
+    if (resolver === null) return await this.execFallbackResolver(ctx, name);
+    return await resolver(ctx);
+  }
+
+  private async execArrayResolver(resolvers: Array<string | Resolver>, ctx: ACLContext): Promise<boolean> {
+    let result;
+    this.logger.debug(`ALL [${resolvers}] HAVE TO PASS`);
+
+    const asyncEvery = async (arr, predicate) => {
+      for (const e of arr) {
+        if (!(await predicate(e))) return false;
+      }
+      return true;
+    };
+    return await asyncEvery(resolvers, async element => {
+      if (typeof element === 'string') {
+        result = await this.execResolver(ctx, element);
+        this.logger.debug(`END EXEC FOR ${element}, ALLOW:${result}`);
+        return result;
+      } else if (typeof element === 'function') {
+        result = await element(ctx);
+        this.logger.debug(`END EXEC FOR ${element}, ALLOW:${result}`);
+        return result;
+      }
+    });
+  }
+
+  private async execFallbackResolver(ctx: ACLContext, name: string): Promise<boolean> {
+    return await this.aclManager.rolesResolver(ctx, name);
   }
 }

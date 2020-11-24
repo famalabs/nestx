@@ -46,10 +46,9 @@ function matchId(src, target) {
   return typeof src === typeof target ? src === target : src.toString() === target.toString();
 }
 
-export const RolesResolver: Resolver = function (ctx: ACLContext): boolean {
+export const RolesResolver: Resolver = function (ctx: ACLContext, name: string): boolean {
   const user = ctx.user;
-  const roles = ctx.roles;
-  let allow = true;
-  roles.forEach(role => (allow = allow && user.roles.indexOf(role) >= 0));
+  const role = name;
+  const allow = user.roles.indexOf(role) >= 0;
   return allow;
 };

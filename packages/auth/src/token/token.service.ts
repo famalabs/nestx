@@ -87,13 +87,13 @@ export class TokenService extends BaseService<RefreshToken> {
   }
 
   async createRefreshToken(userId: string): Promise<IRefreshToken> {
-    const refreshToken = new RefreshToken();
-    refreshToken.userId = userId;
-    refreshToken.value = randomBytes(64).toString('hex');
     const date = new Date();
-    refreshToken.expiresAt = new Date(date.setDate(date.getDate() + this.refreshTokenTtl));
+    const refreshToken: IRefreshToken = {
+      userId: userId,
+      value: randomBytes(64).toString('hex'),
+      expiresAt: new Date(date.setDate(date.getDate() + this.refreshTokenTtl)),
+    };
     await this.create(refreshToken);
-
     return refreshToken;
   }
 

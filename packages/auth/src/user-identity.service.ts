@@ -22,13 +22,14 @@ export class UserIdentityService extends BaseService<UserIdentity> {
 
   async linkIdentity(thirdPartyUser: IThirdPartyUser, userId: string): Promise<UserIdentity> {
     this.logger.debug(`linkIdentity thirdPartyUser:${JSON.stringify(thirdPartyUser)}, userId:${userId}`);
-    const userIdentity = new UserIdentity();
-    userIdentity.email = thirdPartyUser.email;
-    userIdentity.externalId = thirdPartyUser.externalId;
-    userIdentity.provider = thirdPartyUser.provider;
-    userIdentity.accessToken = thirdPartyUser.accessToken;
-    userIdentity.refreshToken = thirdPartyUser.refreshToken;
-    userIdentity.userId = userId;
+    const userIdentity = {
+      email: thirdPartyUser.email,
+      externalId: thirdPartyUser.externalId,
+      provider: thirdPartyUser.provider,
+      accessToken: thirdPartyUser.accessToken,
+      refreshToken: thirdPartyUser.refreshToken,
+      userId: userId,
+    };
     return await this.create(userIdentity);
   }
 }

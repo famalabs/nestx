@@ -1,4 +1,4 @@
-import { Module, MiddlewareConsumer, DynamicModule, CacheModule, RequestMethod, NestModule } from '@nestjs/common';
+import { Module, MiddlewareConsumer, DynamicModule, CacheModule } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategies/local.strategy';
@@ -20,9 +20,9 @@ import { UserIdentityService } from './user-identity.service';
 import { FacebookLinkStrategy } from './strategies/facebook-link.strategy';
 import { GoogleLinkStrategy } from './strategies/google-link.strategy';
 import { EmailNotificationService } from './notification/email';
-import { ACLGuard, ACLManager, ACLModule } from './acl';
-import { APP_GUARD } from '@nestjs/core';
+import { ACLGuard, ACLManager, ACL_MANAGER } from './acl';
 import { buildSchema } from '@typegoose/typegoose';
+import { JwtGuard } from './guards';
 
 @Module({
   imports: [
@@ -43,8 +43,8 @@ import { buildSchema } from '@typegoose/typegoose';
     TokenService,
     EmailNotificationService,
     UserIdentityService,
-    //JwtGuard
-    //ACLGuard
+    JwtGuard,
+    ACLGuard,
   ],
   controllers: [AuthController],
   exports: [
@@ -58,11 +58,11 @@ import { buildSchema } from '@typegoose/typegoose';
     TokenService,
     EmailNotificationService,
     UserIdentityService,
-    //JwtGuard
-    //ACLGuard
+    JwtGuard,
+    ACLGuard,
   ],
 })
-export class AuthCoreModule implements NestModule {
+export class AuthCoreModule {
   public static forRoot(options: IAuthenticationModuleOptions, aclManager: ACLManager): DynamicModule {
     return {
       module: AuthCoreModule,
@@ -70,41 +70,23 @@ export class AuthCoreModule implements NestModule {
         PassportModule.register(options.modules.passport),
         JwtModule.register(options.modules.jwt),
         CacheModule.register(options.modules.cache),
-        ACLModule.register(aclManager),
       ],
       providers: [
         { provide: AUTH_OPTIONS, useValue: options },
         {
-          provide: APP_GUARD,
-          useClass: ACLGuard,
+          provide: ACL_MANAGER,
+          useValue: aclManager,
         },
       ],
-      exports: [{ provide: AUTH_OPTIONS, useValue: options }],
+      exports: [
+        { provide: AUTH_OPTIONS, useValue: options },
+        {
+          provide: ACL_MANAGER,
+          useValue: aclManager,
+        },
+      ],
     };
   }
-
-  // export class AuthCoreModule {
-  //   public static forRoot(options: IAuthenticationModuleOptions, aclManager: ACLManager): DynamicModule {
-  //     return {
-  //       module: AuthCoreModule,
-  //       imports: [
-  //         PassportModule.register(options.modules.passport),
-  //         JwtModule.register(options.modules.jwt),
-  //         CacheModule.register(options.modules.cache),
-  //       ],
-  //       providers: [
-  //         { provide: AUTH_OPTIONS, useValue: options },
-  //         {
-  //           provide: ACL_MANAGER,
-  //           useValue: aclManager,
-  //         },
-  //         {
-  //           provide: APP_GUARD,
-  //           useClass: SuperGuard,
-  //         },
-  //       ],
-  //     };
-  //   }
 
   public configure(consumer: MiddlewareConsumer) {
     consumer.apply(FacebookMiddleware).forRoutes('auth/facebook/*');

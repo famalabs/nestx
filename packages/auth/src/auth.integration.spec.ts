@@ -336,11 +336,13 @@ describe('Auth Module integration', () => {
       user.roles = [];
       const registeredUser = await usersService.create(user);
 
-      const userIdentity = new UserIdentity();
-      userIdentity.externalId = 'googleId';
-      userIdentity.email = 'user@gmail.com';
-      userIdentity.provider = THIRD_PARTY_PROVIDER.GOOGLE;
-      userIdentity.userId = registeredUser._id;
+      const userIdentity = {
+        externalId: 'googleId',
+        email: 'user@gmail.com',
+        provider: THIRD_PARTY_PROVIDER.GOOGLE,
+        userId: registeredUser._id,
+      };
+
       await userIdentityService.create(userIdentity);
 
       const credentials: LoginDto = { email: userIdentity.email, password: user.password };
@@ -360,11 +362,13 @@ describe('Auth Module integration', () => {
       user.roles = [];
       const registeredUser = await usersService.create(user);
 
-      const userIdentity = new UserIdentity();
-      userIdentity.externalId = 'googleId';
-      userIdentity.email = 'user@gmail.com';
-      userIdentity.provider = THIRD_PARTY_PROVIDER.GOOGLE;
-      userIdentity.userId = registeredUser._id;
+      const userIdentity = {
+        externalId: 'googleId',
+        email: 'user@gmail.com',
+        provider: THIRD_PARTY_PROVIDER.GOOGLE,
+        userId: registeredUser._id,
+      };
+
       await userIdentityService.create(userIdentity);
 
       //unable to mock google strategy and to mock Req in controller so i call the service methods directly
@@ -388,10 +392,11 @@ describe('Auth Module integration', () => {
       user.roles = [];
       const registeredUser = await usersService.create(user);
 
-      const userIdentity = new UserIdentity();
-      userIdentity.externalId = 'googleId';
-      userIdentity.email = 'user@gmail.com';
-      userIdentity.provider = THIRD_PARTY_PROVIDER.GOOGLE;
+      const userIdentity = {
+        externalId: 'googleId',
+        email: 'user@gmail.com',
+        provider: THIRD_PARTY_PROVIDER.GOOGLE,
+      };
 
       //unable to mock google strategy and to mock Req in controller so i call the service methods directly
       try {
@@ -408,10 +413,11 @@ describe('Auth Module integration', () => {
       user.isVerified = true;
       user.roles = [];
 
-      const userIdentity = new UserIdentity();
-      userIdentity.externalId = 'googleId';
-      userIdentity.email = user.email;
-      userIdentity.provider = THIRD_PARTY_PROVIDER.GOOGLE;
+      const userIdentity = {
+        externalId: 'googleId',
+        email: 'user@gmail.com',
+        provider: THIRD_PARTY_PROVIDER.GOOGLE,
+      };
 
       //unable to mock google strategy and to mock Req in controller so i call the service methods directly
       const validatedUser = await authService.validateThirdPartyIdentity(userIdentity);

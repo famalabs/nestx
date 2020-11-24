@@ -4,4 +4,4 @@ export * from './jwt.guard';
 export * from './facebook-link.guard';
 export * from './google-link.guard';
 export * from './login.guard';
-export * from './auth-acl.guard';
+export * from './super.guard';

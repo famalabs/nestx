@@ -1,6 +1,7 @@
 import { prop } from '@typegoose/typegoose';
-import { BaseModel } from './base.model';
+import { BaseModel } from '@famalabs/nestx-core';
 import { IRefreshToken } from './../interfaces/refresh-token.interface';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class RefreshToken extends BaseModel implements IRefreshToken {
   @prop({ required: true, unique: true })
@@ -11,4 +12,9 @@ export class RefreshToken extends BaseModel implements IRefreshToken {
 
   @prop({ required: true })
   expiresAt!: Date;
+
+  @ApiProperty({ type: Date })
+  createdAt?: Date;
+  @ApiProperty({ type: Date })
+  updatedAt?: Date;
 }
