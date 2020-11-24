@@ -5,7 +5,6 @@ node_modules/
 packages/**/dist
 packages/**/*.d.ts
 packages/**/*.js
-# packages/**/package-lock.json
 
 # example
 /test-projects
