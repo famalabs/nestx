@@ -1,7 +1,5 @@
 {
-  "packages": [
-    "packages/*"
-  ],
+  "packages": ["packages/*"],
   "version": "0.1.0-alpha.5",
   "command": {
     "publish": {
@@ -9,6 +7,9 @@
     },
     "version": {
       "message": "chore(release): release"
+    },
+    "bootstrap": {
+      "hoist": true
     }
   }
 }
