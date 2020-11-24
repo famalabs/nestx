@@ -15,6 +15,7 @@
     "sourceMap": false,
     "allowJs": false,
     "strict": true,
+    "composite": true,
     "strictNullChecks": false
   },
   "exclude": [
