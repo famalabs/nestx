@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.6](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.5...v0.1.0-alpha.6) (2020-11-24)
+
+
+### Bug Fixes
+
+* fix eslint and tsconfig ([a981bc3](https://github.com/famalabs/nestx/commit/a981bc32ef994543fff7488cca45e8d15baf23bd))
+* fix import in tsconfig ([002dbd6](https://github.com/famalabs/nestx/commit/002dbd69fbb7f2af03c2c07f00ccde60a7266e6d))
+* fix include ([eccccd1](https://github.com/famalabs/nestx/commit/eccccd1057022846ec124cc97f9cdb0ebfcc8290))
+* **core:** check properties array ([7c5184d](https://github.com/famalabs/nestx/commit/7c5184d684d4585fe68d3a89923692d3dd3b5dde))
+
+
+
+
+
 # [0.1.0-alpha.5](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.0...v0.1.0-alpha.5) (2020-11-19)
 
 **Note:** Version bump only for package @famalabs/nestx-core

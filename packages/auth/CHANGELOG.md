@@ -3,6 +3,41 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.6](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.5...v0.1.0-alpha.6) (2020-11-24)
+
+
+### Bug Fixes
+
+* change payload structure and req.user ([f3b9f2a](https://github.com/famalabs/nestx/commit/f3b9f2a2c12099d45b59c24f3d6bca8cd40b6b9b))
+* enable composite building with path references in packages with dependencies to sibiling ([63b5f98](https://github.com/famalabs/nestx/commit/63b5f98e5e95799f07aaf3cefe862b6f4d4d7562))
+* fix eslint and tsconfig ([a981bc3](https://github.com/famalabs/nestx/commit/a981bc32ef994543fff7488cca45e8d15baf23bd))
+* fix import in tsconfig ([002dbd6](https://github.com/famalabs/nestx/commit/002dbd69fbb7f2af03c2c07f00ccde60a7266e6d))
+* fix imports ([d508c38](https://github.com/famalabs/nestx/commit/d508c38198647a6689f679a7a953db330d3190ee))
+* fix include ([eccccd1](https://github.com/famalabs/nestx/commit/eccccd1057022846ec124cc97f9cdb0ebfcc8290))
+* fix log info ([524c72a](https://github.com/famalabs/nestx/commit/524c72a0f3c63916e9b6c977ce28f9561b2815b4))
+* fix tests ([ab6f389](https://github.com/famalabs/nestx/commit/ab6f389d5c8845db4fb5c48c181c6bfb10d9d154))
+* fixes to acl and integrating core with baseModel ([6b5894c](https://github.com/famalabs/nestx/commit/6b5894c36b8d0372a9583969dbe5d5dd6bb3d468))
+* import AclModule and apply guard globally ([df91ee0](https://github.com/famalabs/nestx/commit/df91ee00bc3ea1bd542974d0803c4f95b5eb6a8e))
+* remove ipAddress and client id ([876cc90](https://github.com/famalabs/nestx/commit/876cc907b8d3b230c3b595b74efdd3e4ad363f6f))
+* remove ipAddress and clientId ([ed2da01](https://github.com/famalabs/nestx/commit/ed2da01ed6ff8d77e1de58487a623d79ce188332))
+
+
+### Features
+
+* add superGuard and core dep ([f9126de](https://github.com/famalabs/nestx/commit/f9126de12dd54cc731775d4ab5d934e517ea5b30))
+* add tokenExtractor options for auth ([110f1c9](https://github.com/famalabs/nestx/commit/110f1c9fbc2fe880b10a7306ed9d7a286e0f6481))
+* change architecture and add logger for debug ([3228c85](https://github.com/famalabs/nestx/commit/3228c859573eb5041249b639f9eaf4c081884f79))
+* middleware to execute passport jwt strategies when authorization header is present ([092b11b](https://github.com/famalabs/nestx/commit/092b11b8c04d6e9b31f96c132d08400da57fbc62))
+
+
+### Reverts
+
+* insert lockfiles in packages ([546246d](https://github.com/famalabs/nestx/commit/546246d13468f280dfcf85af0a7f559f38e36660))
+
+
+
+
+
 # [0.1.0-alpha.5](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.0...v0.1.0-alpha.5) (2020-11-19)
 
 
