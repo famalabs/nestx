@@ -1,20 +1,27 @@
 {
-  "name": "root",
-  "author": "FamaLabs",
+  "name": "@famalabs/nestx",
   "license": "MIT",
+  "description": "Fama Labs monorepo for nestjs libraries",
+  "author": " Fama Labs <info@famalabs.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/famalabs/nestx"
+  },
+  "bugs": "https://github.com/famalabs/nestx/issues",
   "private": true,
   "scripts": {
-    "build:watch": "gulp default",
+    "dev": "gulp default",
     "prebuild:prod": "npm run clean:prod",
     "build:prod": "gulp build",
     "preversion": "npm run lint",
-    "prepare": "npm run build:prod && gulp copy-misc",
-    "prepublishOnly": "npm test && npm run lint",
+    "prepare": "npm run build:prod",
+    "prepublishOnly": "npm run test && npm run lint",
+    "prepack": "gulp copy-misc",
     "release": "lerna publish --conventional-commits --contents dist",
     "postpublish": "npm run clean:prod",
     "postinstall": "lerna bootstrap --hoist --strict",
     "clean:prod": "gulp clean:prod",
-    "format": "prettier \"**/*.ts\" --ignore-path ./.prettierignore --write && git status",
+    "format": "prettier \"packages/**/*.ts\" --write && git status",
     "lint": "npm run lint:packages",
     "lint:packages": "eslint 'packages/**/**.ts' --fix --ignore-pattern 'packages/**/*.spec.ts' --no-error-on-unmatched-pattern",
     "test": "jest --verbose",
@@ -83,7 +90,7 @@
     }
   },
   "lint-staged": {
-    "*": "prettier --write --ignore-unknown"
+    "**/*.ts": "prettier --write"
   },
   "commitlint": {
     "extends": [
@@ -99,7 +106,7 @@
     "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.ts$": "ts-jest"
     },
     "collectCoverage": true,
     "coverageDirectory": "./coverage",
