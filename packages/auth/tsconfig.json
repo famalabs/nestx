@@ -6,7 +6,8 @@
   },
   "include": [
     "src/**/*",
-    "index.ts"
+    "index.ts",
+    "index.d.ts",
   ],
   "references": [
     { "path": "../core" }
