@@ -1,4 +1,4 @@
-import { ACLResolvers, ACLContext } from '.';
+import { ACLResolvers, ACLContext } from './types';
 import { Resolver } from './types';
 
 export enum GRANT {

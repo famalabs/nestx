@@ -20,9 +20,9 @@ import { UserIdentityService } from './user-identity.service';
 import { FacebookLinkStrategy } from './strategies/facebook-link.strategy';
 import { GoogleLinkStrategy } from './strategies/google-link.strategy';
 import { EmailNotificationService } from './notification/email';
-import { ACLGuard, ACLManager, ACL_MANAGER } from './acl';
+import { ACLManager, ACL_MANAGER } from './acl';
 import { buildSchema } from '@typegoose/typegoose';
-import { JwtGuard } from './guards';
+import { ACLGuard, JwtGuard } from './guards';
 
 @Module({
   imports: [

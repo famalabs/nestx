@@ -9,11 +9,11 @@ import { SignupDto } from './dto/signup.dto';
 import { LoginGuard } from './guards/login.guard';
 import { JwtGuard } from './guards/jwt.guard';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { User } from './decorators';
+import { ACL, User } from './decorators';
 import { NotificationTokenDto, EmailDto } from './dto';
 import { GoogleLinkGuard } from './guards/google-link.guard';
 import { FacebookLinkGuard } from './guards/facebook-link.guard';
-import { ACL, GRANT } from './acl';
+import { GRANT } from './acl';
 
 @ACL(GRANT.ANY)
 @ApiTags('Auth')

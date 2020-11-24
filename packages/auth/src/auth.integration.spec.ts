@@ -18,7 +18,6 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import * as request from 'supertest';
-import { ExtractJwt } from 'passport-jwt';
 import {
   IAuthenticationModuleOptions,
   ILoginResponse,
@@ -37,20 +36,17 @@ import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { IAuthModuleOptions, PassportModule } from '@nestjs/passport';
 import { TokenService } from './token/token.service';
 import { EmailDto, LoginDto, NotificationTokenDto, ResetPasswordDto, SignupDto } from './dto';
-import { FacebookGuard, GoogleGuard, JwtGuard } from './guards';
+import { ACLGuard, FacebookGuard, GoogleGuard, JwtGuard, SuperGuard } from './guards';
 import { Request, Response } from 'express';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
-import {
-  AuthService,
-  UserIdentityService,
-  EmailNotificationService,
-  LocalStrategy,
-  JwtStrategy,
-  ACLGuard,
-  ACLModule,
-  ACLManager,
-} from '.';
-import { ACL, GRANT } from './acl';
+import { GRANT } from './acl/resolvers';
+import { ACL } from './decorators';
+import { AuthService } from './auth.service';
+import { EmailNotificationService } from './notification/email';
+import { UserIdentityService } from './user-identity.service';
+import { LocalStrategy, JwtStrategy } from './strategies';
+import { ExtractJwt } from 'passport-jwt';
+import { ACLManager, ACL_MANAGER } from './acl';
 
 const mongoURI = 'mongodb://localhost:27017/test';
 const jwtModuleOptions: JwtModuleOptions = {
@@ -222,6 +218,7 @@ describe('Auth Module integration', () => {
     const authModule: TestingModule = await Test.createTestingModule({
       imports: [
         DbModule,
+
         MongooseModule.forFeature([
           { name: RefreshToken.name, schema: buildSchema(RefreshToken) },
           { name: EmailNotification.name, schema: buildSchema(EmailNotification) },
@@ -231,7 +228,6 @@ describe('Auth Module integration', () => {
         PassportModule.register(authOptions.modules.passport),
         JwtModule.register(authOptions.modules.jwt),
         CacheModule.register(authOptions.modules.cache),
-        ACLModule.register(new ACLManager()),
       ],
       providers: [
         AuthService,
@@ -240,16 +236,22 @@ describe('Auth Module integration', () => {
         TokenService,
         EmailNotificationService,
         UserIdentityService,
+        JwtGuard,
+        ACLGuard,
         { provide: AUTH_OPTIONS, useValue: authOptions },
         { provide: IUsersService, useClass: MockUsersService },
         { provide: INotificationSender, useClass: MockSender },
+        {
+          provide: ACL_MANAGER,
+          useValue: new ACLManager(),
+        },
         {
           provide: APP_FILTER,
           useClass: HttpExceptionFilter,
         },
         {
           provide: APP_GUARD,
-          useClass: ACLGuard,
+          useClass: SuperGuard,
         },
       ],
       controllers: [AuthController, TestController],

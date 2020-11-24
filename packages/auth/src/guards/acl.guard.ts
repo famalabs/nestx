@@ -1,9 +1,9 @@
 import { Injectable, CanActivate, ExecutionContext, Inject, Logger } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core/injector/module-ref';
 import { Request } from 'express';
-import { ACLContext, ACLType, ACL_MANAGER, Resolver } from './types';
-import { ACLManager } from './acl-manager';
-import { DECORATORS } from './constants';
+import { ACLContext, ACLType, ACL_MANAGER, Resolver } from '../acl/types';
+import { ACLManager } from '../acl/acl-manager';
+import { DECORATORS } from '../acl/constants';
 
 @Injectable()
 export class ACLGuard implements CanActivate {

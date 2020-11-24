@@ -2,7 +2,7 @@ import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/commo
 import { GRANT } from '../acl';
 import { DECORATORS } from '../acl/constants';
 import { ACLType } from '../acl/types';
-import { ACLGuard } from '../acl/acl.guard';
+import { ACLGuard } from './acl.guard';
 import { JwtGuard } from './jwt.guard';
 import { AUTH_OPTIONS } from '../constants';
 import { IAuthenticationModuleOptions } from '../interfaces';

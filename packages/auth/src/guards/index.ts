@@ -5,3 +5,4 @@ export * from './facebook-link.guard';
 export * from './google-link.guard';
 export * from './login.guard';
 export * from './super.guard';
+export * from './acl.guard';

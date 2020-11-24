@@ -1,5 +1,6 @@
 import { SetMetadata } from '@nestjs/common';
-import { ACLType, DECORATORS } from '../ACLs';
+import { DECORATORS } from '../acl/constants';
+import { ACLType } from '../acl/types';
 
 export function ACL(...acls: ACLType[]) {
   return SetMetadata(DECORATORS.ACL, acls);
