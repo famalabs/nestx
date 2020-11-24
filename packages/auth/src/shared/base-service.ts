@@ -1,5 +1,5 @@
 import { CreateQuery, Types } from 'mongoose';
-import { BaseModel } from '../models/base.model';
+import { BaseModel } from '@famalabs/nestx-core';
 import { InternalServerErrorException } from '@nestjs/common';
 import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import { AnyParamConstructor } from '@typegoose/typegoose/lib/types';
