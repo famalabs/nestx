@@ -22,8 +22,8 @@
     "test:e2e:watch": "jest --config ./test/jest-e2e.json --detectOpenHandles --watch"
   },
   "dependencies": {
-    "@famalabs/nestx-auth": "file:../../packages/auth/dist",
-    "@famalabs/nestx-core": "file:../../packages/core/dist",
+    "@famalabs/nestx-auth": "file:../../packages/auth",
+    "@famalabs/nestx-core": "file:../../packages/core",
     "@nestjs/common": "^7.5.1",
     "@nestjs/core": "^7.5.1",
     "@nestjs/jwt": "^7.2.0",

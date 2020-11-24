@@ -17,7 +17,7 @@ export class BooksController {
   }
 
   @Get(':id')
-  @ACL(GRANT.AUTHENTICATED, GRANT.OWNER)
+  @ACL(GRANT.OWNER)
   @ApiBearerAuth()
   findOne(@Param('id') id: string, @ReqInstanceData() instance: BookDto) {
     return instance;

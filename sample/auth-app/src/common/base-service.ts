@@ -2,7 +2,7 @@ import { CreateQuery, Types } from 'mongoose';
 import { InternalServerErrorException } from '@nestjs/common';
 import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import { AnyParamConstructor } from '@typegoose/typegoose/lib/types';
-import { BaseModel } from './base.model';
+import { BaseModel } from '@famalabs/nestx-core';
 
 export abstract class BaseService<T extends BaseModel> {
   protected model: ReturnModelType<AnyParamConstructor<T>>;

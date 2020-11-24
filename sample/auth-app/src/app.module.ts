@@ -7,7 +7,6 @@ import { AppAuthModule } from './app-auth/app-auth.module';
 import { HttpExceptionFilter } from './common/http-exception.filter';
 import { APP_FILTER } from '@nestjs/core';
 import { BooksModule } from './books/books.module';
-import { TokenMiddleware } from '@famalabs/nestx-auth';
 
 @Module({
   imports: [
@@ -30,32 +29,4 @@ import { TokenMiddleware } from '@famalabs/nestx-auth';
     },
   ],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(TokenMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL });
-  }
-}
-
-// @Module({
-//   imports: [
-//     MongooseModule.forRoot(process.env.MONGO_URI, {
-//       autoIndex: true,
-//       useNewUrlParser: true,
-//       useUnifiedTopology: true,
-//       useFindAndModify: false,
-//       useCreateIndex: true,
-//     }),
-//     UsersModule,
-//     AppAuthModule,
-//     BooksModule,
-//   ],
-//   controllers: [AppController],
-//   providers: [
-//     {
-//       provide: APP_FILTER,
-//       useClass: HttpExceptionFilter,
-//     },
-
-//   ],
-// })
-// export class AppModule {}
+export class AppModule {}
