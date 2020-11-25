@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.8](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.7...v0.1.0-alpha.8) (2020-11-25)
+
+
+### Bug Fixes
+
+* fix test ([1d24835](https://github.com/famalabs/nestx/commit/1d248351fb5de8ec9aed1f2b8460d81b818940cf))
+
+
+
+
+
 # [0.1.0-alpha.7](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.6...v0.1.0-alpha.7) (2020-11-25)
 
 
