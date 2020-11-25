@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.7](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.6...v0.1.0-alpha.7) (2020-11-25)
+
+
+### Features
+
+* add logger and logging options ([43d7a1d](https://github.com/famalabs/nestx/commit/43d7a1dc10ef58b1c8891edcfe017b44994c7aa3))
+
+
+
+
+
 # [0.1.0-alpha.6](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.5...v0.1.0-alpha.6) (2020-11-24)
 
 
