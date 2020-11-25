@@ -42,5 +42,6 @@
     "authentication",
     "authorization",
     "passport"
-  ]
+  ],
+  "gitHead": "7c4f01ee26764c4d17ea2c5ec2e9840feb6cb98a"
 }

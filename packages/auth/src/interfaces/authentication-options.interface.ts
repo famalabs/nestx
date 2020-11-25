@@ -2,7 +2,7 @@ import { CacheModuleOptions, LoggerService } from '@nestjs/common';
 import { JwtModuleOptions } from '@nestjs/jwt';
 import { IAuthModuleOptions } from '@nestjs/passport';
 
-export interface IAuthLogger extends LoggerService {}
+export type IAuthLogger = LoggerService;
 
 export type JwtFromRequestFunction = (req: any) => string | null;
 

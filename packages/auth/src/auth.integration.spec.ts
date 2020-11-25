@@ -47,6 +47,7 @@ import { UserIdentityService } from './user-identity.service';
 import { LocalStrategy, JwtStrategy } from './strategies';
 import { ExtractJwt } from 'passport-jwt';
 import { ACLManager, ACL_MANAGER } from './acl';
+import { EmptyLogger } from './logger/empty-logger';
 
 const mongoURI = 'mongodb://localhost:27017/test';
 const jwtModuleOptions: JwtModuleOptions = {
@@ -252,6 +253,10 @@ describe('Auth Module integration', () => {
         {
           provide: APP_GUARD,
           useClass: SuperGuard,
+        },
+        {
+          provide: 'LOGGER',
+          useClass: EmptyLogger,
         },
       ],
       controllers: [AuthController, TestController],
