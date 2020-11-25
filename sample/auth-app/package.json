@@ -10,7 +10,7 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "nest start --watch",
+    "start:dev": "npm run build && nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -22,8 +22,8 @@
     "test:e2e:watch": "jest --config ./test/jest-e2e.json --detectOpenHandles --watch"
   },
   "dependencies": {
-    "@famalabs/nestx-auth": "file:../../packages/auth",
-    "@famalabs/nestx-core": "file:../../packages/core",
+    "@famalabs/nestx-auth": "file:..\\..\\packages\\auth",
+    "@famalabs/nestx-core": "file:..\\..\\packages\\core",
     "@nestjs/common": "^7.5.1",
     "@nestjs/core": "^7.5.1",
     "@nestjs/jwt": "^7.2.0",

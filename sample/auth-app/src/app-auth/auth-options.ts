@@ -25,6 +25,7 @@ const cacheModuleOptions: CacheModuleOptions = {
 };
 
 export const authOptions: IAuthenticationModuleOptions = {
+  logging: true,
   modules: {
     jwt: jwtModuleOptions,
     passport: passportModuleOptions,

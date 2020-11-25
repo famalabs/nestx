@@ -1,4 +1,13 @@
-import { Module, MiddlewareConsumer, DynamicModule, CacheModule } from '@nestjs/common';
+import {
+  Module,
+  MiddlewareConsumer,
+  DynamicModule,
+  CacheModule,
+  Injectable,
+  Logger,
+  Scope,
+  LoggerService,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategies/local.strategy';
@@ -23,6 +32,7 @@ import { EmailNotificationService } from './notification/email';
 import { ACLManager, ACL_MANAGER } from './acl';
 import { buildSchema } from '@typegoose/typegoose';
 import { ACLGuard, JwtGuard } from './guards';
+import { DefaultLogger, EmptyLogger } from './logger';
 
 @Module({
   imports: [
@@ -77,12 +87,34 @@ export class AuthCoreModule {
           provide: ACL_MANAGER,
           useValue: aclManager,
         },
+        {
+          provide: 'LOGGER',
+          useFactory: (options: IAuthenticationModuleOptions) => {
+            if (options.logging) {
+              if (options.logger) {
+                return options.logger;
+              } else return new DefaultLogger();
+            } else return new EmptyLogger();
+          },
+          inject: [AUTH_OPTIONS],
+        },
       ],
       exports: [
         { provide: AUTH_OPTIONS, useValue: options },
         {
           provide: ACL_MANAGER,
           useValue: aclManager,
+        },
+        {
+          provide: 'LOGGER',
+          useFactory: (options: IAuthenticationModuleOptions) => {
+            if (options.logging) {
+              if (options.logger) {
+                return options.logger;
+              } else return new DefaultLogger();
+            } else return new EmptyLogger();
+          },
+          inject: [AUTH_OPTIONS],
         },
       ],
     };

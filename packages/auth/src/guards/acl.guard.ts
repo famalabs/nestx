@@ -1,15 +1,18 @@
-import { Injectable, CanActivate, ExecutionContext, Inject, Logger } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, Inject, Logger, LoggerService } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core/injector/module-ref';
 import { Request } from 'express';
 import { ACLContext, ACLType, ACL_MANAGER, Resolver } from '../acl/types';
 import { ACLManager } from '../acl/acl-manager';
 import { DECORATORS } from '../acl/constants';
+import { IAuthLogger } from '../interfaces';
 
 @Injectable()
 export class ACLGuard implements CanActivate {
-  private readonly logger = new Logger(ACLGuard.name);
-
-  constructor(@Inject(ACL_MANAGER) private readonly aclManager: ACLManager, private readonly moduleRef: ModuleRef) {}
+  constructor(
+    @Inject(ACL_MANAGER) private readonly aclManager: ACLManager,
+    private readonly moduleRef: ModuleRef,
+    @Inject('LOGGER') private readonly logger: IAuthLogger,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const classType = context.getClass();
@@ -27,6 +30,7 @@ export class ACLGuard implements CanActivate {
       `[BEFORE] ACLGuard class:${classType.name}, handler:${handler.name}, user:${ctx.user && ctx.user.id}, instance:${
         ctx.instance
       }`,
+      ACLGuard.name,
     );
 
     const permissions = await this.resolvePermissions(ctx);
@@ -35,10 +39,11 @@ export class ACLGuard implements CanActivate {
       `[AFTER] ACLGuard class:${classType.name}, handler:${handler.name}, user:${ctx.user && ctx.user.id}, instance:${
         ctx.instance
       }`,
+      ACLGuard.name,
     );
 
     ctx.req['permissions'] = permissions;
-    this.logger.debug(`Request passed with these permissions:[${permissions}]`);
+    this.logger.debug(`Request passed with these permissions:[${permissions}]`, ACLGuard.name);
     if (!permissions) {
       return false;
     }
@@ -74,9 +79,9 @@ export class ACLGuard implements CanActivate {
     const permissions = []; // permissions
     const acl = ctx.acl;
 
-    this.logger.debug(`RESOLVING ACL [${acl}] ...`);
+    this.logger.debug(`RESOLVING ACL [${acl}] ...`, ACLGuard.name);
     for (const role of acl) {
-      this.logger.debug(`START EXEC FOR ${role}`);
+      this.logger.debug(`START EXEC FOR ${role}`, ACLGuard.name);
 
       let name; // role name
       let allow = false;
@@ -105,7 +110,7 @@ export class ACLGuard implements CanActivate {
           permissions.push(name); // permission object
         }
       }
-      this.logger.debug(`END EXEC FOR ${role}, ALLOW:${allow}`);
+      this.logger.debug(`END EXEC FOR ${role}, ALLOW:${allow}`, ACLGuard.name);
     }
 
     return permissions.length > 0 ? permissions : null;
@@ -119,7 +124,7 @@ export class ACLGuard implements CanActivate {
 
   private async execArrayResolver(resolvers: Array<string | Resolver>, ctx: ACLContext): Promise<boolean> {
     let result;
-    this.logger.debug(`ALL [${resolvers}] HAVE TO PASS`);
+    this.logger.debug(`ALL [${resolvers}] HAVE TO PASS`, ACLGuard.name);
 
     const asyncEvery = async (arr, predicate) => {
       for (const e of arr) {
@@ -130,11 +135,11 @@ export class ACLGuard implements CanActivate {
     return await asyncEvery(resolvers, async element => {
       if (typeof element === 'string') {
         result = await this.execResolver(ctx, element);
-        this.logger.debug(`END EXEC FOR ${element}, ALLOW:${result}`);
+        this.logger.debug(`END EXEC FOR ${element}, ALLOW:${result}`, ACLGuard.name);
         return result;
       } else if (typeof element === 'function') {
         result = await element(ctx);
-        this.logger.debug(`END EXEC FOR ${element}, ALLOW:${result}`);
+        this.logger.debug(`END EXEC FOR ${element}, ALLOW:${result}`, ACLGuard.name);
         return result;
       }
     });
