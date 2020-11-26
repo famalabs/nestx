@@ -39,7 +39,7 @@ export class AuthService {
   ) {}
 
   async signup(data: SignupDto): Promise<User> {
-    const user = await this.usersService.findOne({ email: data.email });
+    const user = await this.usersService.findByEmail(data.email);
     if (user) {
       throw new BadRequestException(SIGNUP_ERRORS.USER_ALREADY_EXISTS);
     }
@@ -51,7 +51,7 @@ export class AuthService {
   }
 
   async validateUser(email: string, password: string): Promise<User> {
-    const user = await this.usersService.findOne({ email: email });
+    const user = await this.usersService.findByEmail(email);
     if (user) {
       //if user exists then validate it
       const valid = await this.usersService.validateUser(email, password);
@@ -84,7 +84,7 @@ export class AuthService {
     }
 
     //if not found, then search a user with ther thirdPartyUser.email
-    const user = await this.usersService.findOne({ email: thirdPartyUser.email });
+    const user = await this.usersService.findByEmail(thirdPartyUser.email);
     //if exists then throw a warning to the user
     if (user) {
       throw new UnauthorizedException(LOGIN_ERRORS.USER_NOT_LINKED);
@@ -190,17 +190,15 @@ export class AuthService {
       throw new NotFoundException(EMAIL_ERRORS.EMAIL_WRONG_VERIFY_CODE);
     }
 
-    const user = await this.usersService.findOne({
-      email: emailNotification.to,
-    });
+    const user = await this.usersService.findByEmail(emailNotification.to);
     user.isVerified = true;
-    const updatedUser = await this.usersService.update(user._id, user);
+    const updatedUser = await this.usersService.updateById(user._id, user);
     await this.emailNotificationService.deleteById(emailNotification._id);
     return !!updatedUser;
   }
 
   async sendForgottenPasswordEmail(email: string): Promise<boolean> {
-    const user = await this.usersService.findOne({ email: email });
+    const user = await this.usersService.findByEmail(email);
     if (!user) throw new NotFoundException(LOGIN_ERRORS.USER_NOT_FOUND);
 
     const emailNotification = await this.createEmailNotification(email, NOTIFICATION_CATEGORY.RESET_CREDENTIALS);

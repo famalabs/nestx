@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { ReturnModelType } from '@typegoose/typegoose';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { ReturnModelType, DocumentType } from '@typegoose/typegoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { BaseService } from '../../shared/base-service';
 import { EmailNotification } from '../../models';
+import { CrudService, Where } from '@famalabs/nestx-core';
 
 /***
  * This class send an email notification
@@ -12,11 +12,19 @@ import { EmailNotification } from '../../models';
  */
 
 Injectable();
-export class EmailNotificationService extends BaseService<EmailNotification> {
+export class EmailNotificationService extends CrudService<DocumentType<EmailNotification>> {
   constructor(
     @InjectModel(EmailNotification.name)
     private readonly emailNotificationModel: ReturnModelType<typeof EmailNotification>,
   ) {
     super(emailNotificationModel);
+  }
+
+  async findOneAndUpdate(conditions = {}, update = {}, options = {}): Promise<DocumentType<EmailNotification>> {
+    try {
+      return await this.model.findOneAndUpdate(conditions, update, options).exec();
+    } catch (e) {
+      throw new UnprocessableEntityException(e.message);
+    }
   }
 }

@@ -1,10 +1,10 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { ReturnModelType } from '@typegoose/typegoose';
+import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserIdentity } from './models/user-identity.model';
-import { BaseService } from './shared/base-service';
 import { IThirdPartyUser } from './interfaces/third-party-user.interface';
 import { IAuthLogger } from './interfaces';
+import { CrudService } from '@famalabs/nestx-core';
 
 /***
  * This class handle userCredentials
@@ -12,7 +12,7 @@ import { IAuthLogger } from './interfaces';
  */
 
 Injectable();
-export class UserIdentityService extends BaseService<UserIdentity> {
+export class UserIdentityService extends CrudService<DocumentType<UserIdentity>> {
   constructor(
     @InjectModel(UserIdentity.name)
     private readonly userIdentityModel: ReturnModelType<typeof UserIdentity>,

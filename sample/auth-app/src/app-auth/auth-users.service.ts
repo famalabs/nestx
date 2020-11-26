@@ -4,7 +4,7 @@ import { User } from '../users/user.model';
 import * as bcrypt from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
 import { IUsersService, LOGIN_ERRORS } from '@famalabs/nestx-auth';
-import { BaseService } from '../common/base-service';
+import { CrudService } from '@famalabs/nestx-core';
 
 /**
  * This class implements IUsersService from @famalabs/nestx-auth.
@@ -13,7 +13,7 @@ import { BaseService } from '../common/base-service';
  */
 
 @Injectable()
-export class AuthUsersService extends BaseService<DocumentType<User>> implements IUsersService {
+export class AuthUsersService extends CrudService<DocumentType<User>> implements IUsersService {
   constructor(
     @InjectModel(User.name)
     private readonly userModel: ReturnModelType<typeof User>,
@@ -22,15 +22,19 @@ export class AuthUsersService extends BaseService<DocumentType<User>> implements
   }
 
   async findOneToValidate(email: string): Promise<User> {
-    return this.userModel.findOne({ email: email }).select('+password').lean();
+    return await this.userModel.findOne({ email: email }).select('+password').lean();
   }
 
-  async validateUser(username: string, pass: string): Promise<User | null> {
-    const user: User = await this.findOneToValidate(username);
-    if (user && (await bcrypt.compare(pass, user.password))) {
+  async validateUser(email: string, password: string): Promise<User | null> {
+    const user: User = await this.findOneToValidate(email);
+    if (user && (await bcrypt.compare(password, user.password))) {
       return user;
     }
     return null;
+  }
+
+  async findByEmail(email: string): Promise<User> {
+    return await this.userModel.findOne({ email: email }).lean();
   }
 
   async setPassword(email: string, newPassword: string): Promise<boolean> {

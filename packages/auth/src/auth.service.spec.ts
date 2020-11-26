@@ -10,17 +10,14 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import {
-  IAccessToken,
   IAuthenticationModuleOptions,
   IEmailNotification,
-  IJwtPayload,
   INotificationSender,
-  IRefreshToken,
   IUsersService,
   NOTIFICATION_CATEGORY,
 } from './interfaces';
 import { Document } from 'mongoose';
-import { LoginDto, LoginResponseDto, ResetPasswordDto, SignupDto, User } from './dto';
+import { LoginDto, ResetPasswordDto, User } from './dto';
 import * as mocks from 'node-mocks-http';
 import { EmailNotification } from './models';
 import { UserIdentityService } from './user-identity.service';
@@ -113,46 +110,9 @@ const resetPwdExpToken: ResetPasswordDto = {
   token: mockOldForgottenPasswordDoc.token,
 };
 
-const userLocalLogin: LoginDto = {
-  email: userLocal.email,
-  password: userLocal.password,
-};
-const userLocalPayload: IJwtPayload = {
-  sub: userLocal._id,
-};
-
-const userLocalAccessToken: IAccessToken = {
-  accessToken: 'accessToken',
-  expiresIn: '900',
-  tokenType: 'Bearer',
-};
-const userLocalTokenContent = {
-  userId: userLocal._id,
-};
-const userLocalRefreshToken: IRefreshToken = {
-  value: 'refreshToken',
-  userId: userLocal._id,
-  expiresAt: date,
-};
-const loginResponse: LoginResponseDto = {
-  accessToken: 'accessToken',
-  expiresIn: '900',
-  refreshToken: 'refreshToken',
-  tokenType: 'Bearer',
-};
-const signup: SignupDto = {
-  email: userLocal.email,
-  password: userLocal.password,
-};
 const req = mocks.createRequest();
 req.res = mocks.createResponse();
 req.user = { id: userGoogle._id };
-const userGooglePayload: IJwtPayload = {
-  sub: userGoogle._id,
-};
-const userGoogleTokenContent = {
-  userId: userGoogle._id,
-};
 
 @Injectable()
 export class MockSender implements INotificationSender {
@@ -206,8 +166,8 @@ describe('AuthService', () => {
           useValue: {
             validateUser: jest.fn(),
             create: jest.fn(),
-            findOne: jest.fn(),
-            update: jest.fn(),
+            findByEmail: jest.fn(),
+            updateById: jest.fn(),
             setPassword: jest.fn().mockResolvedValue(true),
           },
         },
@@ -283,17 +243,15 @@ describe('AuthService', () => {
 
   describe('sendForgottenPasswordEmail', () => {
     it('should not send forgotten password email to not registered user', async () => {
-      const spy = jest.spyOn(usersService, 'findOne').mockResolvedValue(null);
-      await expect(() => service.sendForgottenPasswordEmail(userLocal.email)).rejects.toThrow(
-        NotFoundException,
-      );
+      const spy = jest.spyOn(usersService, 'findByEmail').mockResolvedValue(null);
+      await expect(() => service.sendForgottenPasswordEmail(userLocal.email)).rejects.toThrow(NotFoundException);
       await expect(() => service.sendForgottenPasswordEmail(userLocal.email)).rejects.toThrow(
         LOGIN_ERRORS.USER_NOT_FOUND,
       );
-      expect(spy).toHaveBeenCalledWith({ email: userLocal.email });
+      expect(spy).toHaveBeenCalledWith(userLocal.email);
     });
     it('should not send forgotten password email when error during send', async () => {
-      const spyOnUsersService = jest.spyOn(usersService, 'findOne').mockResolvedValue(userLocal as any);
+      const spyOnUsersService = jest.spyOn(usersService, 'findByEmail').mockResolvedValue(userLocal as any);
       const spyOnEmailNotificationFind = jest
         .spyOn(emailNotificationService, 'findOne')
         .mockResolvedValue(mockOldForgottenPasswordDoc as any);
@@ -305,24 +263,22 @@ describe('AuthService', () => {
       await expect(() => service.sendForgottenPasswordEmail(userLocal.email)).rejects.toThrow(
         EMAIL_ERRORS.EMAIL_NOT_SENT,
       );
-      expect(spyOnUsersService).toHaveBeenCalledWith({ email: userLocal.email });
+      expect(spyOnUsersService).toHaveBeenCalledWith(userLocal.email);
       expect(spyOnEmailNotificationFind).toHaveBeenCalledWith({
         to: userLocal.email,
         category: NOTIFICATION_CATEGORY.RESET_CREDENTIALS,
       });
     });
     it('should not send forgotten password email when recently sent', async () => {
-      const spyOnUsersService = jest.spyOn(usersService, 'findOne').mockResolvedValue(userLocal as any);
+      const spyOnUsersService = jest.spyOn(usersService, 'findByEmail').mockResolvedValue(userLocal as any);
       const spyOnEmailNotificationFind = jest
         .spyOn(emailNotificationService, 'findOne')
         .mockResolvedValue(mockForgottenPasswordDoc as any);
-      await expect(() => service.sendForgottenPasswordEmail(userLocal.email)).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(() => service.sendForgottenPasswordEmail(userLocal.email)).rejects.toThrow(ConflictException);
       await expect(() => service.sendForgottenPasswordEmail(userLocal.email)).rejects.toThrow(
         EMAIL_ERRORS.EMAIL_SENT_RECENTLY,
       );
-      expect(spyOnUsersService).toHaveBeenCalledWith({ email: userLocal.email });
+      expect(spyOnUsersService).toHaveBeenCalledWith(userLocal.email);
       expect(spyOnEmailNotificationFind).toHaveBeenCalledWith({
         to: userLocal.email,
         category: NOTIFICATION_CATEGORY.RESET_CREDENTIALS,
@@ -334,9 +290,7 @@ describe('AuthService', () => {
     it('should not send verification email to not registered user', async () => {
       const spy = jest.spyOn(emailNotificationService, 'findOne').mockResolvedValue(null);
       await expect(() => service.sendVerificationEmail(userLocal.email)).rejects.toThrow(NotFoundException);
-      await expect(() => service.sendVerificationEmail(userLocal.email)).rejects.toThrow(
-        EMAIL_ERRORS.USER_NOT_FOUND,
-      );
+      await expect(() => service.sendVerificationEmail(userLocal.email)).rejects.toThrow(EMAIL_ERRORS.USER_NOT_FOUND);
       expect(spy).toHaveBeenCalledWith({
         to: userLocal.email,
         category: NOTIFICATION_CATEGORY.ACCOUNT_VERIFICATION,
@@ -351,12 +305,8 @@ describe('AuthService', () => {
         .mockResolvedValue(mockVerificationEmailDoc as any);
       const spyOnEmailServiceSend = jest.spyOn(sender, 'notify').mockResolvedValue(false);
 
-      await expect(() => service.sendVerificationEmail(userLocal.email)).rejects.toThrow(
-        InternalServerErrorException,
-      );
-      await expect(() => service.sendVerificationEmail(userLocal.email)).rejects.toThrow(
-        EMAIL_ERRORS.EMAIL_NOT_SENT,
-      );
+      await expect(() => service.sendVerificationEmail(userLocal.email)).rejects.toThrow(InternalServerErrorException);
+      await expect(() => service.sendVerificationEmail(userLocal.email)).rejects.toThrow(EMAIL_ERRORS.EMAIL_NOT_SENT);
       expect(spyOnEmailServiceFind).toHaveBeenCalledWith({
         to: userLocal.email,
         category: NOTIFICATION_CATEGORY.ACCOUNT_VERIFICATION,
@@ -394,9 +344,7 @@ describe('AuthService', () => {
     it('should not resend verification email to not previously registered user', async () => {
       const spyOnEmailServiceFind = jest.spyOn(emailNotificationService, 'findOne').mockResolvedValue(null);
       await expect(() => service.resendVerificationEmail(userLocal.email)).rejects.toThrow(NotFoundException);
-      await expect(() => service.resendVerificationEmail(userLocal.email)).rejects.toThrow(
-        EMAIL_ERRORS.USER_NOT_FOUND,
-      );
+      await expect(() => service.resendVerificationEmail(userLocal.email)).rejects.toThrow(EMAIL_ERRORS.USER_NOT_FOUND);
       expect(spyOnEmailServiceFind).toHaveBeenCalledWith({
         to: userLocal.email,
         category: NOTIFICATION_CATEGORY.ACCOUNT_VERIFICATION,
@@ -410,9 +358,7 @@ describe('AuthService', () => {
       await expect(() => service.resendVerificationEmail(userLocal.email)).rejects.toThrow(
         InternalServerErrorException,
       );
-      await expect(() => service.resendVerificationEmail(userLocal.email)).rejects.toThrow(
-        EMAIL_ERRORS.EMAIL_NOT_SENT,
-      );
+      await expect(() => service.resendVerificationEmail(userLocal.email)).rejects.toThrow(EMAIL_ERRORS.EMAIL_NOT_SENT);
       expect(spyOnEmailServiceFind).toHaveBeenCalledWith({
         to: userLocal.email,
         category: NOTIFICATION_CATEGORY.ACCOUNT_VERIFICATION,
@@ -437,7 +383,7 @@ describe('AuthService', () => {
         id: '1234',
       };
 
-      jest.spyOn(usersService, 'findOne').mockResolvedValue(user as any);
+      jest.spyOn(usersService, 'findByEmail').mockResolvedValue(user as any);
       const onSpyUsersService = jest.spyOn(usersService, 'validateUser').mockResolvedValue(null);
       await expect(() => service.validateUser(credentials.email, credentials.password)).rejects.toThrow(
         UnauthorizedException,

@@ -1,12 +1,11 @@
-import { IBaseModel } from '../models';
+import { IDType } from '@famalabs/nestx-core';
 
-export interface IUser extends IBaseModel {
+export interface IUser {
   email: string;
   password: string;
   roles?: string[];
   isVerified: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  id: string;
-  _id?: string;
+  _id: IDType;
 }

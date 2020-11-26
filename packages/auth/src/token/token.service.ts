@@ -7,19 +7,19 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { randomBytes } from 'crypto';
-import { ReturnModelType } from '@typegoose/typegoose';
+import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import { RefreshToken } from '../models/refresh-token.model';
 import { JwtService } from '@nestjs/jwt';
 import { AUTH_OPTIONS, JWT_ERRORS, REFRESH_TOKEN_ERRORS } from '../constants';
 import { IJwtPayload } from '../interfaces/jwt-payload.interface';
 import { IAccessToken, ILoginResponse } from './../interfaces/login-response.interface';
-import { BaseService } from '../shared/base-service';
 import { InjectModel } from '@nestjs/mongoose';
 import { IAuthenticationModuleOptions, IRefreshToken } from '../interfaces';
 import { v4 as uuidv4 } from 'uuid';
+import { CrudService } from '@famalabs/nestx-core';
 
 @Injectable()
-export class TokenService extends BaseService<RefreshToken> {
+export class TokenService extends CrudService<DocumentType<RefreshToken>> {
   private refreshTokenTtl: number;
   constructor(
     @InjectModel(RefreshToken.name)
@@ -65,7 +65,7 @@ export class TokenService extends BaseService<RefreshToken> {
     await this.revokeToken(oldAccessToken, oldPayload.sub.userId);
 
     // Remove old refresh token and generate a new one
-    await this.delete(token._id);
+    await this.deleteById(token._id);
     const userId = oldPayload.sub.userId;
     const refreshTMP = await this.createRefreshToken(userId);
     loginResponse.refreshToken = refreshTMP.value;
@@ -102,9 +102,7 @@ export class TokenService extends BaseService<RefreshToken> {
   }
 
   async deleteRefreshToken(value: string) {
-    console.log(value);
     const doc = await this.findOne({ value: value });
-    console.log(doc);
     await this.delete({ value: value });
   }
 

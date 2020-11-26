@@ -27,8 +27,7 @@ import {
   NOTIFICATION_CATEGORY,
   THIRD_PARTY_PROVIDER,
 } from './interfaces';
-import { BaseService } from './shared/base-service';
-import { BaseModel, EmailNotification, RefreshToken, UserIdentity } from './models';
+import { EmailNotification, RefreshToken, UserIdentity } from './models';
 import { mongoose, prop, buildSchema } from '@typegoose/typegoose';
 import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import { AUTH_OPTIONS, JWT_ERRORS, LOGIN_ERRORS, REFRESH_TOKEN_ERRORS, SIGNUP_ERRORS } from './constants';
@@ -48,6 +47,7 @@ import { LocalStrategy, JwtStrategy } from './strategies';
 import { ExtractJwt } from 'passport-jwt';
 import { ACLManager, ACL_MANAGER } from './acl';
 import { EmptyLogger } from './logger/empty-logger';
+import { BaseModel, CrudService } from '@famalabs/nestx-core';
 
 const mongoURI = 'mongodb://localhost:27017/test';
 const jwtModuleOptions: JwtModuleOptions = {
@@ -139,7 +139,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 }
 
 @Injectable()
-export class MockUsersService extends BaseService<DocumentType<MockUser>> implements IUsersService {
+export class MockUsersService extends CrudService<DocumentType<MockUser>> implements IUsersService {
   constructor(
     @InjectModel(MockUser.name)
     private readonly userModel: ReturnModelType<typeof MockUser>,
@@ -149,6 +149,9 @@ export class MockUsersService extends BaseService<DocumentType<MockUser>> implem
   async findOneToValidate(email: string): Promise<MockUser> {
     return await this.userModel.findOne({ email: email }).select('+password').lean();
   }
+  async findByEmail(email: string): Promise<MockUser> {
+    return await this.userModel.findOne({ email: email }).lean();
+  }
   async setPassword(email: string, newPassword: string): Promise<boolean> {
     var userFromDb = await this.findOne({ email: email });
     if (!userFromDb) throw new NotFoundException(LOGIN_ERRORS.USER_NOT_FOUND);
@@ -156,9 +159,9 @@ export class MockUsersService extends BaseService<DocumentType<MockUser>> implem
     await userFromDb.save();
     return true;
   }
-  async validateUser(username: string, pass: string): Promise<MockUser> {
-    const user = await this.findOneToValidate(username);
-    if (user && user.email === username && user.password === pass) {
+  async validateUser(email: string, password: string): Promise<MockUser> {
+    const user = await this.findOneToValidate(email);
+    if (user && user.email === email && user.password === password) {
       return user;
     }
     return null;
@@ -303,11 +306,13 @@ describe('Auth Module integration', () => {
   });
   describe('/auth/login (POST)', () => {
     it('should login user', async done => {
-      const user = new MockUser();
-      user.email = 'user@email.com';
-      user.password = 'myPassword';
-      user.isVerified = true;
-      user.roles = [];
+      const user = {
+        email: 'user@email.com',
+        password: 'myPassword',
+        isVerified: true,
+        roles: [],
+      };
+
       await usersService.create(user);
       const credentials: LoginDto = { email: user.email, password: user.password };
 
@@ -322,11 +327,12 @@ describe('Auth Module integration', () => {
       done();
     });
     it('should not login not registered user', async done => {
-      const user = new MockUser();
-      user.email = 'user@email.com';
-      user.password = 'myPassword';
-      user.isVerified = true;
-      user.roles = [];
+      const user = {
+        email: 'user@email.com',
+        password: 'myPassword',
+        isVerified: true,
+        roles: [],
+      };
       await usersService.create(user);
       const credentials: LoginDto = { email: 'notRegistered@email.com', password: user.password };
 
@@ -336,11 +342,12 @@ describe('Auth Module integration', () => {
       done();
     });
     it('should warning user to login with third party identity', async done => {
-      const user = new MockUser();
-      user.email = 'user@anotherEmail.com';
-      user.password = 'myPassword';
-      user.isVerified = true;
-      user.roles = [];
+      const user = {
+        email: 'user@anotherEmail.com',
+        password: 'myPassword',
+        isVerified: true,
+        roles: [],
+      };
       const registeredUser = await usersService.create(user);
 
       const userIdentity = {
@@ -362,11 +369,12 @@ describe('Auth Module integration', () => {
   });
   describe('3rd-party login', () => {
     it('should login a user with identity previously linked', async done => {
-      const user = new MockUser();
-      user.email = 'user@email.com';
-      user.password = 'myPassword';
-      user.isVerified = true;
-      user.roles = [];
+      const user = {
+        email: 'user@email.com',
+        password: 'myPassword',
+        isVerified: true,
+        roles: [],
+      };
       const registeredUser = await usersService.create(user);
 
       const userIdentity = {
@@ -392,11 +400,12 @@ describe('Auth Module integration', () => {
       done();
     });
     it('should warning a user that no identity exists but there is an account with the provided email', async done => {
-      const user = new MockUser();
-      user.email = 'user@gmail.com';
-      user.password = 'myPassword';
-      user.isVerified = true;
-      user.roles = [];
+      const user = {
+        email: 'user@email.com',
+        password: 'myPassword',
+        isVerified: true,
+        roles: [],
+      };
       const registeredUser = await usersService.create(user);
 
       const userIdentity = {
@@ -415,10 +424,12 @@ describe('Auth Module integration', () => {
       done();
     });
     it('should register user and create identity if identity and user not exist', async done => {
-      const user = new MockUser();
-      user.email = 'user@gmail.com';
-      user.isVerified = true;
-      user.roles = [];
+      const user = {
+        email: 'user@gmail.com',
+        password: 'myPassword',
+        isVerified: true,
+        roles: [],
+      };
 
       const userIdentity = {
         externalId: 'googleId',
@@ -447,17 +458,18 @@ describe('Auth Module integration', () => {
       const res = await request(server).post('/auth/signup').send(data).set('Accept', 'application/json');
       expect(res.status).toBe(201);
 
-      const savedUser = await usersService.findOne({ email: data.email });
+      const savedUser = await usersService.findByEmail(data.email);
       expect(savedUser).not.toBeNull;
       done();
     });
 
     it('should not signup duplicate user', async done => {
-      const user = new MockUser();
-      user.email = 'user@email.com';
-      user.password = 'myPassword';
-      user.isVerified = true;
-      user.roles = [];
+      const user = {
+        email: 'user@email.com',
+        password: 'myPassword',
+        isVerified: true,
+        roles: [],
+      };
       await usersService.create(user);
 
       const data: SignupDto = { email: user.email, password: 'myPassword' };
@@ -471,11 +483,12 @@ describe('Auth Module integration', () => {
   describe('access to protected route by JwtGuard', () => {
     it('should give the access with valid accessToken', async done => {
       //create and login a user
-      const user = new MockUser();
-      user.email = 'user@email.com';
-      user.password = 'myPassword';
-      user.isVerified = true;
-      user.roles = [];
+      const user = {
+        email: 'user@email.com',
+        password: 'myPassword',
+        isVerified: true,
+        roles: [],
+      };
       await usersService.create(user);
       const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
@@ -500,11 +513,12 @@ describe('Auth Module integration', () => {
     });
     it('should not give the access with blacklisted accessToken', async done => {
       //create and login a user
-      const user = new MockUser();
-      user.email = 'user@email.com';
-      user.password = 'myPassword';
-      user.isVerified = true;
-      user.roles = [];
+      const user = {
+        email: 'user@email.com',
+        password: 'myPassword',
+        isVerified: true,
+        roles: [],
+      };
       const registeredUser = await usersService.create(user);
       const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
@@ -526,11 +540,12 @@ describe('Auth Module integration', () => {
   describe('/token (GET)', () => {
     it('should give new access and refresh token with a valid refresh token and old accessToken', async done => {
       //create and login a user
-      const user = new MockUser();
-      user.email = 'user@email.com';
-      user.password = 'myPassword';
-      user.isVerified = true;
-      user.roles = [];
+      const user = {
+        email: 'user@email.com',
+        password: 'myPassword',
+        isVerified: true,
+        roles: [],
+      };
       await usersService.create(user);
       const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
@@ -561,11 +576,12 @@ describe('Auth Module integration', () => {
     });
     it('should not give new access and refresh token with a non existent refresh token', async done => {
       //create and login a user
-      const user = new MockUser();
-      user.email = 'user@email.com';
-      user.password = 'myPassword';
-      user.isVerified = true;
-      user.roles = [];
+      const user = {
+        email: 'user@email.com',
+        password: 'myPassword',
+        isVerified: true,
+        roles: [],
+      };
       await usersService.create(user);
       const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
@@ -585,11 +601,12 @@ describe('Auth Module integration', () => {
     });
     it('should not give new access and refresh token with a blacklisted oldAccessToken', async done => {
       //create and login a user
-      const user = new MockUser();
-      user.email = 'user@email.com';
-      user.password = 'myPassword';
-      user.isVerified = true;
-      user.roles = [];
+      const user = {
+        email: 'user@email.com',
+        password: 'myPassword',
+        isVerified: true,
+        roles: [],
+      };
       const registeredUser = await usersService.create(user);
       const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
@@ -612,11 +629,12 @@ describe('Auth Module integration', () => {
     });
     it('should not give new access and refresh token with an invalid oldAccessToken', async done => {
       //create and login a user
-      const user = new MockUser();
-      user.email = 'user@email.com';
-      user.password = 'myPassword';
-      user.isVerified = true;
-      user.roles = [];
+      const user = {
+        email: 'user@email.com',
+        password: 'myPassword',
+        isVerified: true,
+        roles: [],
+      };
       await usersService.create(user);
       const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
@@ -637,11 +655,12 @@ describe('Auth Module integration', () => {
     });
     it('should not give new access and refresh token if refreshToken owner is different from the accessToken owner', async done => {
       //create and login a user
-      const user = new MockUser();
-      user.email = 'user@email.com';
-      user.password = 'myPassword';
-      user.isVerified = true;
-      user.roles = [];
+      const user = {
+        email: 'user@email.com',
+        password: 'myPassword',
+        isVerified: true,
+        roles: [],
+      };
       const registeredUser = await usersService.create(user);
       const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
@@ -651,11 +670,13 @@ describe('Auth Module integration', () => {
       const refreshToken = loginResponse.refreshToken;
 
       //create and login a malicious user
-      const maliciousUser = new MockUser();
-      maliciousUser.email = 'maliciousUser@email.com';
-      maliciousUser.password = 'myPassword';
-      maliciousUser.isVerified = true;
-      maliciousUser.roles = [];
+      let maliciousUser = {
+        email: 'maliciousUser@email.com',
+        password: 'myPassword',
+        isVerified: true,
+        roles: [],
+      };
+
       const maliciousRegisteredUser = await usersService.create(maliciousUser);
       const maliciousCredentials: LoginDto = {
         email: maliciousUser.email,
@@ -687,11 +708,12 @@ describe('Auth Module integration', () => {
   describe('/logout (POST)', () => {
     it('should logout user from one device', async done => {
       //create and login a user
-      const user = new MockUser();
-      user.email = 'user@email.com';
-      user.password = 'myPassword';
-      user.isVerified = true;
-      user.roles = [];
+      const user = {
+        email: 'user@email.com',
+        password: 'myPassword',
+        isVerified: true,
+        roles: [],
+      };
       const registeredUser = await usersService.create(user);
       const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
@@ -714,11 +736,12 @@ describe('Auth Module integration', () => {
 
     it('should logout user from all devices', async done => {
       //create and login a user
-      const user = new MockUser();
-      user.email = 'user@email.com';
-      user.password = 'myPassword';
-      user.isVerified = true;
-      user.roles = [];
+      const user = {
+        email: 'user@email.com',
+        password: 'myPassword',
+        isVerified: true,
+        roles: [],
+      };
       const registeredUser = await usersService.create(user);
       const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
@@ -736,7 +759,7 @@ describe('Auth Module integration', () => {
         .query({ refresh_token: refreshToken, from_all: 'true' })
         .set('Authorization', 'Bearer ' + accessToken);
 
-      const check = await tokenService.findAll({ userId: registeredUser._id });
+      const check = await tokenService.find({ where: { userId: registeredUser._id } });
       expect(check).toStrictEqual([]);
       expect(await tokenService.isBlackListed(accessToken)).toBeTruthy();
       done();
@@ -744,11 +767,12 @@ describe('Auth Module integration', () => {
 
     it('should not logout user with invalid from_all value', async done => {
       //create and login a user
-      const user = new MockUser();
-      user.email = 'user@email.com';
-      user.password = 'myPassword';
-      user.isVerified = true;
-      user.roles = [];
+      const user = {
+        email: 'user@email.com',
+        password: 'myPassword',
+        isVerified: true,
+        roles: [],
+      };
       const registeredUser = await usersService.create(user);
       const credentials: LoginDto = { email: user.email, password: user.password };
       const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
@@ -773,7 +797,7 @@ describe('Auth Module integration', () => {
       jest.spyOn(sender, 'notify').mockResolvedValue(Promise.resolve(true));
       const data: SignupDto = { email: 'user@email.com', password: 'myPassword' };
       await request(server).post('/auth/signup').send(data).set('Accept', 'application/json');
-      const savedUser = await usersService.findOne({ email: data.email });
+      const savedUser = await usersService.findByEmail(data.email);
       expect(savedUser).not.toBeNull;
 
       const notification = await emailNotificationService.findOne({ to: savedUser.email });
@@ -784,7 +808,7 @@ describe('Auth Module integration', () => {
         value: notification.token,
       };
       const res = await request(server).post(`/auth/email/verify`).send(notificationToken);
-      const updatedUser = await usersService.findOne({ email: savedUser.email });
+      const updatedUser = await usersService.findByEmail(savedUser.email);
       expect(res).toBeTruthy();
       expect(updatedUser.isVerified).toBeTruthy();
       done();
@@ -793,11 +817,12 @@ describe('Auth Module integration', () => {
   describe('forgot & reset password', () => {
     it('should create an emailNotification for the user and reset password', async done => {
       jest.spyOn(sender, 'notify').mockResolvedValue(Promise.resolve(true));
-      const user = new MockUser();
-      user.email = 'user@email.com';
-      user.password = 'myPassword';
-      user.isVerified = true;
-      user.roles = [];
+      const user = {
+        email: 'user@email.com',
+        password: 'myPassword',
+        isVerified: true,
+        roles: [],
+      };
       const registeredUser = await usersService.create(user);
       const data: EmailDto = {
         value: registeredUser.email,
@@ -811,7 +836,7 @@ describe('Auth Module integration', () => {
 
       const credentials: ResetPasswordDto = { token: notification.token, newPassword: 'myNewPassword' };
       res = await request(server).post(`/auth/email/reset-password`).send(credentials);
-      const updatedUser = await usersService.findOne({ email: registeredUser.email });
+      const updatedUser = await usersService.findByEmail(registeredUser.email);
       expect(res).toBeTruthy;
       expect(updatedUser._id).toEqual(registeredUser._id);
       expect(updatedUser.password).toEqual(credentials.newPassword);
