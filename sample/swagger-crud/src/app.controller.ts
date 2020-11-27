@@ -48,8 +48,6 @@ export class AppController {
     @Query(
       new ValidationPipe({
         transform: true,
-        validateCustomDecorators: true,
-        transformOptions: { enableImplicitConversion: true },
         expectedType: AppFilter,
       }),
     )
