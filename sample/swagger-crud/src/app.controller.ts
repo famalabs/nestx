@@ -10,7 +10,6 @@ import {
 import { AppService } from './app.service';
 import { ApiExtraModels, ApiQuery } from '@nestjs/swagger';
 import {
-  ref,
   ApiQuery as CustomApiQuery,
   ListFilter,
   CountFilter,
