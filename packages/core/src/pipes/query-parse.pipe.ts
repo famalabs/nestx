@@ -1,5 +1,5 @@
 import { ArgumentMetadata, PipeTransform } from '@nestjs/common';
-import { Filter, Where } from '../model/dto';
+// import { Filter, Where } from '../model';
 import { DECORATORS } from '@nestjs/swagger/dist/constants';
 
 export class QueryParsePipe implements PipeTransform {

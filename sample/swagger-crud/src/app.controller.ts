@@ -2,17 +2,24 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Query,
   ValidationPipe,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ApiExtraModels, ApiQuery } from '@nestjs/swagger';
-import { ref, ApiQuery as CustomApiQuery, Filter } from '@famalabs/nestx-core';
+import {
+  ref,
+  ApiQuery as CustomApiQuery,
+  Filter,
+  Where,
+} from '@famalabs/nestx-core';
 import { AppFilter } from './app-filter.dto';
 import { AppQuery } from './app-query.dto';
+import { ListFilter, CountFilter, InstanceFilter } from '@famalabs/nestx-core';
 
-@ApiExtraModels(AppFilter, Filter)
+// @ApiExtraModels(Where)
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
@@ -36,53 +43,32 @@ export class AppController {
   }
 
   @Get('test2')
-  @ApiQuery({ style: 'deepObject', explode: true, schema: ref(AppFilter) })
-  // @ApiQuery({style: 'deepObject', explode: true, name: 'where', schema: ref(AppQuery)})
-  test2(@Query() filter: AppFilter) {
-    console.log(filter);
-    return filter;
-  }
-
-  @Get('test2a')
   @CustomApiQuery({ type: AppFilter })
-  test2a(@Query() filter: AppFilter) {
-    console.log(filter);
-    return filter;
-  }
-
-  @Get('test2b')
-  @CustomApiQuery({ type: AppFilter })
-  test2b(
-    @Query(new ValidationPipe({ transform: true, expectedType: AppFilter }))
-    filter,
-  ) {
-    // test2b(@Query() filter) {
-    console.log(filter);
-    return filter;
-  }
-
-  @Get('test2c')
-  test2c(@Query() filter: Filter<AppQuery>) {
-    console.log(filter);
-    return filter;
-  }
-
-  @Get('test2d')
-  @CustomApiQuery({ type: Filter })
-  test2d(
-    @Query(new ValidationPipe({ transform: true, expectedType: Filter }))
+  test2(
+    @Query(
+      new ValidationPipe({
+        transform: true,
+        validateCustomDecorators: true,
+        transformOptions: { enableImplicitConversion: true },
+        expectedType: AppFilter,
+      }),
+    )
     filter,
   ) {
     console.log(filter);
     return filter;
   }
 
-  @Get('test3')
-  @ApiQuery({
-    name: 'where',
-    content: { 'application/json': { schema: ref(AppQuery) } },
-  })
-  test3(@Query() filter: AppFilter) {
+  @Get('test2/count')
+  @CustomApiQuery({ name: 'where', type: AppQuery, required: false })
+  count(@Query('where') where) {
+    console.log(where);
+    return where;
+  }
+
+  @Get('test2/:id')
+  @CustomApiQuery({ type: InstanceFilter })
+  async findById(@Param('id') id: string, @Query() filter) {
     console.log(filter);
     return filter;
   }

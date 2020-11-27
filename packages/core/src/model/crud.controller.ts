@@ -1,12 +1,12 @@
 import { BaseModel } from './base.model';
-import { Filter, ItemFilter, Where } from './dto';
+import { Filter, FilterQuery, ItemFilter } from './types';
 
 export interface ICrudController<T extends BaseModel> {
   create(data: T): Promise<T>;
 
   find(filter: Filter<T>): Promise<T[]>;
 
-  count(where: Where<T>): Promise<number>;
+  count(where: FilterQuery<T>): Promise<number>;
 
   findById(id: T['id'], filter: ItemFilter<T>): Promise<T>;
 

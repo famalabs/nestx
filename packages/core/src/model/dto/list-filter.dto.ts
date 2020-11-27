@@ -1,14 +1,14 @@
 import { IsInt, IsOptional, IsString, Min } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
-import { Where } from './where.dto';
+import { plainToClass, Transform, Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Where } from './where.dto';
+import { ParseString } from '../../decorators';
 
-export class Filter<T> {
+export class ListFilter {
   @ApiPropertyOptional()
+  @ParseString(() => Where)
   @IsOptional()
-  @Type(() => Where)
-  @Transform(value => new Where(value))
-  where?: Where<T>;
+  where?: Where;
 
   @ApiPropertyOptional()
   @IsInt()

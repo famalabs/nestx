@@ -1,27 +1,27 @@
 import { Model, Document } from 'mongoose';
 import { NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { Filter, ItemFilter, Where } from './dto';
+import { Filter, ItemFilter, FilterQuery } from './types';
 
 export type IDType = any | string | number;
 
 export interface ICrudService<T> {
   find(filter: Filter<T>): Promise<T[]>;
 
-  findOne(where: Where<T>): Promise<T>;
+  findOne(where: FilterQuery<T>, filter?: ItemFilter<T>): Promise<T>;
 
-  findById(id: IDType): Promise<T>;
+  findById(id: IDType, filter?: ItemFilter<T>): Promise<T>;
 
-  count(where: Where<T>): Promise<number>;
+  count(where: FilterQuery<T>, filter?: ItemFilter<T>): Promise<number>;
 
   create(data: any): Promise<T>;
 
-  update(where: Where<T>, data: any): Promise<T[]>;
+  update(where: FilterQuery<T>, data: any): Promise<T[]>;
 
   updateById(id: IDType, data: any): Promise<T>;
 
   replaceById(id: IDType, data: any): Promise<T>;
 
-  delete(where: Where<T>): Promise<number>;
+  delete(where: FilterQuery<T>): Promise<number>;
 
   deleteById(id: IDType): Promise<boolean>;
 }
@@ -36,7 +36,7 @@ export class CrudService<T extends Document> implements ICrudService<T> {
     return op.exec();
   }
 
-  async findOne(where: Where<T>, filter?: ItemFilter<T>): Promise<T> {
+  async findOne(where: FilterQuery<T>, filter?: ItemFilter<T>): Promise<T> {
     console.log('Crud', this.constructor.name, 'findOne', where, filter);
     let op = this.model.findOne(where);
     op = applyFilter(op, filter);
@@ -60,7 +60,7 @@ export class CrudService<T extends Document> implements ICrudService<T> {
       });
   }
 
-  async count(where: Where<T>): Promise<number> {
+  async count(where?: FilterQuery<T>): Promise<number> {
     console.log('Crud', this.constructor.name, 'count', where);
     return this.model.countDocuments(where).exec();
   }
@@ -73,7 +73,7 @@ export class CrudService<T extends Document> implements ICrudService<T> {
     });
   }
 
-  async update(where: Where<T>, data): Promise<T[]> {
+  async update(where: FilterQuery<T>, data): Promise<T[]> {
     console.log('Crud', this.constructor.name, 'update', where, data);
     await this.model.updateMany(where, data).exec();
     return this.model.find().where(where).exec();
@@ -100,7 +100,7 @@ export class CrudService<T extends Document> implements ICrudService<T> {
       });
   }
 
-  async delete(where: Where<T>): Promise<number> {
+  async delete(where: FilterQuery<T>): Promise<number> {
     console.log('Crud', this.constructor.name, 'delete', where);
     return this.model
       .remove(where)
