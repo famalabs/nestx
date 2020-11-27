@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.11](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.10...v0.1.0-alpha.11) (2020-11-27)
+
+
+### Bug Fixes
+
+* decorators ([239aac2](https://github.com/famalabs/nestx/commit/239aac2baea57a991374a1e49eebcc013823c317))
+* nothing ([713e917](https://github.com/famalabs/nestx/commit/713e91783e482ca8ec3952633887ca290d4333bd))
+* please build ([8c55d39](https://github.com/famalabs/nestx/commit/8c55d3974ea3463529597cf6684534ea04ce7317))
+
+
+
+
+
 # [0.1.0-alpha.10](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.9...v0.1.0-alpha.10) (2020-11-27)
 
 
