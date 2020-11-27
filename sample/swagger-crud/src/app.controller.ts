@@ -12,12 +12,11 @@ import { ApiExtraModels, ApiQuery } from '@nestjs/swagger';
 import {
   ref,
   ApiQuery as CustomApiQuery,
-  Filter,
-  Where,
+  ListFilter,
+  CountFilter,
+  InstanceFilter,
 } from '@famalabs/nestx-core';
-import { AppFilter } from './app-filter.dto';
-import { AppQuery } from './app-query.dto';
-import { ListFilter, CountFilter, InstanceFilter } from '@famalabs/nestx-core';
+import { AppFilter, AppQuery } from './dto';
 
 // @ApiExtraModels(Where)
 @Controller()
