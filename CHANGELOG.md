@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.13](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.12...v0.1.0-alpha.13) (2020-11-27)
+
+
+### Bug Fixes
+
+* **core:** api query constructor ([8e4860c](https://github.com/famalabs/nestx/commit/8e4860cb37b1e0f04a8ade2093d9a2f945996ca3))
+
+
+
+
+
 # [0.1.0-alpha.12](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.11...v0.1.0-alpha.12) (2020-11-27)
 
 
