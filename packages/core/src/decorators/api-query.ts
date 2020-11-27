@@ -3,7 +3,7 @@ import { ApiQuery as SrcApiQuery, ApiQueryOptions as BaseApiQueryOptions } from 
 import { DECORATORS } from '@nestjs/swagger/dist/constants';
 import { ref } from '../model';
 
-declare type ApiQueryOptions = BaseApiQueryOptions & { name?: string; type: new () => any };
+declare type ApiQueryOptions = BaseApiQueryOptions & { name?: string; type: Function };
 
 export function ApiQuery(options: ApiQueryOptions): MethodDecorator {
   const { name, type, ...opts } = options;
