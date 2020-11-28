@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.17](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.16...v0.1.0-alpha.17) (2020-11-28)
+
+
+### Bug Fixes
+
+* api query property not defined avoid exception ([b3d5253](https://github.com/famalabs/nestx/commit/b3d5253728fa5129b44f3e8d6a4e838d742f1468))
+* json transform decorators ([4361fa7](https://github.com/famalabs/nestx/commit/4361fa72ac31d06a63831227e908243c3e6fb30e))
+
+
+
+
+
 # [0.1.0-alpha.16](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.15...v0.1.0-alpha.16) (2020-11-28)
 
 

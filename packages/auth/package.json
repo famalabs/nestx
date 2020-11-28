@@ -1,6 +1,6 @@
 {
   "name": "@famalabs/nestx-auth",
-  "version": "0.1.0-alpha.16",
+  "version": "0.1.0-alpha.17",
   "license": "MIT",
   "description": "Fama Labs - Nestjs extension libraries collection (@auth) ",
   "author": " Fama Labs <info@famalabs.com>",
@@ -26,7 +26,7 @@
     "swagger-ui-express": "^4.1.5"
   },
   "dependencies": {
-    "@famalabs/nestx-core": "^0.1.0-alpha.16",
+    "@famalabs/nestx-core": "^0.1.0-alpha.17",
     "@nestjs/jwt": "^7.2.0",
     "@nestjs/passport": "^7.1.5",
     "nodemailer": "^6.4.16",
