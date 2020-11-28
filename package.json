@@ -112,6 +112,9 @@
     "testEnvironment": "node",
     "roots": [
       "<rootDir>/packages/"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/packages/dist/"
     ]
   }
 }
