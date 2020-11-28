@@ -28,6 +28,7 @@ export class AuthController {
   async login(@Body() credentials: LoginDto): Promise<LoginResponseDto> {
     let test = 4;
     console.log(test);
+    console.log(test);
     return await this.authService.login(credentials);
   }
 
