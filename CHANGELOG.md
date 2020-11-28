@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.16](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.15...v0.1.0-alpha.16) (2020-11-28)
+
+
+### Bug Fixes
+
+* **core:** api filter ([6f49d06](https://github.com/famalabs/nestx/commit/6f49d06901f0f927e9be6a8f1221e195c1860dc7))
+* fix max code lenght ([cf09167](https://github.com/famalabs/nestx/commit/cf09167b3bab303428d110bcff8eba6fc022e7d2))
+
+
+
+
+
+
 # [0.1.0-alpha.15](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.14...v0.1.0-alpha.15) (2020-11-28)
 
 
