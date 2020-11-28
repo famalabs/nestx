@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { ApiExtraModels } from '@nestjs/swagger';
-import { CountFilter, InstanceFilter, ListFilter } from './model';
+import { Where } from './model';
 
 @Controller('core')
-// @ApiExtraModels(ListFilter, CountFilter, InstanceFilter)
+// @ApiExtraModels(Where)
 export class CoreController {}

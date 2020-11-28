@@ -8,7 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(
-    new QueryParsePipe(),
+    // new QueryParsePipe(), // not needed if adding ValidationPipe in methods manually
     new ValidationPipe({
       disableErrorMessages: false,
       whitelist: true,
