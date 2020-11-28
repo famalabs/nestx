@@ -4,8 +4,9 @@ export const LOGIN_ERRORS = {
   USER_NOT_VERIFIED: 'Please, verify you mail.',
   WRONG_CREDENTIALS: 'Wrong credentials.',
   USER_NOT_LINKED:
-    'This email address is already being used. If you are the owner of the account then login and link to your third-party provider.',
-  IDENTITY_LINKED: 'There is an account connected to this identity. Try to login with a third party provider.',
+    'This email address is already being used.\n' +
+    'If you are the owner of the account then login and link to your third-party provider.',
+  IDENTITY_LINKED: 'There is an account connected to this identity.\n' + 'Try to login with a third party provider.',
 };
 export const SIGNUP_ERRORS = {
   USER_ALREADY_EXISTS: 'User already exists.',
