@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.15](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.14...v0.1.0-alpha.15) (2020-11-28)
+
+
+### Bug Fixes
+
+* fix spaces ([c3e69e5](https://github.com/famalabs/nestx/commit/c3e69e5503fbf70d7f6986fc4c5af1cfb933c77b))
+
+
+
+
+
 # [0.1.0-alpha.14](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.13...v0.1.0-alpha.14) (2020-11-28)
 
 **Note:** Version bump only for package @famalabs/nestx-auth
