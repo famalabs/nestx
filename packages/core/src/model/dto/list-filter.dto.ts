@@ -2,11 +2,11 @@ import { IsInt, IsOptional, IsString, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Where } from './where.dto';
-import { ParseString } from '../../decorators';
+import { JSONParse } from '../../decorators';
 
 export class ListFilter {
   @ApiPropertyOptional()
-  @ParseString(() => Where)
+  @JSONParse(() => Where)
   @IsOptional()
   where?: Where;
 
