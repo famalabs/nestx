@@ -12,7 +12,7 @@ export function ApiQuery(options: ApiQueryOptions): MethodDecorator {
     const keys = Reflect.getMetadata(DECORATORS.API_MODEL_PROPERTIES_ARRAY, instance);
     if (!(keys instanceof Array)) {
       console.error(`Type ${type} has no @ApiProperty defined. Skipping.`);
-      return;
+      return applyDecorators();
     }
     // console.log(type, keys);
     const decorators = [];
