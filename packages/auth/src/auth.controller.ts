@@ -26,9 +26,6 @@ export class AuthController {
   @ApiOperation({ summary: 'Login user' })
   @ApiResponse({ type: LoginResponseDto })
   async login(@Body() credentials: LoginDto): Promise<LoginResponseDto> {
-    let test = 4;
-    console.log(test);
-    console.log(test);
     return await this.authService.login(credentials);
   }
 
