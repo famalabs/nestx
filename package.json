@@ -21,7 +21,7 @@
     "clean:prod": "gulp clean:prod",
     "format": "prettier \"packages/**/*.ts\" --write && git status",
     "lint": "npm run lint:packages",
-    "lint:packages": "eslint 'packages/**/**.ts' --fix --ignore-pattern 'packages/**/*.spec.ts' --no-error-on-unmatched-pattern",
+    "lint:packages": "eslint 'packages/**/**.ts' --ignore-pattern 'packages/**/*.spec.ts' --no-error-on-unmatched-pattern",
     "test": "jest --verbose",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage --no-cache"
