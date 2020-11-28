@@ -111,7 +111,7 @@
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
     "roots": [
-      "<rootDir>/packages/"
+      "<rootDir>/packages/src"
     ],
     "modulePathIgnorePatterns": [
       "<rootDir>/packages/dist/"
