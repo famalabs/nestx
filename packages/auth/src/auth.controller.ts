@@ -17,8 +17,6 @@ import { GRANT } from './acl';
 
 @ACL(GRANT.ANY)
 @ApiTags('Auth')
-// metti tutto any cosi passa sempre e mantieni il jwt guard con i googleLinkGuard e facebookLinkGuard
-// se app usera il middleware del token per sfruttare poi ACLGuard allora semplicemente nei casi in cui verrà passato un header jwt verrà fatto il controllo due volte in sole tre route
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -28,6 +26,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Login user' })
   @ApiResponse({ type: LoginResponseDto })
   async login(@Body() credentials: LoginDto): Promise<LoginResponseDto> {
+    let test = 4;
+    console.log(test);
     return await this.authService.login(credentials);
   }
 
