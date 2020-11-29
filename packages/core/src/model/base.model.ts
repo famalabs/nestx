@@ -1,22 +1,12 @@
 import { modelOptions, prop } from '@typegoose/typegoose';
 import { ApiHideProperty, ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import { Exclude, Expose, Transform } from 'class-transformer';
-import { IsMongoId } from 'class-validator';
 import { IDType } from './crud.service';
 
 @modelOptions({ schemaOptions: { timestamps: true } })
 export class BaseModel {
-  // @ApiProperty({ type: 'string', required: false })
-  // id: string | any;
-  //
-  // @ApiHideProperty()
-  // @Expose({ name: 'id', toPlainOnly: true })
-  // @Transform(value => value && value.toString())
-  //   // tslint:disable-next-line:variable-name
-  // _id: any;
-
   @ApiProperty({ type: String })
-  @Expose()
+  @Expose({ toPlainOnly: true })
   public get id() {
     return this._id && this._id.toString();
   }
@@ -26,7 +16,7 @@ export class BaseModel {
   }
 
   @ApiHideProperty()
-  @Exclude()
+  @Exclude({ toPlainOnly: true })
   _id: IDType;
 
   constructor(partial: object) {
