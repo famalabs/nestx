@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.18](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.17...v0.1.0-alpha.18) (2020-11-29)
+
+
+### Bug Fixes
+
+* type conversion fix ([405c6eb](https://github.com/famalabs/nestx/commit/405c6eb55154c01b2cde6f7e488ecc327c4342ac))
+
+
+
+
+
 # [0.1.0-alpha.17](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.16...v0.1.0-alpha.17) (2020-11-28)
 
 
