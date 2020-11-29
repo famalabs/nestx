@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.19](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.18...v0.1.0-alpha.19) (2020-11-29)
+
+
+### Bug Fixes
+
+* **core:** base model expose id ([358ece7](https://github.com/famalabs/nestx/commit/358ece741b3a63524b27ca08f0c2dd0e86b062d4))
+
+
+
+
+
 # [0.1.0-alpha.18](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.17...v0.1.0-alpha.18) (2020-11-29)
 
 
