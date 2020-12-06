@@ -107,7 +107,7 @@ export class AuthCoreModule {
 
   private static createOptionsProvider(options: AuthAsyncOptions): Provider {
     if (options.useFactory) {
-      // For useFactory...
+      // For useFactory..
       return {
         provide: AUTH_OPTIONS,
         useFactory: options.useFactory,
