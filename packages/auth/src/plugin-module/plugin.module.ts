@@ -40,6 +40,7 @@ export interface PluginOptions {
   /**
    * Options for plugin modules used by Auth
    */
+
   passport: IAuthModuleOptions;
   jwt: JwtModuleOptions;
   cache: CacheModuleOptions;
