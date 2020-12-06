@@ -1,6 +1,5 @@
 import { IDType } from '@famalabs/nestx-core';
 import { User } from '../dto/user';
-export const IUsersService = Symbol('IUsersService');
 
 export interface IUsersService {
   create(data: any): Promise<User>;

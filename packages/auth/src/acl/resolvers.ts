@@ -30,13 +30,7 @@ function owner(ctx: ACLContext): boolean {
     return false;
   }
 
-  // const isUserModel = usersPaths.includes(req.route.path);
-  // const paramsId = resolveId(req);
-  // if (isUserModel) {
-  //   return matchId(paramsId, user.id);
-  // } else {
   return matchId(instance.user, user.id);
-  // }
 }
 
 function matchId(src, target) {

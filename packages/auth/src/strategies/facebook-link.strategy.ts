@@ -2,23 +2,23 @@ import { PassportStrategy } from '@nestjs/passport';
 import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Profile, Strategy } from 'passport-facebook';
 import { AUTH_OPTIONS, JWT_ERRORS } from '../constants';
-import { IAuthenticationModuleOptions } from '../interfaces';
 import { IThirdPartyUser, THIRD_PARTY_PROVIDER } from '../interfaces/third-party-user.interface';
 import { UserIdentityService } from './../user-identity.service';
 import qs = require('qs');
 import { TokenService } from './../token/token.service';
+import { AuthOptions } from '../interfaces/auth-options.interface';
 
 @Injectable()
 export class FacebookLinkStrategy extends PassportStrategy(Strategy, 'facebook-link') {
   constructor(
     private readonly userIdentityService: UserIdentityService,
     private readonly tokenService: TokenService,
-    @Inject(AUTH_OPTIONS) private options: IAuthenticationModuleOptions,
+    @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions,
   ) {
     super({
-      clientID: options.constants.social.facebook.clientID,
-      clientSecret: options.constants.social.facebook.clientSecret,
-      callbackURL: options.constants.social.facebook.linkIdentity.callbackURL,
+      clientID: _AuthOptions.constants.social.facebook.clientID,
+      clientSecret: _AuthOptions.constants.social.facebook.clientSecret,
+      callbackURL: _AuthOptions.constants.social.facebook.linkIdentity.callbackURL,
       profileFields: ['email'],
       passReqToCallback: true,
     });

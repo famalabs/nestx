@@ -3,7 +3,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { InjectModel, MongooseModule } from '@nestjs/mongoose';
 import {
   ArgumentsHost,
-  CacheModule,
   CacheModuleOptions,
   Catch,
   Controller,
@@ -12,6 +11,7 @@ import {
   HttpStatus,
   INestApplication,
   Injectable,
+  Logger,
   Module,
   NotFoundException,
   UseGuards,
@@ -19,7 +19,7 @@ import {
 } from '@nestjs/common';
 import * as request from 'supertest';
 import {
-  IAuthenticationModuleOptions,
+  AuthOptions,
   ILoginResponse,
   INotificationSender,
   IUser,
@@ -28,11 +28,11 @@ import {
   THIRD_PARTY_PROVIDER,
 } from './interfaces';
 import { EmailNotification, RefreshToken, UserIdentity } from './models';
-import { mongoose, prop, buildSchema } from '@typegoose/typegoose';
+import { mongoose, prop, buildSchema, getModelForClass } from '@typegoose/typegoose';
 import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import { AUTH_OPTIONS, JWT_ERRORS, LOGIN_ERRORS, REFRESH_TOKEN_ERRORS, SIGNUP_ERRORS } from './constants';
-import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
-import { IAuthModuleOptions, PassportModule } from '@nestjs/passport';
+import { JwtModuleOptions } from '@nestjs/jwt';
+import { IAuthModuleOptions } from '@nestjs/passport';
 import { TokenService } from './token/token.service';
 import { EmailDto, LoginDto, NotificationTokenDto, ResetPasswordDto, SignupDto } from './dto';
 import { ACLGuard, FacebookGuard, GoogleGuard, JwtGuard, SuperGuard } from './guards';
@@ -45,9 +45,9 @@ import { EmailNotificationService } from './notification/email';
 import { UserIdentityService } from './user-identity.service';
 import { LocalStrategy, JwtStrategy } from './strategies';
 import { ExtractJwt } from 'passport-jwt';
-import { ACLManager, ACL_MANAGER } from './acl';
-import { EmptyLogger } from './logger/empty-logger';
+import { ACLManager } from './acl';
 import { BaseModel, CrudService } from '@famalabs/nestx-core';
+import { PluginModule, PluginOptions } from './plugin-module';
 
 const mongoURI = 'mongodb://localhost:27017/test';
 const jwtModuleOptions: JwtModuleOptions = {
@@ -59,49 +59,6 @@ const passportModuleOptions: IAuthModuleOptions = {};
 
 const cacheModuleOptions: CacheModuleOptions = {
   ttl: 900,
-};
-
-const authOptions: IAuthenticationModuleOptions = {
-  modules: {
-    jwt: jwtModuleOptions,
-    passport: passportModuleOptions,
-    cache: cacheModuleOptions,
-  },
-  constants: {
-    blockNotVerifiedUser: true,
-    jwt: {
-      accessTokenTTL: 900,
-      refreshTokenTTL: 30,
-      tokenFromRequestExtractor: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    },
-    mail: {
-      auth: {
-        user: '',
-      },
-      links: {
-        emailVerification: '',
-        forgotPassword: '',
-      },
-    },
-    social: {
-      facebook: {
-        callbackURL: '',
-        clientID: '',
-        clientSecret: '',
-        linkIdentity: {
-          callbackURL: 'string',
-        },
-      },
-      google: {
-        callbackURL: '',
-        clientID: '',
-        clientSecret: '',
-        linkIdentity: {
-          callbackURL: 'string',
-        },
-      },
-    },
-  },
 };
 
 class MockUser extends BaseModel implements IUser {
@@ -207,31 +164,79 @@ export class MockGuard {
   }
 }
 
+const authOptions: AuthOptions = {
+  usersService: new MockUsersService(getModelForClass(MockUser)),
+  notificationSender: new MockSender(),
+  logger: new Logger(),
+  aclManager: new ACLManager(),
+  constants: {
+    blockNotVerifiedUser: true,
+    jwt: {
+      secret: 'secret',
+      signOptions: { expiresIn: 900 },
+      accessTokenTTL: 900,
+      refreshTokenTTL: 30,
+      tokenFromRequestExtractor: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    },
+    mail: {
+      auth: {
+        user: '',
+      },
+      links: {
+        emailVerification: '',
+        forgotPassword: '',
+      },
+    },
+    social: {
+      facebook: {
+        callbackURL: '',
+        clientID: '',
+        clientSecret: '',
+        linkIdentity: {
+          callbackURL: 'string',
+        },
+      },
+      google: {
+        callbackURL: '',
+        clientID: '',
+        clientSecret: '',
+        linkIdentity: {
+          callbackURL: 'string',
+        },
+      },
+    },
+  },
+};
+
+const pluginOptions: PluginOptions = {
+  passport: passportModuleOptions,
+  jwt: jwtModuleOptions,
+  cache: cacheModuleOptions,
+};
+
 describe('Auth Module integration', () => {
   let authService: AuthService;
-  let usersService: IUsersService;
   let userIdentityService: UserIdentityService;
   let authController: AuthController;
   let emailNotificationService: EmailNotificationService;
   let tokenService: TokenService;
+  let usersService: IUsersService;
   let sender: INotificationSender;
   let app: INestApplication;
   let server;
+  let options: AuthOptions;
 
   beforeEach(async () => {
     const authModule: TestingModule = await Test.createTestingModule({
       imports: [
         DbModule,
-
         MongooseModule.forFeature([
           { name: RefreshToken.name, schema: buildSchema(RefreshToken) },
           { name: EmailNotification.name, schema: buildSchema(EmailNotification) },
           { name: UserIdentity.name, schema: buildSchema(UserIdentity) },
           { name: MockUser.name, schema: buildSchema(MockUser) },
         ]),
-        PassportModule.register(authOptions.modules.passport),
-        JwtModule.register(authOptions.modules.jwt),
-        CacheModule.register(authOptions.modules.cache),
+        PluginModule.register(pluginOptions),
       ],
       providers: [
         AuthService,
@@ -243,12 +248,6 @@ describe('Auth Module integration', () => {
         JwtGuard,
         ACLGuard,
         { provide: AUTH_OPTIONS, useValue: authOptions },
-        { provide: IUsersService, useClass: MockUsersService },
-        { provide: INotificationSender, useClass: MockSender },
-        {
-          provide: ACL_MANAGER,
-          useValue: new ACLManager(),
-        },
         {
           provide: APP_FILTER,
           useClass: HttpExceptionFilter,
@@ -256,10 +255,6 @@ describe('Auth Module integration', () => {
         {
           provide: APP_GUARD,
           useClass: SuperGuard,
-        },
-        {
-          provide: 'LOGGER',
-          useClass: EmptyLogger,
         },
       ],
       controllers: [AuthController, TestController],
@@ -272,8 +267,9 @@ describe('Auth Module integration', () => {
 
     authService = authModule.get<AuthService>(AuthService);
     authController = authModule.get<AuthController>(AuthController);
-    usersService = authModule.get<IUsersService>(IUsersService);
-    sender = authModule.get<INotificationSender>(INotificationSender);
+    options = authModule.get<AuthOptions>(AUTH_OPTIONS);
+    usersService = options.usersService;
+    sender = options.notificationSender;
     userIdentityService = authModule.get<UserIdentityService>(UserIdentityService);
     emailNotificationService = authModule.get<EmailNotificationService>(EmailNotificationService);
     tokenService = authModule.get<TokenService>(TokenService);
@@ -296,10 +292,10 @@ describe('Auth Module integration', () => {
       useNewUrlParser: true,
     });
     const connection = mongoose.connection.name;
-    if (connection === 'test') await mongoose.connection.db.dropDatabase();
-    await mongoDbConnection.disconnect();
+    if (connection === 'test') await mongoose.connection.dropDatabase();
     done();
   });
+
   it('should be defined', () => {
     expect(authService).toBeDefined();
     expect(authController).toBeDefined();

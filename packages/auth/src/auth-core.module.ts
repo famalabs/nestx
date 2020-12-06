@@ -1,39 +1,30 @@
-import {
-  Module,
-  MiddlewareConsumer,
-  DynamicModule,
-  CacheModule,
-  Injectable,
-  Logger,
-  Scope,
-  LoggerService,
-} from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { PassportModule } from '@nestjs/passport';
-import { LocalStrategy } from './strategies/local.strategy';
-import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { AuthController } from './auth.controller';
-import { FacebookStrategy } from './strategies/facebook.strategy';
-import { GoogleStrategy } from './strategies/google.strategy';
-import { FacebookMiddleware } from './middlewares/facebook.middleware';
-import { RefreshToken } from './models/refresh-token.model';
-import { TokenService } from './token/token.service';
-import { LoggerMiddleware } from './middlewares/logger.middleware';
-import { MongooseModule } from '@nestjs/mongoose/dist/mongoose.module';
-import { IAuthenticationModuleOptions } from './interfaces';
-import { AUTH_OPTIONS } from './constants';
-import { EmailNotification } from './models/email-notification.model';
-import { UserIdentity } from './models/user-identity.model';
-import { UserIdentityService } from './user-identity.service';
-import { FacebookLinkStrategy } from './strategies/facebook-link.strategy';
-import { GoogleLinkStrategy } from './strategies/google-link.strategy';
-import { EmailNotificationService } from './notification/email';
-import { ACLManager, ACL_MANAGER } from './acl';
+import { Module, DynamicModule, Provider, Global, MiddlewareConsumer } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
 import { buildSchema } from '@typegoose/typegoose';
+import { EmailNotification, RefreshToken, UserIdentity } from './models';
+import {
+  FacebookLinkStrategy,
+  FacebookStrategy,
+  GoogleLinkStrategy,
+  GoogleStrategy,
+  JwtStrategy,
+  LocalStrategy,
+} from './strategies';
+import { TokenService } from './token/token.service';
+import { EmailNotificationService } from './notification/email';
+import { UserIdentityService } from './user-identity.service';
 import { ACLGuard, JwtGuard } from './guards';
-import { DefaultLogger, EmptyLogger } from './logger';
+import { FacebookMiddleware } from './middlewares/facebook.middleware';
+import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { AuthOptions } from './interfaces/auth-options.interface';
+import { AuthAsyncOptions } from './interfaces/auth-async-options.interface';
+import { AuthOptionsFactory } from './interfaces/auth-options-factory.interface';
+import { AUTH_OPTIONS } from './constants';
+import { createAuthProviders } from './auth.providers';
 
+@Global()
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -73,50 +64,62 @@ import { DefaultLogger, EmptyLogger } from './logger';
   ],
 })
 export class AuthCoreModule {
-  public static forRoot(options: IAuthenticationModuleOptions, aclManager: ACLManager): DynamicModule {
+  /**
+   * Registers a configured Auth Module for import into the current module
+   */
+  public static register(options: AuthOptions): DynamicModule {
+    const providers = createAuthProviders(options);
     return {
       module: AuthCoreModule,
-      imports: [
-        PassportModule.register(options.modules.passport),
-        JwtModule.register(options.modules.jwt),
-        CacheModule.register(options.modules.cache),
-      ],
-      providers: [
-        { provide: AUTH_OPTIONS, useValue: options },
-        {
-          provide: ACL_MANAGER,
-          useValue: aclManager,
-        },
-        {
-          provide: 'LOGGER',
-          useFactory: (options: IAuthenticationModuleOptions) => {
-            if (options.logging) {
-              if (options.logger) {
-                return options.logger;
-              } else return new DefaultLogger();
-            } else return new EmptyLogger();
-          },
-          inject: [AUTH_OPTIONS],
-        },
-      ],
-      exports: [
-        { provide: AUTH_OPTIONS, useValue: options },
-        {
-          provide: ACL_MANAGER,
-          useValue: aclManager,
-        },
-        {
-          provide: 'LOGGER',
-          useFactory: (options: IAuthenticationModuleOptions) => {
-            if (options.logging) {
-              if (options.logger) {
-                return options.logger;
-              } else return new DefaultLogger();
-            } else return new EmptyLogger();
-          },
-          inject: [AUTH_OPTIONS],
-        },
-      ],
+      providers: [...providers],
+      exports: [...providers],
+    };
+  }
+
+  /**
+   * Registers a configured Auth Module for import into the current module
+   * using dynamic options (factory, etc)
+   */
+  public static registerAsync(options: AuthAsyncOptions): DynamicModule {
+    const providers = this.createProviders(options);
+    return {
+      module: AuthCoreModule,
+      imports: options.imports || [],
+      providers: [...providers],
+      exports: [...providers],
+    };
+  }
+
+  private static createProviders(options: AuthAsyncOptions): Provider[] {
+    if (options.useExisting || options.useFactory) {
+      return [this.createOptionsProvider(options)];
+    }
+
+    // for useClass
+    return [
+      this.createOptionsProvider(options),
+      {
+        provide: options.useClass,
+        useClass: options.useClass,
+      },
+    ];
+  }
+
+  private static createOptionsProvider(options: AuthAsyncOptions): Provider {
+    if (options.useFactory) {
+      // For useFactory...
+      return {
+        provide: AUTH_OPTIONS,
+        useFactory: options.useFactory,
+        inject: options.inject || [],
+      };
+    }
+
+    // For useExisting...
+    return {
+      provide: AUTH_OPTIONS,
+      useFactory: async (optionsFactory: AuthOptionsFactory) => await optionsFactory.createAuthOptions(),
+      inject: [options.useExisting || options.useClass],
     };
   }
 

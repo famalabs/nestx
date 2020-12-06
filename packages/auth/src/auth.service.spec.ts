@@ -10,7 +10,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import {
-  IAuthenticationModuleOptions,
+  AuthOptions,
   IEmailNotification,
   INotificationSender,
   IUsersService,
@@ -130,7 +130,7 @@ describe('AuthService', () => {
   let emailNotificationService: EmailNotificationService;
   let usersService: IUsersService;
   let sender: INotificationSender;
-  let options: IAuthenticationModuleOptions;
+  let options: AuthOptions;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -162,22 +162,17 @@ describe('AuthService', () => {
           useValue: {},
         },
         {
-          provide: IUsersService,
-          useValue: {
-            validateUser: jest.fn(),
-            create: jest.fn(),
-            findByEmail: jest.fn(),
-            updateById: jest.fn(),
-            setPassword: jest.fn().mockResolvedValue(true),
-          },
-        },
-        {
-          provide: INotificationSender,
-          useClass: MockSender,
-        },
-        {
           provide: AUTH_OPTIONS,
           useValue: {
+            usersService: {
+              validateUser: jest.fn(),
+              create: jest.fn(),
+              findByEmail: jest.fn(),
+              updateById: jest.fn(),
+              setPassword: jest.fn().mockResolvedValue(true),
+            },
+            notificationSender: new MockSender(),
+
             constants: {
               blockNotVerifiedUser: true,
               mail: {
@@ -202,9 +197,9 @@ describe('AuthService', () => {
     service = module.get<AuthService>(AuthService);
     emailNotificationService = module.get<EmailNotificationService>(EmailNotificationService);
     tokenService = module.get<TokenService>(TokenService);
-    usersService = module.get<IUsersService>(IUsersService);
-    sender = module.get<INotificationSender>(INotificationSender);
-    options = module.get<IAuthenticationModuleOptions>(AUTH_OPTIONS);
+    options = module.get<AuthOptions>(AUTH_OPTIONS);
+    usersService = options.usersService;
+    sender = options.notificationSender;
   });
 
   it('should be defined', () => {

@@ -3,26 +3,23 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
 import { IJwtPayload } from '../interfaces/jwt-payload.interface';
 import { AUTH_OPTIONS, JWT_ERRORS } from '../constants';
-import { IAuthenticationModuleOptions } from '../interfaces';
 import { TokenService } from '../token/token.service';
 import { Request } from 'express';
+import { AuthOptions } from '../interfaces/auth-options.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(
-    private readonly tokenService: TokenService,
-    @Inject(AUTH_OPTIONS) private options: IAuthenticationModuleOptions,
-  ) {
+  constructor(private readonly tokenService: TokenService, @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions) {
     super({
-      jwtFromRequest: options.constants.jwt.tokenFromRequestExtractor,
-      secretOrKey: options.modules.jwt.secret,
+      jwtFromRequest: _AuthOptions.constants.jwt.tokenFromRequestExtractor,
+      secretOrKey: _AuthOptions.constants.jwt.secret,
       ignoreExpiration: false,
       passReqToCallback: true,
     });
   }
 
   async validate(request: Request, payload: IJwtPayload, done: Function) {
-    const accessToken = this.options.constants.jwt.tokenFromRequestExtractor(request);
+    const accessToken = this._AuthOptions.constants.jwt.tokenFromRequestExtractor(request);
     const isBlacklisted = await this.tokenService.isBlackListed(accessToken);
     if (isBlacklisted) {
       throw new UnauthorizedException(JWT_ERRORS.TOKEN_BLACKLISTED);

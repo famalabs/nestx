@@ -1,4 +1,3 @@
-export * from './authentication-options.interface';
 export * from './email-verification.interface';
 export * from './forgotten-password.interface';
 export * from './jwt-payload.interface';
@@ -12,3 +11,7 @@ export * from './user.interface';
 export * from './notification-sender.interface';
 export * from './notification.interface';
 export * from './third-party-user.interface';
+export * from './auth-options-factory.interface'
+export * from './auth-options.interface'
+export * from './auth-async-options.interface'
+export * from './third-party-providers-options.interface'

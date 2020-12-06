@@ -14,7 +14,6 @@ import { UserIdentityService } from './user-identity.service';
 import { TokenService } from './token/token.service';
 import { EmailNotificationService, IEmailOptions } from './notification/email';
 import {
-  IAuthenticationModuleOptions,
   IEmailNotification,
   IJwtPayload,
   ILoginResponse,
@@ -26,17 +25,21 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import * as crypto from 'crypto';
 import { Request } from 'express';
+import { AuthOptions } from './interfaces/auth-options.interface';
 
 @Injectable()
 export class AuthService {
+  private readonly usersService: IUsersService;
+  private readonly notificationSender: INotificationSender;
   constructor(
     private readonly tokenService: TokenService,
     private readonly emailNotificationService: EmailNotificationService,
     private readonly userIdentityService: UserIdentityService,
-    @Inject(IUsersService) private readonly usersService: IUsersService,
-    @Inject(INotificationSender) private readonly sender: INotificationSender,
-    @Inject(AUTH_OPTIONS) private options: IAuthenticationModuleOptions,
-  ) {}
+    @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions,
+  ) {
+    this.usersService = this._AuthOptions.usersService;
+    this.notificationSender = this._AuthOptions.notificationSender;
+  }
 
   async signup(data: SignupDto): Promise<User> {
     const user = await this.usersService.findByEmail(data.email);
@@ -47,7 +50,7 @@ export class AuthService {
   }
 
   tokenFromRequestExtractor(req: Request) {
-    return this.options.constants.jwt.tokenFromRequestExtractor(req);
+    return this._AuthOptions.constants.jwt.tokenFromRequestExtractor(req);
   }
 
   async validateUser(email: string, password: string): Promise<User> {
@@ -103,7 +106,7 @@ export class AuthService {
 
   async login(credentials: LoginDto): Promise<ILoginResponse> {
     const user = await this.usersService.validateUser(credentials.email, credentials.password);
-    if (this.options.constants.blockNotVerifiedUser && !user.isVerified) {
+    if (this._AuthOptions.constants.blockNotVerifiedUser && !user.isVerified) {
       throw new UnauthorizedException(LOGIN_ERRORS.USER_NOT_VERIFIED);
     }
     return await this.createLoginResponse(user._id, user.roles);
@@ -147,19 +150,19 @@ export class AuthService {
       throw new NotFoundException(EMAIL_ERRORS.USER_NOT_FOUND);
     }
     const mailOptions: IEmailOptions = {
-      from: '"Company" <' + this.options.constants.mail.auth.user + '>',
+      from: '"Company" <' + this._AuthOptions.constants.mail.auth.user + '>',
       to: email,
       subject: 'Verify Email',
       text: 'Verify Email',
       html:
         'Hi! <br><br> Thanks for your registration<br><br>' +
         '<a href=' +
-        this.options.constants.mail.links.emailVerification +
+        this._AuthOptions.constants.mail.links.emailVerification +
         '?token=' +
         emailNotification.token +
         '>Click here to activate your account</a>',
     }; //thir redirect to a page on the client that make a post to server /verify
-    const sent = await this.sender.notify(email, mailOptions);
+    const sent = await this.notificationSender.notify(email, mailOptions);
     if (!sent) {
       throw new InternalServerErrorException(EMAIL_ERRORS.EMAIL_NOT_SENT);
     }
@@ -203,20 +206,20 @@ export class AuthService {
 
     const emailNotification = await this.createEmailNotification(email, NOTIFICATION_CATEGORY.RESET_CREDENTIALS);
     const mailOptions: IEmailOptions = {
-      from: '"Company" <' + this.options.constants.mail.auth.user + '>',
+      from: '"Company" <' + this._AuthOptions.constants.mail.auth.user + '>',
       to: email,
       subject: 'Frogotten Password',
       text: 'Forgot Password',
       html:
         'Hi! <br><br> If you requested to reset your password<br><br>' +
         '<a href=' +
-        this.options.constants.mail.links.forgotPassword +
+        this._AuthOptions.constants.mail.links.forgotPassword +
         '?token=' +
         emailNotification.token +
         '>Click here</a>',
     }; //il link reindirizzerà ad una pagina del client in cui l'utente poi digiterà la propria nuova password
 
-    const sent = await this.sender.notify(email, mailOptions);
+    const sent = await this.notificationSender.notify(email, mailOptions);
     if (!sent) {
       throw new InternalServerErrorException(EMAIL_ERRORS.EMAIL_NOT_SENT);
     }

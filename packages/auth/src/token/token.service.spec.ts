@@ -1,4 +1,4 @@
-import { IAuthenticationModuleOptions, IJwtPayload, ILoginResponse, IRefreshToken } from '../interfaces';
+import { AuthOptions, IRefreshToken } from '../interfaces';
 import { JwtService } from '@nestjs/jwt';
 import { ReturnModelType } from '@typegoose/typegoose';
 import { AnyParamConstructor } from '@typegoose/typegoose/lib/types';
@@ -20,7 +20,7 @@ class MockRefreshToken implements IRefreshToken {
 describe('TokenService', () => {
   let service: TokenService;
   let jwtService: JwtService;
-  let options: IAuthenticationModuleOptions;
+  let options: AuthOptions;
   let model: ReturnModelType<AnyParamConstructor<RefreshToken>>;
 
   beforeEach(async () => {
@@ -74,7 +74,7 @@ describe('TokenService', () => {
 
     service = module.get<TokenService>(TokenService);
     jwtService = module.get<JwtService>(JwtService);
-    options = module.get<IAuthenticationModuleOptions>(AUTH_OPTIONS);
+    options = module.get<AuthOptions>(AUTH_OPTIONS);
     model = module.get<ReturnModelType<AnyParamConstructor<RefreshToken>>>(getModelToken(RefreshToken.name));
   });
 

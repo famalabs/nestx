@@ -1,10 +1,10 @@
 import { ExecutionContext, Inject, Injectable } from '@nestjs/common';
 import { AuthGuard, IAuthModuleOptions } from '@nestjs/passport';
+import { AuthOptions } from '../interfaces/auth-options.interface';
 import { AUTH_OPTIONS } from '../constants';
-import { IAuthenticationModuleOptions } from '../interfaces';
 @Injectable()
 export class FacebookLinkGuard extends AuthGuard('facebook-link') {
-  constructor(@Inject(AUTH_OPTIONS) private readonly options: IAuthenticationModuleOptions) {
+  constructor(@Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions) {
     super();
   }
   /**
@@ -13,7 +13,7 @@ export class FacebookLinkGuard extends AuthGuard('facebook-link') {
    */
   getAuthenticateOptions(context: ExecutionContext): IAuthModuleOptions {
     const request = context.switchToHttp().getRequest();
-    const nestx_token = this.options.constants.jwt.tokenFromRequestExtractor(request);
+    const nestx_token = this._AuthOptions.constants.jwt.tokenFromRequestExtractor(request);
     return {
       state: `nestx_token=${nestx_token}`,
     };

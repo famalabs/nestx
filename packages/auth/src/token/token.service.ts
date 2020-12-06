@@ -14,9 +14,10 @@ import { AUTH_OPTIONS, JWT_ERRORS, REFRESH_TOKEN_ERRORS } from '../constants';
 import { IJwtPayload } from '../interfaces/jwt-payload.interface';
 import { IAccessToken, ILoginResponse } from './../interfaces/login-response.interface';
 import { InjectModel } from '@nestjs/mongoose';
-import { IAuthenticationModuleOptions, IRefreshToken } from '../interfaces';
+import { IRefreshToken } from '../interfaces';
 import { v4 as uuidv4 } from 'uuid';
 import { CrudService } from '@famalabs/nestx-core';
+import { AuthOptions } from '../interfaces/auth-options.interface';
 
 @Injectable()
 export class TokenService extends CrudService<DocumentType<RefreshToken>> {
@@ -25,11 +26,11 @@ export class TokenService extends CrudService<DocumentType<RefreshToken>> {
     @InjectModel(RefreshToken.name)
     private readonly _tokenModel: ReturnModelType<typeof RefreshToken>,
     private jwtService: JwtService,
-    @Inject(AUTH_OPTIONS) private options: IAuthenticationModuleOptions,
+    @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions,
     @Inject(CACHE_MANAGER) protected readonly cacheManager,
   ) {
     super(_tokenModel);
-    this.refreshTokenTtl = options.constants.jwt.refreshTokenTTL;
+    this.refreshTokenTtl = _AuthOptions.constants.jwt.refreshTokenTTL;
   }
 
   async getAccessTokenFromRefreshToken(refreshToken: string, oldAccessToken: string): Promise<ILoginResponse> {
@@ -74,13 +75,13 @@ export class TokenService extends CrudService<DocumentType<RefreshToken>> {
   }
 
   async createAccessToken(payload: IJwtPayload): Promise<IAccessToken> {
-    const opts = this.options.modules.jwt.signOptions;
+    const opts = this._AuthOptions.constants.jwt.signOptions;
     //this optional setting avoid any collision in token generation
     opts.jwtid = uuidv4();
     const accessToken = this.jwtService.sign(payload, opts);
     const token: ILoginResponse = {
       accessToken: accessToken,
-      expiresIn: this.options.modules.jwt.signOptions.expiresIn,
+      expiresIn: this._AuthOptions.constants.jwt.signOptions.expiresIn,
       tokenType: 'Bearer',
     };
     return token;

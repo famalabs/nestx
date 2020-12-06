@@ -5,7 +5,7 @@ import { USER_ROLES } from './users/user.model';
 
 @Controller('app')
 export class AppController {
-  // test with any grant
+  // allow any
   @Get('public')
   @ACL(GRANT.ANY)
   @ApiBearerAuth()
@@ -13,27 +13,37 @@ export class AppController {
     return 'Hello from public route!';
   }
 
-  // test with any grant
-  @Get('private')
+  // allow only authenticated users
+  @Get('authenticated')
   @ACL(GRANT.AUTHENTICATED)
   @ApiBearerAuth()
-  private(): string {
+  authenticated(): string {
     return 'Hello from private route!';
   }
 
-  //test with fallback resolver
-  @Get('private-admin')
+  // allow only users with role ADMIN
+  @Get('admin')
   @ACL(USER_ROLES.ADMIN)
   @ApiBearerAuth()
-  privateAdmin(): string {
+  admin(): string {
     return 'Hello from private admin route!';
   }
 
-  //test with fallback resolver
+  // allow only users with role ADMIN+KING
   @Get('private-admin-king')
-  @ACL([USER_ROLES.ADMIN, USER_ROLES.KING], GRANT.AUTHENTICATED)
+  @ACL([USER_ROLES.ADMIN, USER_ROLES.KING])
   @ApiBearerAuth()
   arrayResolvers(): string {
-    return 'Hello you have permission forever && ever!';
+    return 'Hello you have permission!';
+  }
+
+  // allow users with role ADMIN+KING
+  //              or
+  //  allow authenticated users
+  @Get('private-admin-and-king-or-auth')
+  @ACL([USER_ROLES.ADMIN, USER_ROLES.KING], GRANT.AUTHENTICATED)
+  @ApiBearerAuth()
+  arrayResolversOrAuthenticated(): string {
+    return 'Hello you have permission!';
   }
 }
