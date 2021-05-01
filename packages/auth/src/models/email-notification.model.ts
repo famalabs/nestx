@@ -1,4 +1,4 @@
-import { IEmailNotification, NOTIFICATION_CATEGORY } from '../interfaces/notification.interface';
+import { IEmailNotification, NOTIFICATION_CATEGORY } from '../interfaces/notifications/notification.interface';
 import { index, prop } from '@typegoose/typegoose';
 import { BaseModel } from '@famalabs/nestx-core';
 import { ApiProperty } from '@nestjs/swagger';

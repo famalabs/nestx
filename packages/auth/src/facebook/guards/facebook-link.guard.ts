@@ -1,13 +1,11 @@
 import { ExecutionContext, Inject, Injectable } from '@nestjs/common';
 import { AuthGuard, IAuthModuleOptions } from '@nestjs/passport';
-import { AuthOptions } from '../interfaces/auth-options.interface';
-import { AUTH_OPTIONS } from '../constants';
+import { AuthOptions } from '../../interfaces/module/auth-options.interface';
+import { AUTH_OPTIONS } from '../../constants';
 @Injectable()
-export class GoogleLinkGuard extends AuthGuard('google-link') {
+export class FacebookLinkGuard extends AuthGuard('facebook-link') {
   constructor(@Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions) {
-    super({
-      accessType: 'offline',
-    });
+    super();
   }
   /**
    * Reference for getAuthenticationOptions
@@ -15,7 +13,6 @@ export class GoogleLinkGuard extends AuthGuard('google-link') {
    */
   getAuthenticateOptions(context: ExecutionContext): IAuthModuleOptions {
     const request = context.switchToHttp().getRequest();
-
     const nestx_token = this._AuthOptions.constants.jwt.tokenFromRequestExtractor(request);
     return {
       state: `nestx_token=${nestx_token}`,

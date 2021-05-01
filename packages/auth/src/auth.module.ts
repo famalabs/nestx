@@ -1,10 +1,9 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
 import { AuthCoreModule } from './auth-core.module';
-import { AuthAsyncOptions } from './interfaces/auth-async-options.interface';
-import { AuthOptions } from './interfaces/auth-options.interface';
+import { AuthAsyncOptions } from './interfaces/module/auth-async-options.interface';
+import { AuthOptions } from './interfaces/module/auth-options.interface';
 import { PluginAsyncOptions, PluginModule, PluginOptions } from './plugin-module/plugin.module';
 
-@Global()
 @Module({})
 export class AuthModule {
   public static register(authOptions: AuthOptions, pluginOptions: PluginOptions): DynamicModule {

@@ -1,11 +1,11 @@
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
-import { GRANT } from '../acl';
-import { DECORATORS } from '../acl/constants';
-import { ACLType } from '../acl/types';
+import { GRANT } from '..';
+import { DECORATORS } from '../constants';
+import { ACLType } from '../types';
 import { ACLGuard } from './acl.guard';
-import { JwtGuard } from './jwt.guard';
-import { AUTH_OPTIONS } from '../constants';
-import { AuthOptions } from '../interfaces/auth-options.interface';
+import { JwtGuard } from '../../guards/jwt.guard';
+import { AUTH_OPTIONS } from '../../constants';
+import { AuthOptions } from '../../interfaces/module/auth-options.interface';
 
 @Injectable()
 export class SuperGuard implements CanActivate {

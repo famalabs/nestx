@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { AuthController } from './auth.controller';
 import { Test, TestingModule } from '@nestjs/testing';
 import { InjectModel, MongooseModule } from '@nestjs/mongoose';
@@ -34,20 +35,22 @@ import { AUTH_OPTIONS, JWT_ERRORS, LOGIN_ERRORS, REFRESH_TOKEN_ERRORS, SIGNUP_ER
 import { JwtModuleOptions } from '@nestjs/jwt';
 import { IAuthModuleOptions } from '@nestjs/passport';
 import { TokenService } from './token/token.service';
-import { EmailDto, LoginDto, NotificationTokenDto, ResetPasswordDto, SignupDto } from './dto';
-import { ACLGuard, FacebookGuard, GoogleGuard, JwtGuard, SuperGuard } from './guards';
+import { EmailDto, LoginDto, NotificationTokenDto, RefreshTokenDto, ResetPasswordDto, SignupDto } from './dto';
 import { Request, Response } from 'express';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { GRANT } from './acl/resolvers';
-import { ACL } from './decorators';
 import { AuthService } from './auth.service';
 import { EmailNotificationService } from './notification/email';
-import { UserIdentityService } from './user-identity.service';
+import { UserIdentityService } from './identity-provider/user-identity.service';
 import { LocalStrategy, JwtStrategy } from './strategies';
 import { ExtractJwt } from 'passport-jwt';
-import { ACLManager } from './acl';
+import { ACL, ACLGuard, ACLManager, SuperGuard } from './acl';
 import { BaseModel, CrudService } from '@famalabs/nestx-core';
 import { PluginModule, PluginOptions } from './plugin-module';
+
+import { JwtGuard } from '.';
+import { FacebookGuard } from './facebook/guards';
+import { GoogleGuard } from './google/guards';
 
 const mongoURI = 'mongodb://localhost:27017/test';
 const jwtModuleOptions: JwtModuleOptions = {
@@ -110,7 +113,7 @@ export class MockUsersService extends CrudService<DocumentType<MockUser>> implem
     return await this.userModel.findOne({ email: email }).lean();
   }
   async setPassword(email: string, newPassword: string): Promise<boolean> {
-    var userFromDb = await this.findOne({ email: email });
+    const userFromDb = await this.findOne({ email: email });
     if (!userFromDb) throw new NotFoundException(LOGIN_ERRORS.USER_NOT_FOUND);
     userFromDb.password = newPassword;
     await userFromDb.save();
@@ -174,6 +177,7 @@ const authOptions: AuthOptions = {
     jwt: {
       secret: 'secret',
       signOptions: { expiresIn: 900 },
+      verifyOptions: {},
       accessTokenTTL: 900,
       refreshTokenTTL: 30,
       tokenFromRequestExtractor: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -211,7 +215,6 @@ const authOptions: AuthOptions = {
 const pluginOptions: PluginOptions = {
   passport: passportModuleOptions,
   jwt: jwtModuleOptions,
-  cache: cacheModuleOptions,
 };
 
 describe('Auth Module integration', () => {
@@ -507,34 +510,9 @@ describe('Auth Module integration', () => {
       expect(res.body.message).toEqual('Unauthorized');
       done();
     });
-    it('should not give the access with blacklisted accessToken', async done => {
-      //create and login a user
-      const user = {
-        email: 'user@email.com',
-        password: 'myPassword',
-        isVerified: true,
-        roles: [],
-      };
-      const registeredUser = await usersService.create(user);
-      const credentials: LoginDto = { email: user.email, password: user.password };
-      const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
-
-      //save accessToken
-      const loginResponse: ILoginResponse = loginRes.body;
-
-      //logout in order to invalid accessToken
-      await authService.logout(registeredUser._id, loginResponse.accessToken, loginResponse.refreshToken, true);
-
-      const res = await request(server)
-        .get('/test/protected-jwt')
-        .set('Authorization', 'Bearer ' + loginResponse.accessToken);
-      expect(res.status).toEqual(HttpStatus.UNAUTHORIZED);
-      expect(res.body.message).toEqual(JWT_ERRORS.TOKEN_BLACKLISTED);
-      done();
-    });
   });
   describe('/token (GET)', () => {
-    it('should give new access and refresh token with a valid refresh token and old accessToken', async done => {
+    it('should give new access and refresh token with a valid refresh token', async done => {
       //create and login a user
       const user = {
         email: 'user@email.com',
@@ -550,10 +528,12 @@ describe('Auth Module integration', () => {
       const loginResponse: ILoginResponse = loginRes.body;
       const accessToken = loginResponse.accessToken;
       const refreshToken = loginResponse.refreshToken;
-      const res = await request(server)
-        .get('/auth/token')
-        .query({ refresh_token: refreshToken })
-        .set('Authorization', 'Bearer ' + accessToken);
+
+      const data: RefreshTokenDto = {
+        grantType: 'refresh_token',
+        refreshToken: refreshToken,
+      };
+      const res = await request(server).post('/auth/token').send(data);
 
       expect(res.body).toEqual({
         accessToken: expect.any(String),
@@ -564,11 +544,6 @@ describe('Auth Module integration', () => {
       expect(res.body.accessToken).not.toEqual(accessToken);
       expect(res.body.refreshToken).not.toEqual(refreshToken);
       done();
-
-      //check that oldAccessToken is revoked and the oldRefrehToken doesn't exists anymore
-      const check = await tokenService.findOne({ value: loginResponse.refreshToken });
-      expect(check).toBeNull();
-      expect(await tokenService.isBlackListed(accessToken)).toBeTruthy();
     });
     it('should not give new access and refresh token with a non existent refresh token', async done => {
       //create and login a user
@@ -586,41 +561,14 @@ describe('Auth Module integration', () => {
       const loginResponse: ILoginResponse = loginRes.body;
       const accessToken = loginResponse.accessToken;
       const refreshToken = 'notExist';
-      const res = await request(server)
-        .get('/auth/token')
-        .query({ refresh_token: refreshToken })
-        .set('Authorization', 'Bearer ' + accessToken);
+      const data: RefreshTokenDto = {
+        grantType: 'refresh_token',
+        refreshToken: refreshToken,
+      };
+      const res = await request(server).post('/auth/token').send(data);
 
       expect(res.status).toEqual(HttpStatus.NOT_FOUND);
       expect(res.body.message).toEqual(REFRESH_TOKEN_ERRORS.TOKEN_NOT_FOUND);
-      done();
-    });
-    it('should not give new access and refresh token with a blacklisted oldAccessToken', async done => {
-      //create and login a user
-      const user = {
-        email: 'user@email.com',
-        password: 'myPassword',
-        isVerified: true,
-        roles: [],
-      };
-      const registeredUser = await usersService.create(user);
-      const credentials: LoginDto = { email: user.email, password: user.password };
-      const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
-
-      //save tokens
-      const loginResponse: ILoginResponse = loginRes.body;
-      const accessToken = loginResponse.accessToken;
-      const refreshToken = loginResponse.refreshToken;
-      //blacklist accessToken
-      await tokenService.revokeToken(accessToken, registeredUser._id);
-
-      const res = await request(server)
-        .get('/auth/token')
-        .query({ refresh_token: refreshToken })
-        .set('Authorization', 'Bearer ' + accessToken);
-
-      expect(res.status).toEqual(HttpStatus.UNAUTHORIZED);
-      expect(res.body.message).toEqual(JWT_ERRORS.TOKEN_BLACKLISTED);
       done();
     });
     it('should not give new access and refresh token with an invalid oldAccessToken', async done => {
@@ -640,69 +588,19 @@ describe('Auth Module integration', () => {
       const accessToken = 'notValid';
       const refreshToken = loginResponse.refreshToken;
 
-      const res = await request(server)
-        .get('/auth/token')
-        .query({ refresh_token: refreshToken })
-        .set('Authorization', 'Bearer ' + accessToken);
+      const data: RefreshTokenDto = {
+        grantType: 'refresh_token',
+        refreshToken: refreshToken,
+      };
+      const res = await request(server).post('/auth/token').send(data);
 
       expect(res.status).toEqual(HttpStatus.UNAUTHORIZED);
       expect(res.body.message).toEqual(JWT_ERRORS.TOKEN_NOT_VALID);
       done();
     });
-    it('should not give new access and refresh token if refreshToken owner is different from the accessToken owner', async done => {
-      //create and login a user
-      const user = {
-        email: 'user@email.com',
-        password: 'myPassword',
-        isVerified: true,
-        roles: [],
-      };
-      const registeredUser = await usersService.create(user);
-      const credentials: LoginDto = { email: user.email, password: user.password };
-      const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
-      //save tokens
-      const loginResponse: ILoginResponse = loginRes.body;
-      const accessToken = loginResponse.accessToken;
-      const refreshToken = loginResponse.refreshToken;
-
-      //create and login a malicious user
-      let maliciousUser = {
-        email: 'maliciousUser@email.com',
-        password: 'myPassword',
-        isVerified: true,
-        roles: [],
-      };
-
-      const maliciousRegisteredUser = await usersService.create(maliciousUser);
-      const maliciousCredentials: LoginDto = {
-        email: maliciousUser.email,
-        password: maliciousUser.password,
-      };
-
-      const maliciousloginRes = await request(server)
-        .post('/auth/login')
-        .send(maliciousCredentials)
-        .set('Accept', 'application/json');
-      //save tokens
-      const maliciousloginResponse: ILoginResponse = maliciousloginRes.body;
-      const maliciousAccessToken = maliciousloginResponse.accessToken;
-      const maliciousRefreshToken = maliciousloginResponse.refreshToken;
-
-      /**
-       * Test if i can get a new refresh + access token for the user
-       * from maliciousRefrehToken and user AccessToken
-       * */
-      const res = await request(server)
-        .get('/auth/token')
-        .query({ refresh_token: maliciousRefreshToken })
-        .set('Authorization', 'Bearer ' + accessToken);
-      expect(res.status).toEqual(HttpStatus.UNAUTHORIZED);
-      expect(res.body.message).toEqual(JWT_ERRORS.WRONG_OWNER);
-      done();
-    });
   });
   describe('/logout (POST)', () => {
-    it('should logout user from one device', async done => {
+    it('should logout user', async done => {
       //create and login a user
       const user = {
         email: 'user@email.com',
@@ -724,119 +622,58 @@ describe('Auth Module integration', () => {
         .query({ refresh_token: refreshToken, from_all: false })
         .set('Authorization', 'Bearer ' + accessToken);
 
-      const check = await tokenService.findOne({ value: loginResponse.refreshToken });
-      expect(check).toBeNull();
-      expect(await tokenService.isBlackListed(accessToken)).toBeTruthy();
-      done();
-    });
-
-    it('should logout user from all devices', async done => {
-      //create and login a user
-      const user = {
-        email: 'user@email.com',
-        password: 'myPassword',
-        isVerified: true,
-        roles: [],
-      };
-      const registeredUser = await usersService.create(user);
-      const credentials: LoginDto = { email: user.email, password: user.password };
-      const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
-      //save accessToken
-      const loginResponse: ILoginResponse = loginRes.body;
-      const accessToken = loginResponse.accessToken;
-      const refreshToken = loginResponse.refreshToken;
-
-      //login the same user again
-      const credentials2: LoginDto = { email: user.email, password: user.password };
-      await request(server).post('/auth/login').send(credentials2).set('Accept', 'application/json');
-
-      const res = await request(server)
-        .post('/auth/logout')
-        .query({ refresh_token: refreshToken, from_all: 'true' })
-        .set('Authorization', 'Bearer ' + accessToken);
-
-      const check = await tokenService.find({ where: { userId: registeredUser._id } });
-      expect(check).toStrictEqual([]);
-      expect(await tokenService.isBlackListed(accessToken)).toBeTruthy();
-      done();
-    });
-
-    it('should not logout user with invalid from_all value', async done => {
-      //create and login a user
-      const user = {
-        email: 'user@email.com',
-        password: 'myPassword',
-        isVerified: true,
-        roles: [],
-      };
-      const registeredUser = await usersService.create(user);
-      const credentials: LoginDto = { email: user.email, password: user.password };
-      const loginRes = await request(server).post('/auth/login').send(credentials).set('Accept', 'application/json');
-
-      //save accessToken
-      const loginResponse: ILoginResponse = loginRes.body;
-      const accessToken = loginResponse.accessToken;
-      const refreshToken = loginResponse.refreshToken;
-
-      const res = await request(server)
-        .post('/auth/logout')
-        .query({ refresh_token: refreshToken, from_all: 'invalidValue' })
-        .set('Authorization', 'Bearer ' + accessToken);
-
-      expect(res.status).toBe(HttpStatus.BAD_REQUEST);
-      expect(res.body.message).toBe('from_all invalid value');
       done();
     });
   });
-  describe('signup & verify email', () => {
-    it('should create an emailNotification for the new user and verify', async done => {
-      jest.spyOn(sender, 'notify').mockResolvedValue(Promise.resolve(true));
-      const data: SignupDto = { email: 'user@email.com', password: 'myPassword' };
-      await request(server).post('/auth/signup').send(data).set('Accept', 'application/json');
-      const savedUser = await usersService.findByEmail(data.email);
-      expect(savedUser).not.toBeNull;
+  // describe('signup & verify email', () => {
+  //   it('should create an emailNotification for the new user and verify', async done => {
+  //     jest.spyOn(sender, 'notify').mockResolvedValue(Promise.resolve(true));
+  //     const data: SignupDto = { email: 'user@email.com', password: 'myPassword' };
+  //     await request(server).post('/auth/signup').send(data).set('Accept', 'application/json');
+  //     const savedUser = await usersService.findByEmail(data.email);
+  //     expect(savedUser).not.toBeNull;
 
-      const notification = await emailNotificationService.findOne({ to: savedUser.email });
-      expect(notification).toBeDefined();
-      expect(notification.category).toEqual(NOTIFICATION_CATEGORY.ACCOUNT_VERIFICATION);
+  //     const notification = await emailNotificationService.findOne({ to: savedUser.email });
+  //     expect(notification).toBeDefined();
+  //     expect(notification.category).toEqual(NOTIFICATION_CATEGORY.ACCOUNT_VERIFICATION);
 
-      const notificationToken: NotificationTokenDto = {
-        value: notification.token,
-      };
-      const res = await request(server).post(`/auth/email/verify`).send(notificationToken);
-      const updatedUser = await usersService.findByEmail(savedUser.email);
-      expect(res).toBeTruthy();
-      expect(updatedUser.isVerified).toBeTruthy();
-      done();
-    });
-  });
-  describe('forgot & reset password', () => {
-    it('should create an emailNotification for the user and reset password', async done => {
-      jest.spyOn(sender, 'notify').mockResolvedValue(Promise.resolve(true));
-      const user = {
-        email: 'user@email.com',
-        password: 'myPassword',
-        isVerified: true,
-        roles: [],
-      };
-      const registeredUser = await usersService.create(user);
-      const data: EmailDto = {
-        value: registeredUser.email,
-      };
-      let res;
-      res = await request(server).post(`/auth/email/forgot-password`).send(data);
-      const notification = await emailNotificationService.findOne({ to: registeredUser.email });
-      expect(res).toBeTruthy;
-      expect(notification).toBeDefined();
-      expect(notification.category).toEqual(NOTIFICATION_CATEGORY.RESET_CREDENTIALS);
+  //     const notificationToken: NotificationTokenDto = {
+  //       value: notification.token,
+  //     };
+  //     const res = await request(server).post(`/auth/email/verify`).send(notificationToken);
+  //     const updatedUser = await usersService.findByEmail(savedUser.email);
+  //     expect(res).toBeTruthy();
+  //     expect(updatedUser.isVerified).toBeTruthy();
+  //     done();
+  //   });
+  // });
+  // describe('forgot & reset password', () => {
+  //   it('should create an emailNotification for the user and reset password', async done => {
+  //     jest.spyOn(sender, 'notify').mockResolvedValue(Promise.resolve(true));
+  //     const user = {
+  //       email: 'user@email.com',
+  //       password: 'myPassword',
+  //       isVerified: true,
+  //       roles: [],
+  //     };
+  //     const registeredUser = await usersService.create(user);
+  //     const data: EmailDto = {
+  //       value: registeredUser.email,
+  //     };
+  //     let res;
+  //     res = await request(server).post(`/auth/email/forgot-password`).send(data);
+  //     const notification = await emailNotificationService.findOne({ to: registeredUser.email });
+  //     expect(res).toBeTruthy;
+  //     expect(notification).toBeDefined();
+  //     expect(notification.category).toEqual(NOTIFICATION_CATEGORY.RESET_CREDENTIALS);
 
-      const credentials: ResetPasswordDto = { token: notification.token, newPassword: 'myNewPassword' };
-      res = await request(server).post(`/auth/email/reset-password`).send(credentials);
-      const updatedUser = await usersService.findByEmail(registeredUser.email);
-      expect(res).toBeTruthy;
-      expect(updatedUser._id).toEqual(registeredUser._id);
-      expect(updatedUser.password).toEqual(credentials.newPassword);
-      done();
-    });
-  });
+  //     const credentials: ResetPasswordDto = { token: notification.token, newPassword: 'myNewPassword' };
+  //     res = await request(server).post(`/auth/email/reset-password`).send(credentials);
+  //     const updatedUser = await usersService.findByEmail(registeredUser.email);
+  //     expect(res).toBeTruthy;
+  //     expect(updatedUser._id).toEqual(registeredUser._id);
+  //     expect(updatedUser.password).toEqual(credentials.newPassword);
+  //     done();
+  //   });
+  // });
 });

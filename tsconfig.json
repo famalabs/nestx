@@ -1,25 +1,22 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+    "moduleResolution": "Node",
     "declaration": true,
-    "noImplicitAny": false,
-    "skipLibCheck": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "noUnusedLocals": false,
-    "importHelpers": true,
     "removeComments": true,
-    "noLib": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
     "target": "es2017",
-    "sourceMap": false,
-    "allowJs": false,
-    "strict": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
     "composite": true,
-    "strictNullChecks": false
-  },
-  "exclude": [
-    "node_modules",
-    "./**/*.spec.ts"
-  ]
+    "paths": {
+      "@famalabs/nestx-auth": ["packages/auth/dist"],
+      "@famalabs/nestx-core": ["packages/core/dist"]
+    },
+    "incremental": true,
+    "resolveJsonModule": true
+  }
 }

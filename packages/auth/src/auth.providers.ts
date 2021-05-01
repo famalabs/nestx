@@ -1,5 +1,5 @@
 import { AUTH_OPTIONS } from './constants';
-import { AuthOptions } from './interfaces/auth-options.interface';
+import { AuthOptions } from './interfaces/module/auth-options.interface';
 
 export function createAuthProviders(options: AuthOptions) {
   return [

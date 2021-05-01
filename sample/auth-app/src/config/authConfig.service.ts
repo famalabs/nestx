@@ -20,6 +20,7 @@ export class AuthConfigService implements AuthOptionsFactory {
         jwt: {
           secret: this.configService.get<string>('JWT_TOKEN_SECRET'),
           signOptions: { expiresIn: parseInt(this.configService.get<string>('ACCESS_TOKEN_TTL'), 10) },
+          verifyOptions: {},
           tokenFromRequestExtractor: ExtractJwt.fromAuthHeaderAsBearerToken(),
           accessTokenTTL: parseInt(this.configService.get<string>('ACCESS_TOKEN_TTL')) || 60 * 15, // 15 mins
           refreshTokenTTL: parseInt(this.configService.get<string>('REFRESH_TOKEN_TTL')) || 30, // 30 Days

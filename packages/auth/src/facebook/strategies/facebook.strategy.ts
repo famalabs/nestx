@@ -1,10 +1,10 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { Inject, Injectable } from '@nestjs/common';
 import { Profile, Strategy } from 'passport-facebook';
-import { AUTH_OPTIONS } from './../constants';
-import { IThirdPartyUser, THIRD_PARTY_PROVIDER } from '../interfaces/third-party-user.interface';
-import { AuthService } from '../auth.service';
-import { AuthOptions } from '../interfaces/auth-options.interface';
+import { AUTH_OPTIONS } from '../../constants';
+import { IThirdPartyUser, THIRD_PARTY_PROVIDER } from '../../interfaces/oauth/third-party-user.interface';
+import { AuthService } from '../../auth.service';
+import { AuthOptions } from '../../interfaces/module/auth-options.interface';
 
 @Injectable()
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
