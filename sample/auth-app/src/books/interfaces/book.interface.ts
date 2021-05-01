@@ -1,5 +1,5 @@
 import { Ref } from '@typegoose/typegoose';
-import { User } from '../../users/user.model';
+import { User } from 'src/users/user.model';
 
 export interface IBook {
   id?: string;

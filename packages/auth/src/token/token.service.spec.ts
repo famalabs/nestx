@@ -88,7 +88,7 @@ describe('TokenService', () => {
     jest.clearAllMocks();
   });
 
-  describe('refresh', () => {
+  describe('getAccessTokenFromRefreshToken', () => {
     it('should not get new access and refresh token with an expired refresh token', async () => {
       const addMinutes = function (dt, minutes) {
         return new Date(dt.getTime() + minutes * 60000);
@@ -101,8 +101,14 @@ describe('TokenService', () => {
       mockRefreshToken.expiresAt = oldDate;
       mockRefreshToken.userId = 'userId';
 
-      await expect(() => service.refresh(mockRefreshToken.value)).rejects.toThrow(BadRequestException);
-      await expect(() => service.refresh(mockRefreshToken.value)).rejects.toThrow(REFRESH_TOKEN_ERRORS.TOKEN_EXPIRED);
+      const spy = jest.spyOn(service, 'findOne').mockResolvedValue(mockRefreshToken as any);
+
+      await expect(() =>
+        service.getAccessTokenFromRefreshToken(mockRefreshToken.value, 'oldAccessToken'),
+      ).rejects.toThrow(BadRequestException);
+      await expect(() =>
+        service.getAccessTokenFromRefreshToken(mockRefreshToken.value, 'oldAccessToken'),
+      ).rejects.toThrow(REFRESH_TOKEN_ERRORS.TOKEN_EXPIRED);
     });
   });
 });

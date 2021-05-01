@@ -2,77 +2,65 @@ import { Module, DynamicModule, Provider, Global, MiddlewareConsumer } from '@ne
 import { MongooseModule } from '@nestjs/mongoose';
 import { buildSchema } from '@typegoose/typegoose';
 import { EmailNotification, RefreshToken, UserIdentity } from './models';
-import { JwtStrategy, LocalStrategy } from './strategies';
+import {
+  FacebookLinkStrategy,
+  FacebookStrategy,
+  GoogleLinkStrategy,
+  GoogleStrategy,
+  JwtStrategy,
+  LocalStrategy,
+} from './strategies';
+import { TokenService } from './token/token.service';
 import { EmailNotificationService } from './notification/email';
-import { UserIdentityService } from './identity-provider/user-identity.service';
-import { JwtGuard } from './guards';
+import { UserIdentityService } from './user-identity.service';
+import { ACLGuard, JwtGuard } from './guards';
+import { FacebookMiddleware } from './middlewares/facebook.middleware';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { AuthOptions } from './interfaces/module/auth-options.interface';
-import { AuthAsyncOptions } from './interfaces/module/auth-async-options.interface';
-import { AuthOptionsFactory } from './interfaces/module/auth-options-factory.interface';
+import { AuthOptions } from './interfaces/auth-options.interface';
+import { AuthAsyncOptions } from './interfaces/auth-async-options.interface';
+import { AuthOptionsFactory } from './interfaces/auth-options-factory.interface';
 import { AUTH_OPTIONS } from './constants';
 import { createAuthProviders } from './auth.providers';
-import { ACLGuard } from './acl';
 
-import { RefreshTokenService } from './token/refresh-token.service';
-import { AccessTokenService } from './token/access-token.service';
-import { TokenService } from './token/token.service';
-import { GoogleGuard, GoogleLinkGuard } from './google/guards';
-import { GoogleLinkStrategy, GoogleStrategy } from './google/strategies';
-import { GoogleController } from './google/google.controller';
-import { FacebookMiddleware } from './facebook/middlewares/facebook.middleware';
-import { FacebookLinkStrategy, FacebookStrategy } from './facebook/strategies';
-import { FacebookGuard, FacebookLinkGuard } from './facebook/guards';
-import { FacebookController } from './facebook/facebook.controller';
-
+@Global()
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: EmailNotification.name, schema: buildSchema(EmailNotification) },
       { name: RefreshToken.name, schema: buildSchema(RefreshToken) },
+      { name: EmailNotification.name, schema: buildSchema(EmailNotification) },
       { name: UserIdentity.name, schema: buildSchema(UserIdentity) },
     ]),
   ],
   providers: [
     AuthService,
-    AccessTokenService,
-    RefreshTokenService,
-    TokenService,
     LocalStrategy,
-    UserIdentityService,
     JwtStrategy,
+    FacebookStrategy,
+    GoogleStrategy,
+    FacebookLinkStrategy,
+    GoogleLinkStrategy,
+    TokenService,
     EmailNotificationService,
+    UserIdentityService,
     JwtGuard,
     ACLGuard,
-    GoogleGuard,
-    GoogleLinkGuard,
-    GoogleLinkStrategy,
-    GoogleStrategy,
-    FacebookGuard,
-    FacebookLinkGuard,
-    FacebookLinkStrategy,
-    FacebookStrategy,
   ],
-  controllers: [AuthController, GoogleController, FacebookController],
+  controllers: [AuthController],
   exports: [
     AuthService,
-    TokenService,
     LocalStrategy,
     JwtStrategy,
+    FacebookStrategy,
+    GoogleStrategy,
+    FacebookLinkStrategy,
+    GoogleLinkStrategy,
+    TokenService,
     EmailNotificationService,
+    UserIdentityService,
     JwtGuard,
     ACLGuard,
-    GoogleGuard,
-    GoogleLinkGuard,
-    GoogleLinkStrategy,
-    GoogleStrategy,
-    FacebookGuard,
-    FacebookLinkGuard,
-    FacebookLinkStrategy,
-    FacebookStrategy,
-    UserIdentityService,
   ],
 })
 export class AuthCoreModule {
@@ -136,8 +124,8 @@ export class AuthCoreModule {
   }
 
   public configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes(AuthController);
     consumer.apply(FacebookMiddleware).forRoutes('auth/facebook/*');
     consumer.apply(FacebookMiddleware).forRoutes('auth/connect/facebook/*');
+    consumer.apply(LoggerMiddleware).forRoutes(AuthController);
   }
 }

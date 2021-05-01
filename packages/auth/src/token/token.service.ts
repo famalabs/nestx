@@ -1,40 +1,134 @@
-import { Injectable } from '@nestjs/common';
-import { IJwtPayload, IRefreshToken } from '../interfaces/oauth';
-import { AccessTokenService } from './access-token.service';
-import { RefreshTokenService } from './refresh-token.service';
-
-export interface ITokenService {
-  refresh(token: string): Promise<IRefreshToken>;
-  deleteRefreshTokenForUser(userId: string): Promise<void>;
-  createAccessToken(payload: IJwtPayload): Promise<string>;
-  createRefreshToken(userId: string): Promise<IRefreshToken>;
-  verifyAccessToken(token: string): Promise<IJwtPayload>;
-}
+import {
+  Injectable,
+  Inject,
+  CACHE_MANAGER,
+  NotFoundException,
+  BadRequestException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { randomBytes } from 'crypto';
+import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
+import { RefreshToken } from '../models/refresh-token.model';
+import { JwtService } from '@nestjs/jwt';
+import { AUTH_OPTIONS, JWT_ERRORS, REFRESH_TOKEN_ERRORS } from '../constants';
+import { IJwtPayload } from '../interfaces/jwt-payload.interface';
+import { IAccessToken, ILoginResponse } from './../interfaces/login-response.interface';
+import { InjectModel } from '@nestjs/mongoose';
+import { IRefreshToken } from '../interfaces';
+import { v4 as uuidv4 } from 'uuid';
+import { CrudService } from '@famalabs/nestx-core';
+import { AuthOptions } from '../interfaces/auth-options.interface';
 
 @Injectable()
-export class TokenService implements ITokenService {
+export class TokenService extends CrudService<DocumentType<RefreshToken>> {
+  private refreshTokenTtl: number;
   constructor(
-    private readonly accessTokenService: AccessTokenService,
-    private readonly refreshTokenService: RefreshTokenService,
-  ) {}
-
-  async refresh(token: string): Promise<IRefreshToken> {
-    return await this.refreshTokenService.refresh(token);
+    @InjectModel(RefreshToken.name)
+    private readonly _tokenModel: ReturnModelType<typeof RefreshToken>,
+    private jwtService: JwtService,
+    @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions,
+    @Inject(CACHE_MANAGER) protected readonly cacheManager,
+  ) {
+    super(_tokenModel);
+    this.refreshTokenTtl = _AuthOptions.constants.jwt.refreshTokenTTL;
   }
 
-  async deleteRefreshTokenForUser(userId: string): Promise<void> {
-    await this.refreshTokenService.deleteRefreshTokenForUser(userId);
+  async getAccessTokenFromRefreshToken(refreshToken: string, oldAccessToken: string): Promise<ILoginResponse> {
+    // check if refresh token exist in database and is still valid
+    const token = await this.findOne({ value: refreshToken });
+    if (!token) {
+      throw new NotFoundException(REFRESH_TOKEN_ERRORS.TOKEN_NOT_FOUND);
+    }
+    const currentDate = new Date();
+    if (token.expiresAt < currentDate) {
+      throw new BadRequestException(REFRESH_TOKEN_ERRORS.TOKEN_EXPIRED);
+    }
+
+    // Now Generate a new access token
+    // check if oldAccessToken was blacklisted
+    const isBlacklisted = await this.isBlackListed(oldAccessToken);
+    if (isBlacklisted) {
+      throw new UnauthorizedException(JWT_ERRORS.TOKEN_BLACKLISTED);
+    }
+    // Check if the oldAccesToken was a validToken (ignore expiration this time)
+    const oldPayload: IJwtPayload = await this.validateToken(oldAccessToken, true);
+    const payload: IJwtPayload = {
+      sub: oldPayload.sub,
+    };
+
+    // check if the owner of the oldAccessToken is the same of the refreshToken
+    if (!(token.userId === payload.sub.userId)) {
+      throw new UnauthorizedException(JWT_ERRORS.WRONG_OWNER);
+    }
+
+    // create a newAccessToken with oldPayload and revoke the oldOne
+    const loginResponse: ILoginResponse = await this.createAccessToken(payload);
+    await this.revokeToken(oldAccessToken, oldPayload.sub.userId);
+
+    // Remove old refresh token and generate a new one
+    await this.deleteById(token._id);
+    const userId = oldPayload.sub.userId;
+    const refreshTMP = await this.createRefreshToken(userId);
+    loginResponse.refreshToken = refreshTMP.value;
+
+    return loginResponse;
   }
 
-  async createAccessToken(payload: IJwtPayload): Promise<string> {
-    return await this.accessTokenService.create(payload);
+  async createAccessToken(payload: IJwtPayload): Promise<IAccessToken> {
+    const opts = this._AuthOptions.constants.jwt.signOptions;
+    //this optional setting avoid any collision in token generation
+    opts.jwtid = uuidv4();
+    const accessToken = this.jwtService.sign(payload, opts);
+    const token: ILoginResponse = {
+      accessToken: accessToken,
+      expiresIn: this._AuthOptions.constants.jwt.signOptions.expiresIn,
+      tokenType: 'Bearer',
+    };
+    return token;
   }
 
   async createRefreshToken(userId: string): Promise<IRefreshToken> {
-    return await this.refreshTokenService.createTokenForUser(userId);
+    const date = new Date();
+    const refreshToken: IRefreshToken = {
+      userId: userId,
+      value: randomBytes(64).toString('hex'),
+      expiresAt: new Date(date.setDate(date.getDate() + this.refreshTokenTtl)),
+    };
+    await this.create(refreshToken);
+    return refreshToken;
   }
 
-  async verifyAccessToken(token: string): Promise<IJwtPayload> {
-    return await this.accessTokenService.verify(token);
+  async deleteAllRefreshTokenForUser(userId: string) {
+    await this.model.deleteMany({ userId: { $eq: userId } }).exec();
+  }
+
+  async deleteRefreshToken(value: string) {
+    const doc = await this.findOne({ value: value });
+    await this.delete({ value: value });
+  }
+
+  async validateToken(token: string, ignoreExpiration = false): Promise<IJwtPayload> {
+    try {
+      return this.jwtService.verify(token, {
+        ignoreExpiration,
+      }) as IJwtPayload;
+    } catch (err) {
+      throw new UnauthorizedException(JWT_ERRORS.TOKEN_NOT_VALID);
+    }
+  }
+
+  async isBlackListed(accessToken: string): Promise<boolean> {
+    const value = await this.cacheManager.get(accessToken);
+    //if value is null => token isn't blacklisted
+    //if values isn't null => token is blacklisted
+    if (!value) {
+      return false;
+    }
+    return true;
+  }
+
+  async revokeToken(accessToken: string, userId: string) {
+    await this.cacheManager.set(accessToken, userId);
+    return;
   }
 }

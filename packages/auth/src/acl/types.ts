@@ -1,4 +1,4 @@
-import { Instance } from '../middlewares/instance.middleware';
+import { Instance } from '../getInstance/instance.middleware';
 import { Request } from 'express';
 
 export interface ACLContext {

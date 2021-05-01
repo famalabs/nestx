@@ -1,13 +1,16 @@
+import { IRefreshToken } from './../interfaces/refresh-token.interface';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
 
-export type GrantType = 'refresh_token';
-export class RefreshTokenDto {
-  @ApiProperty({ required: true })
-  @IsString()
-  refreshToken!: string;
+export class RefreshTokenDto implements IRefreshToken {
+  id?: string;
 
   @ApiProperty({ required: true })
-  @IsString()
-  grantType!: GrantType;
+  value!: string;
+
+  @ApiProperty({ required: true })
+  userId!: string;
+
+  @ApiProperty({ required: true })
+  expiresAt: Date;
+
 }

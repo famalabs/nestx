@@ -10,7 +10,7 @@ import {
 import { AUTH_OPTIONS, EMAIL_ERRORS, LOGIN_ERRORS, RESET_PASSWORD_ERRORS, SIGNUP_ERRORS } from './constants';
 import { User } from './dto/user';
 import { LoginDto, LoginResponseDto, ResetPasswordDto, SignupDto } from './dto';
-import { UserIdentityService } from './identity-provider/user-identity.service';
+import { UserIdentityService } from './user-identity.service';
 import { TokenService } from './token/token.service';
 import { EmailNotificationService, IEmailOptions } from './notification/email';
 import {
@@ -25,7 +25,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import * as crypto from 'crypto';
 import { Request } from 'express';
-import { AuthOptions } from './interfaces/module/auth-options.interface';
+import { AuthOptions } from './interfaces/auth-options.interface';
 
 @Injectable()
 export class AuthService {
@@ -42,72 +42,15 @@ export class AuthService {
   }
 
   async signup(data: SignupDto): Promise<User> {
-    const { email, password } = data;
-    const userExist = await this.usersService.findByEmail(email);
-    if (userExist) {
+    const user = await this.usersService.findByEmail(data.email);
+    if (user) {
       throw new BadRequestException(SIGNUP_ERRORS.USER_ALREADY_EXISTS);
     }
-    const user = await this.usersService.create({ email: email, password: password });
-    return user;
-  }
-
-  async login(data: LoginDto): Promise<ILoginResponse> {
-    const { email, password } = data;
-    const user = await this.usersService.validateUser(email, password);
-    if (this._AuthOptions.constants.blockNotVerifiedUser && !user.isVerified) {
-      throw new UnauthorizedException(LOGIN_ERRORS.USER_NOT_VERIFIED);
-    }
-    return await this.createLoginResponse(user._id, user.roles);
-  }
-
-  async logout(userId: string): Promise<void> {
-    await this.tokenService.deleteRefreshTokenForUser(userId);
-  }
-
-  async refresh(token: string): Promise<any> {
-    const refreshToken = await this.tokenService.refresh(token);
-    const user = await this.usersService.findById(refreshToken.userId);
-    const payload: IJwtPayload = {
-      sub: {
-        userId: user.id,
-        roles: user.roles,
-      },
-    };
-    const accessToken = await this.tokenService.createAccessToken(payload);
-    const loginResponse: ILoginResponse = {
-      accessToken: accessToken,
-      expiresIn: this._AuthOptions.constants.jwt.accessTokenTTL,
-      tokenType: 'Bearer',
-      refreshToken: refreshToken.value,
-    };
-    return loginResponse;
-  }
-
-  private async createLoginResponse(userId: string, roles: string[]): Promise<ILoginResponse> {
-    const payload: IJwtPayload = {
-      sub: {
-        userId: userId,
-        roles: roles,
-      },
-    };
-    const accessToken = await this.tokenService.createAccessToken(payload);
-    const refreshToken = await this.tokenService.createRefreshToken(userId);
-
-    const loginResponse: ILoginResponse = {
-      accessToken: accessToken,
-      expiresIn: this._AuthOptions.constants.jwt.accessTokenTTL,
-      tokenType: 'Bearer',
-      refreshToken: refreshToken.value,
-    };
-    return loginResponse;
+    return await this.usersService.create({ email: data.email, password: data.password });
   }
 
   tokenFromRequestExtractor(req: Request) {
     return this._AuthOptions.constants.jwt.tokenFromRequestExtractor(req);
-  }
-
-  async thirdPartyLogin(userId: string, roles: string[]): Promise<ILoginResponse> {
-    return await this.createLoginResponse(userId, roles);
   }
 
   async validateUser(email: string, password: string): Promise<User> {
@@ -159,6 +102,46 @@ export class AuthService {
     });
     await this.userIdentityService.linkIdentity(thirdPartyUser, registeredUser._id);
     return registeredUser;
+  }
+
+  async login(credentials: LoginDto): Promise<ILoginResponse> {
+    const user = await this.usersService.validateUser(credentials.email, credentials.password);
+    if (this._AuthOptions.constants.blockNotVerifiedUser && !user.isVerified) {
+      throw new UnauthorizedException(LOGIN_ERRORS.USER_NOT_VERIFIED);
+    }
+    return await this.createLoginResponse(user._id, user.roles);
+  }
+
+  async thirdPartyLogin(userId: string, roles: string[]): Promise<ILoginResponse> {
+    return await this.createLoginResponse(userId, roles);
+  }
+
+  private async createLoginResponse(userId: string, roles: string[]): Promise<ILoginResponse> {
+    const payload: IJwtPayload = {
+      sub: {
+        userId: userId,
+        roles: roles,
+      },
+    };
+    const accessToken = await this.tokenService.createAccessToken(payload);
+    const refreshToken = await this.tokenService.createRefreshToken(userId);
+
+    const loginResponse: ILoginResponse = {
+      refreshToken: refreshToken.value,
+      ...accessToken,
+    };
+
+    return loginResponse;
+  }
+
+  async logout(userId: string, accessToken: string, refreshToken: string, fromAll: boolean): Promise<null> {
+    if (fromAll) {
+      await this.logoutFromAll(userId);
+    } else {
+      await this.logoutFromOne(refreshToken);
+    }
+    await this.tokenService.revokeToken(accessToken, userId);
+    return null;
   }
 
   async sendVerificationEmail(email: string): Promise<boolean> {
@@ -248,6 +231,10 @@ export class AuthService {
     //TODO maybe you also want to delete all refresh token for the user who own the token
   }
 
+  async refreshToken(refreshToken: string, oldAccessToken: string): Promise<LoginResponseDto> {
+    return await this.tokenService.getAccessTokenFromRefreshToken(refreshToken, oldAccessToken);
+  }
+
   private async resetFromToken(token: string, newPassword: string): Promise<boolean> {
     const notification = await this.emailNotificationService.findOne({
       category: NOTIFICATION_CATEGORY.RESET_CREDENTIALS,
@@ -285,6 +272,16 @@ export class AuthService {
       );
       return newDoc;
     }
+  }
+
+  private async logoutFromOne(refreshToken: string): Promise<null> {
+    await this.tokenService.deleteRefreshToken(refreshToken);
+    return null;
+  }
+
+  private async logoutFromAll(userId: string): Promise<null> {
+    await this.tokenService.deleteAllRefreshTokenForUser(userId);
+    return null;
   }
 
   private checkTimestampLimit(first: Date, last: Date, limit: number): boolean {

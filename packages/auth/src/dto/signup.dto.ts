@@ -1,6 +1,6 @@
 import { IsString, IsEmail } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ISignup } from '../interfaces/oauth/signup.interface';
+import { ISignup } from './../interfaces/signup.interface';
 
 export class SignupDto implements ISignup {
   @ApiProperty({ example: 'user@email.com' })

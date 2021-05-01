@@ -1,5 +1,7 @@
-import { Body, Controller, Get, Post, UnprocessableEntityException, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
+import { BadRequestException, Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiQuery, ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
+import { GoogleGuard } from './guards/google.guard';
+import { FacebookGuard } from './guards/facebook.guard';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-respone.dto';
 import { AuthService } from './auth.service';
@@ -7,9 +9,11 @@ import { SignupDto } from './dto/signup.dto';
 import { LoginGuard } from './guards/login.guard';
 import { JwtGuard } from './guards/jwt.guard';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { User } from './decorators';
-import { NotificationTokenDto, EmailDto, RefreshTokenDto } from './dto';
-import { ACL, GRANT } from './acl';
+import { ACL, User } from './decorators';
+import { NotificationTokenDto, EmailDto } from './dto';
+import { GoogleLinkGuard } from './guards/google-link.guard';
+import { FacebookLinkGuard } from './guards/facebook-link.guard';
+import { GRANT } from './acl';
 
 @ACL(GRANT.ANY)
 @ApiTags('Auth')
@@ -30,27 +34,6 @@ export class AuthController {
   async signup(@Body() data: SignupDto): Promise<boolean> {
     await this.authService.signup(data);
     return await this.authService.sendVerificationEmail(data.email);
-  }
-
-  @Post('token')
-  @ApiOperation({ summary: 'Refresh token' })
-  @ApiResponse({ type: LoginResponseDto })
-  async token(@Body() data: RefreshTokenDto): Promise<LoginResponseDto> {
-    const grantType = data.grantType;
-    if (grantType == 'refresh_token') {
-      const token = data.refreshToken;
-      return await this.authService.refresh(token);
-    } else {
-      throw new UnprocessableEntityException();
-    }
-  }
-
-  @Post('logout')
-  @ApiBearerAuth()
-  @UseGuards(JwtGuard)
-  @ApiOperation({ summary: 'Logout' })
-  async logout(@User() user): Promise<void> {
-    return await this.authService.logout(user.id);
   }
 
   @Post('email/verify')
@@ -78,11 +61,98 @@ export class AuthController {
     return this.authService.resetPassword(resetPwd);
   }
 
+  @Get('token')
+  @ApiBearerAuth()
+  @ApiQuery({ name: 'refresh_token', required: true })
+  @ApiOperation({ summary: 'Refresh token' })
+  @ApiResponse({ type: LoginResponseDto })
+  async token(@Req() req, @Query('refresh_token') refreshToken: string): Promise<LoginResponseDto> {
+    const oldAccessToken = this.authService.tokenFromRequestExtractor(req);
+    return await this.authService.refreshToken(refreshToken, oldAccessToken);
+  }
+
+  @Post('logout')
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard)
+  @ApiQuery({ name: 'refresh_token', required: true })
+  @ApiQuery({ name: 'from_all', required: true, type: Boolean })
+  @ApiOperation({ summary: 'Logout' })
+  async logout(
+    @Req() req,
+    @Query('refresh_token') refreshToken: string,
+    @Query('from_all') fromAll = 'false',
+  ): Promise<null> {
+    if (fromAll !== 'false' && fromAll !== 'true') {
+      throw new BadRequestException('from_all invalid value');
+    }
+    const accessToken = this.authService.tokenFromRequestExtractor(req);
+    const flag = fromAll === 'true';
+    return await this.authService.logout(req.user['id'], accessToken, refreshToken, flag);
+  }
+
   @Get('me')
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: 'Me route' })
   @ApiBearerAuth()
-  async me(@User() user): Promise<any> {
-    return user;
+  async me(@Req() req): Promise<any> {
+    return req.user;
+  }
+
+  @Get('google')
+  @ApiOperation({ summary: 'Google login/signup' })
+  @UseGuards(GoogleGuard)
+  async googleAuth(@Req() req, @Res() res) {
+    return;
+  }
+
+  @Get('google/redirect')
+  @ApiOperation({ summary: 'Google login/signup redirect' })
+  @UseGuards(GoogleGuard)
+  async googleAuthRedirect(@User() user): Promise<LoginResponseDto> {
+    return await this.authService.thirdPartyLogin(user.id, user.roles);
+  }
+
+  @Get('facebook')
+  @ApiOperation({ summary: 'Facebook login/signup' })
+  @UseGuards(FacebookGuard)
+  async facebookLogin(@Req() req, @Res() res) {
+    return;
+  }
+
+  @Get('facebook/redirect')
+  @ApiOperation({ summary: 'Facebook login/signup redirect' })
+  @UseGuards(FacebookGuard)
+  async facebookLoginCallback(@User() user): Promise<LoginResponseDto> {
+    return await this.authService.thirdPartyLogin(user.id, user.roles);
+  }
+
+  @Get('connect/google')
+  @ApiOperation({ summary: 'Google link identity' })
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard, GoogleLinkGuard)
+  async linkGoogleIdentity(@Req() req, @Res() res) {
+    return;
+  }
+
+  @Get('connect/google/redirect')
+  @ApiOperation({ summary: 'Google link identity redirect' })
+  @UseGuards(GoogleLinkGuard)
+  async linkGoogleIdentityRedirect(@Req() req) {
+    return;
+  }
+
+  @Get('connect/facebook')
+  @ApiOperation({ summary: 'Facebook link identity' })
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard, FacebookLinkGuard)
+  async linkFacebookIdentity(@Req() req, @Res() res) {
+    return;
+  }
+
+  @Get('connect/facebook/redirect')
+  @ApiOperation({ summary: 'Facebook link identity redirect' })
+  @UseGuards(FacebookLinkGuard)
+  async linkFacebookIdentityCallback(@Req() req) {
+    return;
   }
 }

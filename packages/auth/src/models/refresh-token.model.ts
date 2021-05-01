@@ -1,6 +1,6 @@
 import { prop } from '@typegoose/typegoose';
 import { BaseModel } from '@famalabs/nestx-core';
-import { IRefreshToken } from '../interfaces/oauth/refresh-token.interface';
+import { IRefreshToken } from './../interfaces/refresh-token.interface';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RefreshToken extends BaseModel implements IRefreshToken {

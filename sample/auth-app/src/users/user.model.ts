@@ -3,7 +3,7 @@ import * as bcrypt from 'bcrypt';
 import { IsEmail } from 'class-validator';
 import * as mongoose from 'mongoose';
 import { BaseModel } from '@famalabs/nestx-core';
-import { IUser } from '@famalabs/nestx-auth';
+import { IUser } from '@famalabs/nestx-auth/dist/interfaces/user.interface';
 export enum USER_ROLES {
   ADMIN = 'ADMIN',
   KING = 'KING',

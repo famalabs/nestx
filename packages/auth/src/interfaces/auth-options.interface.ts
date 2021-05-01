@@ -1,9 +1,9 @@
 import { LoggerService } from '@nestjs/common';
-import { JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
-import { ACLManager } from '../../acl';
-import { INotificationSender } from '../notifications/notification-sender.interface';
-import { IThirdPartyProviderOptions } from '../oauth/third-party-providers-options.interface';
-import { IUsersService } from '../user/users-service.interface';
+import { JwtSignOptions } from '@nestjs/jwt';
+import { ACLManager } from '../acl';
+import { INotificationSender } from './notification-sender.interface';
+import { IThirdPartyProviderOptions } from './third-party-providers-options.interface';
+import { IUsersService } from './users-service.interface';
 
 export type JwtFromRequestFunction = (req: any) => string | null;
 
@@ -51,10 +51,7 @@ export interface AuthOptions {
        * Jwt sign options (must be the same used for JwtModule)
        */
       signOptions: JwtSignOptions;
-      /**
-       * Jwt verify options (must be the same used for JwtModule)
-       */
-      verifyOptions: JwtVerifyOptions;
+
       /**
        * Time-to-live for acces token
        */

@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsDefined, IsOptional, IsString } from 'class-validator';
-import { ILoginResponse, TokenType } from '../interfaces/oauth/login-response.interface';
+import { ILoginResponse } from './../interfaces/login-response.interface';
 
 export class LoginResponseDto implements ILoginResponse {
   @ApiProperty()
@@ -10,14 +10,14 @@ export class LoginResponseDto implements ILoginResponse {
   @ApiProperty({ default: 'Bearer' })
   @IsOptional()
   @IsString()
-  tokenType: TokenType;
+  tokenType?: string = 'Bearer';
 
   @ApiProperty()
   @IsDefined()
-  expiresIn: number;
+  expiresIn: string | number;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  refreshToken: string;
+  refreshToken?: string;
 }
