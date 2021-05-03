@@ -1,24 +1,24 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
+import { JwtModuleAsyncOptions, JwtModuleOptions } from '@nestjs/jwt';
+import { AuthModuleAsyncOptions, IAuthModuleOptions } from '@nestjs/passport';
 import { AuthCoreModule } from './auth-core.module';
-import { AuthAsyncOptions } from './interfaces/auth-async-options.interface';
-import { AuthOptions } from './interfaces/auth-options.interface';
-import { PluginAsyncOptions, PluginModule, PluginOptions } from './plugin-module/plugin.module';
+import { AuthAsyncOptions } from './interfaces/module/auth-async-options.interface';
+import { AuthOptions } from './interfaces/module/auth-options.interface';
 
-@Global()
 @Module({})
 export class AuthModule {
-  public static register(authOptions: AuthOptions, pluginOptions: PluginOptions): DynamicModule {
+  public static register(authOptions: AuthOptions): DynamicModule {
     return {
       module: AuthModule,
-      imports: [AuthCoreModule.register(authOptions), PluginModule.register(pluginOptions)],
+      imports: [AuthCoreModule.register(authOptions)],
       exports: [AuthCoreModule],
     };
   }
 
-  public static registerAsync(authOptions: AuthAsyncOptions, pluginOptions: PluginAsyncOptions): DynamicModule {
+  public static registerAsync(authOptions: AuthAsyncOptions): DynamicModule {
     return {
       module: AuthModule,
-      imports: [AuthCoreModule.registerAsync(authOptions), PluginModule.registerAsync(pluginOptions)],
+      imports: [AuthCoreModule.registerAsync(authOptions)],
       exports: [AuthCoreModule],
     };
   }
