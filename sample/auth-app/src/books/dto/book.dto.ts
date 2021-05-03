@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Ref } from '@typegoose/typegoose';
 import { IsString } from 'class-validator';
-import { User } from 'src/users/user.model';
+import { User } from '../../users/user.model';
 import { IBook } from '../interfaces/book.interface';
 
 export class BookDto implements IBook {

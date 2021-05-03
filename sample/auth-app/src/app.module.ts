@@ -8,12 +8,12 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { BooksModule } from './books/books.module';
 import { AuthModule } from '@famalabs/nestx-auth';
 import { SuperGuard } from '@famalabs/nestx-auth';
-import { PassportConfigService, JwtConfigService, CacheConfigService, AuthConfigService } from './config';
+import { PassportConfigService, JwtConfigService, AuthConfigService } from './config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    MongooseModule.forRoot(process.env.MONGO_URI, {
+    MongooseModule.forRoot(process.env.MONGODB_URI, {
       autoIndex: true,
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -21,23 +21,12 @@ import { PassportConfigService, JwtConfigService, CacheConfigService, AuthConfig
       useCreateIndex: true,
     }),
     UsersModule,
-    AuthModule.registerAsync(
-      {
-        imports: [UsersModule], // need this import in order to resolve the dependencies  for user model in AuthConfigService
-        useClass: AuthConfigService,
-      },
-      {
-        passport: {
-          useClass: PassportConfigService,
-        },
-        jwt: {
-          useClass: JwtConfigService,
-        },
-        cache: {
-          useClass: CacheConfigService,
-        },
-      },
-    ),
+    AuthModule.registerAsync({
+      jwtModuleConfig: { useClass: JwtConfigService },
+      passportModuleConfig: { useClass: PassportConfigService },
+      imports: [UsersModule], // need this import in order to resolve the dependencies  for user model in AuthConfigService
+      useClass: AuthConfigService,
+    }),
     BooksModule,
   ],
   controllers: [AppController],
@@ -45,7 +34,6 @@ import { PassportConfigService, JwtConfigService, CacheConfigService, AuthConfig
     AuthConfigService,
     PassportConfigService,
     JwtConfigService,
-    CacheConfigService,
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
