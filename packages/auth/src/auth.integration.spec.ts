@@ -31,7 +31,15 @@ import {
 import { EmailNotification, RefreshToken, UserIdentity } from './models';
 import { mongoose, prop, buildSchema, getModelForClass } from '@typegoose/typegoose';
 import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
-import { AUTH_OPTIONS, JWT_ERRORS, LOGIN_ERRORS, REFRESH_TOKEN_ERRORS, SIGNUP_ERRORS } from './constants';
+import {
+  AUTH_OPTIONS,
+  JWT_ERRORS,
+  JWT_OPTIONS,
+  LOGIN_ERRORS,
+  PASSPORT_OPTIONS,
+  REFRESH_TOKEN_ERRORS,
+  SIGNUP_ERRORS,
+} from './constants';
 import { JwtModuleOptions } from '@nestjs/jwt';
 import { IAuthModuleOptions } from '@nestjs/passport';
 import { TokenService } from './token/token.service';
@@ -46,7 +54,6 @@ import { LocalStrategy, JwtStrategy } from './strategies';
 import { ExtractJwt } from 'passport-jwt';
 import { ACL, ACLGuard, ACLManager, SuperGuard } from './acl';
 import { BaseModel, CrudService } from '@famalabs/nestx-core';
-import { PluginModule, PluginOptions } from './plugin-module';
 
 import { JwtGuard } from '.';
 import { FacebookGuard } from './facebook/guards';
@@ -175,10 +182,6 @@ const authOptions: AuthOptions = {
   constants: {
     blockNotVerifiedUser: true,
     jwt: {
-      secret: 'secret',
-      signOptions: { expiresIn: 900 },
-      verifyOptions: {},
-      accessTokenTTL: 900,
       refreshTokenTTL: 30,
       tokenFromRequestExtractor: ExtractJwt.fromAuthHeaderAsBearerToken(),
     },
@@ -214,11 +217,6 @@ const authOptions: AuthOptions = {
   jwtModuleConfig: {},
 };
 
-const pluginOptions: PluginOptions = {
-  passport: passportModuleOptions,
-  jwt: jwtModuleOptions,
-};
-
 describe('Auth Module integration', () => {
   let authService: AuthService;
   let userIdentityService: UserIdentityService;
@@ -230,6 +228,7 @@ describe('Auth Module integration', () => {
   let app: INestApplication;
   let server;
   let options: AuthOptions;
+  let jwtOptions: JwtModuleOptions;
 
   beforeEach(async () => {
     const authModule: TestingModule = await Test.createTestingModule({
@@ -241,7 +240,6 @@ describe('Auth Module integration', () => {
           { name: UserIdentity.name, schema: buildSchema(UserIdentity) },
           { name: MockUser.name, schema: buildSchema(MockUser) },
         ]),
-        PluginModule.register(pluginOptions),
       ],
       providers: [
         AuthService,
@@ -253,6 +251,9 @@ describe('Auth Module integration', () => {
         JwtGuard,
         ACLGuard,
         { provide: AUTH_OPTIONS, useValue: authOptions },
+        { provide: PASSPORT_OPTIONS, useValue: passportModuleOptions },
+        { provide: JWT_OPTIONS, useValue: jwtModuleOptions },
+
         {
           provide: APP_FILTER,
           useClass: HttpExceptionFilter,
@@ -273,6 +274,8 @@ describe('Auth Module integration', () => {
     authService = authModule.get<AuthService>(AuthService);
     authController = authModule.get<AuthController>(AuthController);
     options = authModule.get<AuthOptions>(AUTH_OPTIONS);
+    jwtOptions = authModule.get<JwtModuleOptions>(JWT_OPTIONS);
+
     usersService = options.usersService;
     sender = options.notificationSender;
     userIdentityService = authModule.get<UserIdentityService>(UserIdentityService);
@@ -322,7 +325,7 @@ describe('Auth Module integration', () => {
       expect(res.body).toEqual({
         accessToken: expect.any(String),
         refreshToken: expect.any(String),
-        expiresIn: authOptions.constants.jwt.accessTokenTTL,
+        expiresIn: jwtOptions.signOptions.expiresIn,
         tokenType: 'Bearer',
       });
       done();
@@ -395,7 +398,7 @@ describe('Auth Module integration', () => {
       expect(getResponse).toEqual({
         accessToken: expect.any(String),
         refreshToken: expect.any(String),
-        expiresIn: authOptions.constants.jwt.accessTokenTTL,
+        expiresIn: jwtOptions.signOptions.expiresIn,
         tokenType: 'Bearer',
       });
       done();
@@ -540,7 +543,7 @@ describe('Auth Module integration', () => {
       expect(res.body).toEqual({
         accessToken: expect.any(String),
         refreshToken: expect.any(String),
-        expiresIn: authOptions.constants.jwt.accessTokenTTL,
+        expiresIn: jwtOptions.signOptions.expiresIn,
         tokenType: 'Bearer',
       });
       expect(res.body.accessToken).not.toEqual(accessToken);

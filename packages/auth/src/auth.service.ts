@@ -7,9 +7,16 @@ import {
   InternalServerErrorException,
   BadRequestException,
 } from '@nestjs/common';
-import { AUTH_OPTIONS, EMAIL_ERRORS, LOGIN_ERRORS, RESET_PASSWORD_ERRORS, SIGNUP_ERRORS } from './constants';
+import {
+  AUTH_OPTIONS,
+  EMAIL_ERRORS,
+  JWT_OPTIONS,
+  LOGIN_ERRORS,
+  RESET_PASSWORD_ERRORS,
+  SIGNUP_ERRORS,
+} from './constants';
 import { User } from './dto/user';
-import { LoginDto, LoginResponseDto, ResetPasswordDto, SignupDto } from './dto';
+import { LoginDto, ResetPasswordDto, SignupDto } from './dto';
 import { UserIdentityService } from './user-identity/user-identity.service';
 import { TokenService } from './token/token.service';
 import { EmailNotificationService, IEmailOptions } from './notification/email';
@@ -19,6 +26,7 @@ import {
   ILoginResponse,
   INotificationSender,
   IThirdPartyUser,
+  ITokens,
   IUsersService,
   NOTIFICATION_CATEGORY,
 } from './interfaces';
@@ -26,6 +34,7 @@ import { v4 as uuidv4 } from 'uuid';
 import * as crypto from 'crypto';
 import { Request } from 'express';
 import { AuthOptions } from './interfaces/module/auth-options.interface';
+import { JwtModuleOptions } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -36,6 +45,7 @@ export class AuthService {
     private readonly emailNotificationService: EmailNotificationService,
     private readonly userIdentityService: UserIdentityService,
     @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions,
+    @Inject(JWT_OPTIONS) private jwtOptions: JwtModuleOptions,
   ) {
     this.usersService = this._AuthOptions.usersService;
     this.notificationSender = this._AuthOptions.notificationSender;
@@ -57,14 +67,15 @@ export class AuthService {
     if (this._AuthOptions.constants.blockNotVerifiedUser && !user.isVerified) {
       throw new UnauthorizedException(LOGIN_ERRORS.USER_NOT_VERIFIED);
     }
-    return await this.createLoginResponse(user._id, user.roles);
+    const { accessToken, refreshToken } = await this.createTokensForUser(user._id, user.roles);
+    return this.createLoginResponse(accessToken, refreshToken.value);
   }
 
   async logout(userId: string): Promise<void> {
     await this.tokenService.deleteRefreshTokenForUser(userId);
   }
 
-  async refresh(token: string): Promise<any> {
+  async refresh(token: string): Promise<ILoginResponse> {
     const refreshToken = await this.tokenService.refresh(token);
     const user = await this.usersService.findById(refreshToken.userId);
     const payload: IJwtPayload = {
@@ -74,16 +85,29 @@ export class AuthService {
       },
     };
     const accessToken = await this.tokenService.createAccessToken(payload);
+    return this.createLoginResponse(accessToken, refreshToken.value);
+  }
+
+  async thirdPartyLogin(userId: string, roles: string[]): Promise<ILoginResponse> {
+    const { accessToken, refreshToken } = await this.createTokensForUser(userId, roles);
+    return this.createLoginResponse(accessToken, refreshToken.value);
+  }
+
+  private createLoginResponse(accessToken: string, refreshToken: string): ILoginResponse {
     const loginResponse: ILoginResponse = {
       accessToken: accessToken,
-      expiresIn: this._AuthOptions.constants.jwt.accessTokenTTL,
+      expiresIn: this.jwtOptions.signOptions.expiresIn,
       tokenType: 'Bearer',
-      refreshToken: refreshToken.value,
+      refreshToken: refreshToken,
     };
     return loginResponse;
   }
 
-  private async createLoginResponse(userId: string, roles: string[]): Promise<ILoginResponse> {
+  tokenFromRequestExtractor(req: Request) {
+    return this._AuthOptions.constants.jwt.tokenFromRequestExtractor(req);
+  }
+
+  private async createTokensForUser(userId: string, roles: string[]): Promise<ITokens> {
     const payload: IJwtPayload = {
       sub: {
         userId: userId,
@@ -93,21 +117,7 @@ export class AuthService {
     const accessToken = await this.tokenService.createAccessToken(payload);
     const refreshToken = await this.tokenService.createRefreshToken(userId);
 
-    const loginResponse: ILoginResponse = {
-      accessToken: accessToken,
-      expiresIn: this._AuthOptions.constants.jwt.accessTokenTTL,
-      tokenType: 'Bearer',
-      refreshToken: refreshToken.value,
-    };
-    return loginResponse;
-  }
-
-  tokenFromRequestExtractor(req: Request) {
-    return this._AuthOptions.constants.jwt.tokenFromRequestExtractor(req);
-  }
-
-  async thirdPartyLogin(userId: string, roles: string[]): Promise<ILoginResponse> {
-    return await this.createLoginResponse(userId, roles);
+    return { accessToken, refreshToken };
   }
 
   async validateUser(email: string, password: string): Promise<User> {

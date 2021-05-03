@@ -1,33 +1,27 @@
-import { Module, DynamicModule, Provider, Global, MiddlewareConsumer } from '@nestjs/common';
+import { DynamicModule, MiddlewareConsumer, Module, Provider } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
+import { PassportModule } from '@nestjs/passport';
 import { buildSchema } from '@typegoose/typegoose';
-import { EmailNotification, RefreshToken, UserIdentity } from './models';
-import { JwtStrategy, LocalStrategy } from './strategies';
-import { EmailNotificationService } from './notification/email';
-import { UserIdentityService } from './user-identity/user-identity.service';
-import { JwtGuard } from './guards';
-import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { ACLGuard } from './acl/guards';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { AuthOptions } from './interfaces/module/auth-options.interface';
-import { AuthAsyncOptions } from './interfaces/module/auth-async-options.interface';
-import { AuthOptionsFactory } from './interfaces/module/auth-options-factory.interface';
-import { AUTH_OPTIONS } from './constants';
-import { createAuthProviders } from './auth.providers';
-import { ACLGuard } from './acl';
-
-import { RefreshTokenService } from './token/refresh-token.service';
-import { AccessTokenService } from './token/access-token.service';
-import { TokenService } from './token/token.service';
-import { GoogleGuard, GoogleLinkGuard } from './google/guards';
-import { GoogleLinkStrategy, GoogleStrategy } from './google/strategies';
-import { GoogleController } from './google/google.controller';
+import { AUTH_OPTIONS, JWT_OPTIONS, PASSPORT_OPTIONS } from './constants';
+import { FacebookController } from './facebook/facebook.controller';
+import { FacebookGuard, FacebookLinkGuard } from './facebook/guards';
 import { FacebookMiddleware } from './facebook/middlewares/facebook.middleware';
 import { FacebookLinkStrategy, FacebookStrategy } from './facebook/strategies';
-import { FacebookGuard, FacebookLinkGuard } from './facebook/guards';
-import { FacebookController } from './facebook/facebook.controller';
-import { PassportModule } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
+import { GoogleController } from './google/google.controller';
+import { GoogleGuard, GoogleLinkGuard } from './google/guards';
+import { GoogleLinkStrategy, GoogleStrategy } from './google/strategies';
+import { JwtGuard } from './guards';
+import { AuthAsyncOptions, AuthOptions, AuthOptionsFactory } from './interfaces';
+import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { EmailNotification, RefreshToken, UserIdentity } from './models';
+import { EmailNotificationService } from './notification';
+import { JwtStrategy, LocalStrategy } from './strategies';
+import { AccessTokenService, RefreshTokenService, TokenService } from './token';
+import { UserIdentityService } from './user-identity/user-identity.service';
 
 @Module({
   imports: [
@@ -88,7 +82,7 @@ export class AuthCoreModule {
     };
 
     const passportModuleOptions = {
-      provide: 'PassportOptions',
+      provide: PASSPORT_OPTIONS,
       useFactory: async (options: AuthOptions) => {
         return options.passportModuleConfig;
       },
@@ -96,7 +90,7 @@ export class AuthCoreModule {
     };
 
     const jwtModuleOptions = {
-      provide: 'JwtOptions',
+      provide: JWT_OPTIONS,
       useFactory: async (options: AuthOptions) => {
         return options.jwtModuleConfig;
       },
@@ -120,7 +114,7 @@ export class AuthCoreModule {
     const providers = this.createAsyncProviders(options);
 
     const passportModuleOptions = {
-      provide: 'PassportOptions',
+      provide: PASSPORT_OPTIONS,
       useFactory: async (options: AuthOptions) => {
         return options.passportModuleConfig;
       },
@@ -128,7 +122,7 @@ export class AuthCoreModule {
     };
 
     const jwtModuleOptions = {
-      provide: 'JwtOptions',
+      provide: JWT_OPTIONS,
       useFactory: async (options: AuthOptions) => {
         return options.jwtModuleConfig;
       },

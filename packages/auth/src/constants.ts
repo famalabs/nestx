@@ -1,4 +1,6 @@
 export const AUTH_OPTIONS = 'AUTH_OPTIONS';
+export const PASSPORT_OPTIONS = 'PASSPORT_OPTIONS';
+export const JWT_OPTIONS = 'JWT_OPTIONS';
 export const LOGIN_ERRORS = {
   USER_NOT_FOUND: "This user doesn't exists.",
   USER_NOT_VERIFIED: 'Please, verify you mail.',

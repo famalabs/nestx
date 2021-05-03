@@ -45,22 +45,6 @@ export interface AuthOptions {
     blockNotVerifiedUser: boolean;
     jwt: {
       /**
-       * Jwt secret (must be the same used for JwtModule)
-       */
-      secret: string;
-      /**
-       * Jwt sign options (must be the same used for JwtModule)
-       */
-      signOptions: JwtSignOptions;
-      /**
-       * Jwt verify options (must be the same used for JwtModule)
-       */
-      verifyOptions: JwtVerifyOptions;
-      /**
-       * Time-to-live for acces token
-       */
-      accessTokenTTL: number;
-      /**
        * Time-to-live for refresh token
        */
       refreshTokenTTL: number;

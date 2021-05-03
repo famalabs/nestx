@@ -2,7 +2,7 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtModuleOptions, JwtService, JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
 import { AuthOptions, IJwtPayload } from '../interfaces';
 import { v4 as uuidv4 } from 'uuid';
-import { AUTH_OPTIONS, JWT_ERRORS } from '../constants';
+import { AUTH_OPTIONS, JWT_ERRORS, JWT_OPTIONS } from '../constants';
 
 export interface IAccessTokenService {
   create(payload: IJwtPayload): Promise<string>;
@@ -13,7 +13,7 @@ export interface IAccessTokenService {
 export class AccessTokenService implements IAccessTokenService {
   private signOptions: JwtSignOptions;
   private verifyOptions: JwtVerifyOptions;
-  constructor(private jwtService: JwtService, @Inject('JwtOptions') private jwtOptions: JwtModuleOptions) {
+  constructor(private jwtService: JwtService, @Inject(JWT_OPTIONS) private jwtOptions: JwtModuleOptions) {
     this.signOptions = this.jwtOptions.signOptions;
     this.verifyOptions = this.jwtOptions.verifyOptions;
   }
