@@ -20,7 +20,7 @@ import { Document } from 'mongoose';
 import { LoginDto, ResetPasswordDto, User } from './dto';
 import * as mocks from 'node-mocks-http';
 import { EmailNotification } from './models';
-import { UserIdentityService } from './user-identity.service';
+import { UserIdentityService } from './user-identity/user-identity.service';
 import { EmailNotificationService } from './notification';
 
 const addMinutes = function (dt, minutes) {
@@ -126,7 +126,6 @@ export class MockSender implements INotificationSender {
 
 describe('AuthService', () => {
   let service: AuthService;
-  let tokenService: TokenService;
   let emailNotificationService: EmailNotificationService;
   let usersService: IUsersService;
   let sender: INotificationSender;
@@ -139,12 +138,11 @@ describe('AuthService', () => {
         {
           provide: TokenService,
           useValue: {
+            refresh: jest.fn(),
+            deleteRefreshTokenForUser: jest.fn(),
             createAccessToken: jest.fn(),
             createRefreshToken: jest.fn(),
-            revokeToken: jest.fn(),
-            getAccessTokenFromRefreshToken: jest.fn(),
-            deleteRefreshToken: jest.fn(),
-            deleteAllRefreshTokenForUser: jest.fn(),
+            verifyAccessToken: jest.fn(),
           },
         },
         {
@@ -196,7 +194,6 @@ describe('AuthService', () => {
 
     service = module.get<AuthService>(AuthService);
     emailNotificationService = module.get<EmailNotificationService>(EmailNotificationService);
-    tokenService = module.get<TokenService>(TokenService);
     options = module.get<AuthOptions>(AUTH_OPTIONS);
     usersService = options.usersService;
     sender = options.notificationSender;
@@ -205,7 +202,6 @@ describe('AuthService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
     expect(emailNotificationService).toBeDefined();
-    expect(tokenService).toBeDefined();
     expect(usersService).toBeDefined();
     expect(options).toBeDefined();
   });

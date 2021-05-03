@@ -3,7 +3,7 @@ import { Profile, Strategy, StrategyOptionsWithRequest, VerifyCallback } from 'p
 import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { AUTH_OPTIONS, JWT_ERRORS } from '../../constants';
 import { IThirdPartyUser, THIRD_PARTY_PROVIDER } from '../../interfaces/oauth/third-party-user.interface';
-import { UserIdentityService } from '../../identity-provider/user-identity.service';
+import { UserIdentityService } from '../../user-identity/user-identity.service';
 import qs = require('qs');
 import { TokenService } from '../../token/token.service';
 import { AuthOptions } from '../../interfaces/module/auth-options.interface';

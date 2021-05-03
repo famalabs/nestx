@@ -1,11 +1,22 @@
 import { AUTH_OPTIONS } from './constants';
-import { AuthOptions } from './interfaces/auth-options.interface';
+import { AuthOptions } from './interfaces/module/auth-options.interface';
 
 export function createAuthProviders(options: AuthOptions) {
-  return [
-    {
-      provide: AUTH_OPTIONS,
-      useValue: options,
+  const passportModuleOptions = {
+    provide: 'PassportOptions',
+    useFactory: async (options: AuthOptions) => {
+      return options.passportModuleConfig;
     },
-  ];
+    inject: [AUTH_OPTIONS],
+  };
+
+  const jwtModuleOptions = {
+    provide: 'JwtOptions',
+    useFactory: async (options: AuthOptions) => {
+      return options.jwtModuleConfig;
+    },
+    inject: [AUTH_OPTIONS],
+  };
+
+  return [passportModuleOptions, jwtModuleOptions];
 }
