@@ -1,5 +1,5 @@
 import { IDType } from '@famalabs/nestx-core';
-import { User } from '../dto/user';
+import { User } from '../../dto/user';
 
 export interface IUsersService {
   create(data: any): Promise<User>;
