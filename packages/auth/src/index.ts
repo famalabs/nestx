@@ -12,5 +12,4 @@ export * from './identity-provider/user-identity/user-identity.service';
 export * from './constants';
 export * from './middlewares/instance.middleware';
 export * from './identity-provider/google';
-export * from './identity-provider/facebook';
 export * from './dto';
