@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UnprocessableEntityException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UnprocessableEntityException, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-respone.dto';
@@ -7,9 +7,9 @@ import { SignupDto } from './dto/signup.dto';
 import { LoginGuard } from './guards/login.guard';
 import { JwtGuard } from './guards/jwt.guard';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { User } from './decorators';
 import { NotificationTokenDto, EmailDto, RefreshTokenDto } from './dto';
 import { ACL, GRANT } from './acl';
+import { ReqWithUser } from './interfaces';
 
 @ACL(GRANT.ANY)
 @ApiTags('Auth')
@@ -49,8 +49,8 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: 'Logout' })
-  async logout(@User() user): Promise<void> {
-    return await this.authService.logout(user.id);
+  async logout(@Req() req: ReqWithUser): Promise<void> {
+    return await this.authService.logout(req.user.id);
   }
 
   @Post('email/verify')
@@ -82,7 +82,7 @@ export class AuthController {
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: 'Me route' })
   @ApiBearerAuth()
-  async me(@User() user): Promise<any> {
-    return user;
+  async me(@Req() req: ReqWithUser): Promise<any> {
+    return req.user;
   }
 }
