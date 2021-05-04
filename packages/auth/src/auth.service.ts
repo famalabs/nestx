@@ -17,7 +17,7 @@ import {
 } from './constants';
 import { User } from './dto/user';
 import { LoginDto, ResetPasswordDto, SignupDto } from './dto';
-import { UserIdentityService } from './user-identity/user-identity.service';
+import { UserIdentityService } from './identity-provider/user-identity/user-identity.service';
 import { TokenService } from './token/token.service';
 import { EmailNotificationService, IEmailOptions } from './notification/email';
 import {
@@ -29,12 +29,12 @@ import {
   ITokens,
   IUsersService,
   NOTIFICATION_CATEGORY,
+  THIRD_PARTY_PROVIDER,
 } from './interfaces';
 import { v4 as uuidv4 } from 'uuid';
 import * as crypto from 'crypto';
 import { Request } from 'express';
 import { AuthOptions } from './interfaces/module/auth-options.interface';
-import { JwtModuleOptions } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -44,8 +44,8 @@ export class AuthService {
     private readonly tokenService: TokenService,
     private readonly emailNotificationService: EmailNotificationService,
     private readonly userIdentityService: UserIdentityService,
+
     @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions,
-    @Inject(JWT_OPTIONS) private jwtOptions: JwtModuleOptions,
   ) {
     this.usersService = this._AuthOptions.usersService;
     this.notificationSender = this._AuthOptions.notificationSender;
@@ -80,7 +80,7 @@ export class AuthService {
     const user = await this.usersService.findById(refreshToken.userId);
     const payload: IJwtPayload = {
       sub: {
-        userId: user.id,
+        id: user.id,
         roles: user.roles,
       },
     };
@@ -96,28 +96,11 @@ export class AuthService {
   private createLoginResponse(accessToken: string, refreshToken: string): ILoginResponse {
     const loginResponse: ILoginResponse = {
       accessToken: accessToken,
-      expiresIn: this.jwtOptions.signOptions.expiresIn,
+      expiresIn: this._AuthOptions.jwtModuleConfig.signOptions.expiresIn,
       tokenType: 'Bearer',
       refreshToken: refreshToken,
     };
     return loginResponse;
-  }
-
-  tokenFromRequestExtractor(req: Request) {
-    return this._AuthOptions.constants.jwt.tokenFromRequestExtractor(req);
-  }
-
-  private async createTokensForUser(userId: string, roles: string[]): Promise<ITokens> {
-    const payload: IJwtPayload = {
-      sub: {
-        userId: userId,
-        roles: roles,
-      },
-    };
-    const accessToken = await this.tokenService.createAccessToken(payload);
-    const refreshToken = await this.tokenService.createRefreshToken(userId);
-
-    return { accessToken, refreshToken };
   }
 
   async validateUser(email: string, password: string): Promise<User> {
@@ -171,6 +154,22 @@ export class AuthService {
     return registeredUser;
   }
 
+  tokenFromRequestExtractor(req: Request) {
+    return this._AuthOptions.constants.jwt.tokenFromRequestExtractor(req);
+  }
+
+  private async createTokensForUser(userId: string, roles: string[]): Promise<ITokens> {
+    const payload: IJwtPayload = {
+      sub: {
+        id: userId,
+        roles: roles,
+      },
+    };
+    const accessToken = await this.tokenService.createAccessToken(payload);
+    const refreshToken = await this.tokenService.createRefreshToken(userId);
+
+    return { accessToken, refreshToken };
+  }
   async sendVerificationEmail(email: string): Promise<boolean> {
     const emailNotification = await this.createEmailNotification(email, NOTIFICATION_CATEGORY.ACCOUNT_VERIFICATION);
     if (!emailNotification) {

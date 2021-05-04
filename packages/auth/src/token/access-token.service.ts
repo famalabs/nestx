@@ -13,9 +13,9 @@ export interface IAccessTokenService {
 export class AccessTokenService implements IAccessTokenService {
   private signOptions: JwtSignOptions;
   private verifyOptions: JwtVerifyOptions;
-  constructor(private jwtService: JwtService, @Inject(JWT_OPTIONS) private jwtOptions: JwtModuleOptions) {
-    this.signOptions = this.jwtOptions.signOptions;
-    this.verifyOptions = this.jwtOptions.verifyOptions;
+  constructor(private jwtService: JwtService, @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions) {
+    this.signOptions = this._AuthOptions.jwtModuleConfig.signOptions;
+    this.verifyOptions = this._AuthOptions.jwtModuleConfig.verifyOptions;
   }
 
   async create(payload: IJwtPayload): Promise<string> {

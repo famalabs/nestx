@@ -1,4 +1,4 @@
-import { DynamicModule, MiddlewareConsumer, Module, Provider } from '@nestjs/common';
+import { DynamicModule, HttpModule, MiddlewareConsumer, Module, Provider } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
@@ -7,13 +7,8 @@ import { ACLGuard } from './acl/guards';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AUTH_OPTIONS, JWT_OPTIONS, PASSPORT_OPTIONS } from './constants';
-import { FacebookController } from './facebook/facebook.controller';
-import { FacebookGuard, FacebookLinkGuard } from './facebook/guards';
-import { FacebookMiddleware } from './facebook/middlewares/facebook.middleware';
-import { FacebookLinkStrategy, FacebookStrategy } from './facebook/strategies';
-import { GoogleController } from './google/google.controller';
-import { GoogleGuard, GoogleLinkGuard } from './google/guards';
-import { GoogleLinkStrategy, GoogleStrategy } from './google/strategies';
+import { FacebookMiddleware } from './identity-provider/facebook/middlewares/facebook.middleware';
+
 import { JwtGuard } from './guards';
 import { AuthAsyncOptions, AuthOptions, AuthOptionsFactory } from './interfaces';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
@@ -21,7 +16,21 @@ import { EmailNotification, RefreshToken, UserIdentity } from './models';
 import { EmailNotificationService } from './notification';
 import { JwtStrategy, LocalStrategy } from './strategies';
 import { AccessTokenService, RefreshTokenService, TokenService } from './token';
-import { UserIdentityService } from './user-identity/user-identity.service';
+import { UserIdentityService } from './identity-provider/user-identity/user-identity.service';
+import {
+  GoogleController,
+  GoogleGuard,
+  GoogleLinkGuard,
+  GoogleLinkStrategy,
+  GoogleStrategy,
+} from './identity-provider/google';
+import {
+  FacebookController,
+  FacebookGuard,
+  FacebookLinkGuard,
+  FacebookLinkStrategy,
+  FacebookStrategy,
+} from './identity-provider/facebook';
 
 @Module({
   imports: [
@@ -30,6 +39,7 @@ import { UserIdentityService } from './user-identity/user-identity.service';
       { name: RefreshToken.name, schema: buildSchema(RefreshToken) },
       { name: UserIdentity.name, schema: buildSchema(UserIdentity) },
     ]),
+    HttpModule,
   ],
   providers: [
     AuthService,
@@ -113,22 +123,6 @@ export class AuthCoreModule {
   public static registerAsync(options: AuthAsyncOptions): DynamicModule {
     const providers = this.createAsyncProviders(options);
 
-    const passportModuleOptions = {
-      provide: PASSPORT_OPTIONS,
-      useFactory: async (options: AuthOptions) => {
-        return options.passportModuleConfig;
-      },
-      inject: [AUTH_OPTIONS],
-    };
-
-    const jwtModuleOptions = {
-      provide: JWT_OPTIONS,
-      useFactory: async (options: AuthOptions) => {
-        return options.jwtModuleConfig;
-      },
-      inject: [AUTH_OPTIONS],
-    };
-
     return {
       module: AuthCoreModule,
       imports: [
@@ -136,8 +130,7 @@ export class AuthCoreModule {
         PassportModule.registerAsync(options.passportModuleConfig),
         JwtModule.registerAsync(options.jwtModuleConfig),
       ],
-
-      providers: [...providers, passportModuleOptions, jwtModuleOptions],
+      providers: [...providers],
       exports: [...providers],
     };
   }

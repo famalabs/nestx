@@ -1,6 +1,15 @@
 export interface IJwtPayload {
-  sub: { userId: string; roles: string[] };
+  sub: IJwtSub;
   iat?: number;
   exp?: number;
   jti?: string;
+}
+
+export interface IJwtSub {
+  id: string;
+  roles: string[];
+}
+
+export interface ReqWithUser extends Request {
+  user: IJwtSub;
 }

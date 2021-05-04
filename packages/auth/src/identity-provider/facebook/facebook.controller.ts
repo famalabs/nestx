@@ -1,11 +1,12 @@
 import { Controller, Get, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ACL } from '../acl/decorators';
-import { GRANT } from '../acl/resolvers';
-import { AuthService } from '../auth.service';
-import { User } from '../decorators';
-import { LoginResponseDto } from '../dto';
-import { JwtGuard } from '../guards/jwt.guard';
+import { ACL } from '../../acl/decorators';
+import { GRANT } from '../../acl/resolvers';
+import { AuthService } from '../../auth.service';
+import { User } from '../../decorators';
+import { LoginResponseDto } from '../../dto';
+import { JwtGuard } from '../../guards/jwt.guard';
+import { ReqWithUser } from '../../interfaces';
 import { FacebookGuard, FacebookLinkGuard } from './guards';
 
 @ACL(GRANT.ANY)
@@ -21,11 +22,11 @@ export class FacebookController {
     return;
   }
 
-  @Get('redirect')
-  @ApiOperation({ summary: 'Facebook login/signup redirect' })
+  @Get('callback')
+  @ApiOperation({ summary: 'Facebook login/signup callback' })
   @UseGuards(FacebookGuard)
-  async facebookLoginCallback(@User() user): Promise<LoginResponseDto> {
-    return await this.authService.thirdPartyLogin(user.id, user.roles);
+  async facebookLoginCallback(@Req() req: ReqWithUser): Promise<LoginResponseDto> {
+    return await this.authService.thirdPartyLogin(req.user.id, req.user.roles);
   }
 
   @Get('connect')
@@ -36,8 +37,8 @@ export class FacebookController {
     return;
   }
 
-  @Get('connect/redirect')
-  @ApiOperation({ summary: 'Facebook link identity redirect' })
+  @Get('connect/callback')
+  @ApiOperation({ summary: 'Facebook link identity callback' })
   @UseGuards(FacebookLinkGuard)
   async linkFacebookIdentityCallback(@Req() req) {
     return;

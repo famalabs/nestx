@@ -1,10 +1,11 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { Inject, Injectable } from '@nestjs/common';
 import { Profile, Strategy } from 'passport-facebook';
-import { AUTH_OPTIONS } from '../../constants';
-import { IThirdPartyUser, THIRD_PARTY_PROVIDER } from '../../interfaces/oauth/third-party-user.interface';
-import { AuthService } from '../../auth.service';
-import { AuthOptions } from '../../interfaces/module/auth-options.interface';
+import { AUTH_OPTIONS } from '../../../constants';
+import { IThirdPartyUser, THIRD_PARTY_PROVIDER } from '../../../interfaces/oauth/third-party-user.interface';
+import { AuthService } from '../../../auth.service';
+import { AuthOptions } from '../../../interfaces/module/auth-options.interface';
+import { IJwtSub } from 'packages/auth/src/interfaces';
 
 @Injectable()
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
@@ -17,7 +18,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       passReqToCallback: false,
     });
   }
-  public async validate(accessToken: string, refreshToken: string, profile: Profile): Promise<any> {
+  public async validate(accessToken: string, refreshToken: string, profile: Profile): Promise<IJwtSub> {
     const thirdPartyUser: IThirdPartyUser = {
       externalId: profile.id,
       email: profile.emails[0].value,

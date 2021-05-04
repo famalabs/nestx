@@ -20,7 +20,7 @@ import { Document } from 'mongoose';
 import { LoginDto, ResetPasswordDto, User } from './dto';
 import * as mocks from 'node-mocks-http';
 import { EmailNotification } from './models';
-import { UserIdentityService } from './user-identity/user-identity.service';
+import { UserIdentityService } from './identity-provider/user-identity/user-identity.service';
 import { EmailNotificationService } from './notification';
 
 const addMinutes = function (dt, minutes) {

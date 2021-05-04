@@ -1,11 +1,11 @@
 import { Inject, Injectable, Logger, LoggerService } from '@nestjs/common';
 import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { UserIdentity } from '../models/user-identity.model';
-import { IThirdPartyUser } from '../interfaces/oauth/third-party-user.interface';
+import { UserIdentity } from '../../models/user-identity.model';
+import { IThirdPartyUser } from '../../interfaces/oauth/third-party-user.interface';
 import { CrudService } from '@famalabs/nestx-core';
-import { AUTH_OPTIONS } from '../constants';
-import { AuthOptions } from '../interfaces';
+import { AUTH_OPTIONS } from '../../constants';
+import { AuthOptions } from '../../interfaces';
 
 /***
  * This class handle userCredentials
