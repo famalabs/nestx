@@ -3,7 +3,6 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { GRANT } from '../../acl';
 import { ACL } from '../../acl/decorators';
 import { AuthService } from '../../auth.service';
-import { User } from '../../decorators';
 import { LoginResponseDto } from '../../dto';
 import { JwtGuard } from '../../guards';
 import { ReqWithUser } from '../../interfaces';
