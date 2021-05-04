@@ -10,13 +10,14 @@ import { UsersService } from '../users/user.service';
 @Injectable()
 export class AuthConfigService implements AuthOptionsFactory {
   constructor(private readonly usersService: UsersService, private readonly configService: ConfigService) {}
-  createAuthOptions(): AuthOptions | Promise<AuthOptions> {
+  async createAuthOptions(): Promise<AuthOptions> {
     return {
       passportModuleConfig: {},
       jwtModuleConfig: {
         secret: this.configService.get<string>('JWT_TOKEN_SECRET'),
         signOptions: { expiresIn: parseInt(this.configService.get<string>('ACCESS_TOKEN_TTL'), 10) },
       },
+
       logger: new Logger(),
       aclManager: new ACLManager(),
       notificationSender: new EmailSenderService(),

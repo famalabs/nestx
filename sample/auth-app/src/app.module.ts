@@ -6,9 +6,8 @@ import { UsersModule } from './users/users.module';
 import { HttpExceptionFilter } from './common/http-exception.filter';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { BooksModule } from './books/books.module';
-import { AuthModule } from '@famalabs/nestx-auth';
-import { SuperGuard } from '@famalabs/nestx-auth';
-import { PassportConfigService, JwtConfigService, AuthConfigService } from './config';
+import { AuthConfigService, JwtConfigService, PassportConfigService } from './config';
+import { AuthModule, SuperGuard } from '@famalabs/nestx-auth';
 
 @Module({
   imports: [
@@ -23,7 +22,9 @@ import { PassportConfigService, JwtConfigService, AuthConfigService } from './co
     UsersModule,
     AuthModule.registerAsync({
       jwtModuleConfig: { useClass: JwtConfigService },
-      passportModuleConfig: { useClass: PassportConfigService },
+      passportModuleConfig: {
+        useClass: PassportConfigService,
+      },
       imports: [UsersModule], // need this import in order to resolve the dependencies  for user model in AuthConfigService
       useClass: AuthConfigService,
     }),
@@ -31,9 +32,9 @@ import { PassportConfigService, JwtConfigService, AuthConfigService } from './co
   ],
   controllers: [AppController],
   providers: [
-    AuthConfigService,
     PassportConfigService,
     JwtConfigService,
+    AuthConfigService,
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,

@@ -24,7 +24,7 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': 'off',
     '@typescript-eslint/ban-types': 'off',
     '@typescript-eslint/no-empty-function': 'off',
-    indent: ['error', 2],
+    indent: ['error', 2, { SwitchCase: 1 }],
     'max-len': ['error', { code: 120 }],
   },
 };
