@@ -27,7 +27,7 @@ export class RefreshTokenService extends CrudService<DocumentType<RefreshToken>>
   }
 
   async refresh(token: string): Promise<IRefreshToken> {
-    const doc = await super.findOne({ value: token });
+    const doc = await this.findOne({ value: token });
     if (!doc) {
       throw new NotFoundException(REFRESH_TOKEN_ERRORS.TOKEN_NOT_FOUND);
     }
@@ -49,7 +49,7 @@ export class RefreshTokenService extends CrudService<DocumentType<RefreshToken>>
       value: randomBytes(64).toString('hex'),
       expiresAt: new Date(date.setDate(date.getDate() + this.refreshTokenTtl)),
     };
-    const refreshToken = await super.create(token);
+    const refreshToken = await this.create(token);
     return refreshToken;
   }
 

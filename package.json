@@ -22,7 +22,7 @@
     "format": "prettier \"packages/**/*.ts\" --write && git status",
     "lint": "npm run lint:packages",
     "lint:packages": "eslint 'packages/**/**.ts' --ignore-pattern 'packages/**/*.spec.ts' --no-error-on-unmatched-pattern",
-    "test": "jest --verbose",
+    "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage --no-cache"
   },
@@ -105,9 +105,8 @@
     "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.ts$": "ts-jest"
+      "^.+\\.(t)s$": "ts-jest"
     },
-    "collectCoverage": true,
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
     "roots": [
