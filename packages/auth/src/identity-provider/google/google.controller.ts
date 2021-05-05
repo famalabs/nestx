@@ -1,7 +1,6 @@
 import { Controller, Get, UseGuards, Req, Res } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { GRANT } from '../../acl';
-import { ACL } from '../../acl/decorators';
+import { ACL, GRANT } from '../../acl';
 import { AuthService } from '../../auth.service';
 import { LoginResponseDto } from '../../dto';
 import { JwtGuard } from '../../guards';

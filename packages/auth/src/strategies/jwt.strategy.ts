@@ -1,9 +1,8 @@
 import { Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, Inject } from '@nestjs/common';
-import { IJwtPayload, IJwtSub } from '../interfaces/oauth/jwt-payload.interface';
 import { AUTH_OPTIONS } from '../constants';
-import { AuthOptions } from '../interfaces/module/auth-options.interface';
+import { AuthOptions, IJwtPayload, IJwtSub } from '../interfaces';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {

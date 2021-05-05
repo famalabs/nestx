@@ -1,6 +1,6 @@
 import { ExecutionContext, Inject, Injectable } from '@nestjs/common';
 import { AuthGuard, IAuthModuleOptions } from '@nestjs/passport';
-import { AuthOptions } from '../../../interfaces/module/auth-options.interface';
+import { AuthOptions } from '../../../interfaces';
 import { AUTH_OPTIONS } from '../../../constants';
 @Injectable()
 export class GoogleLinkGuard extends AuthGuard('google-link') {
@@ -9,10 +9,6 @@ export class GoogleLinkGuard extends AuthGuard('google-link') {
       accessType: 'offline',
     });
   }
-  /**
-   * Reference for getAuthenticationOptions
-   * https://github.com/nestjs/passport/issues/322#issuecomment-642865500
-   */
   getAuthenticateOptions(context: ExecutionContext): IAuthModuleOptions {
     const request = context.switchToHttp().getRequest();
 

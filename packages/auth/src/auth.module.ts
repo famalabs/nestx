@@ -1,9 +1,6 @@
-import { DynamicModule, Global, Module } from '@nestjs/common';
-import { JwtModuleAsyncOptions, JwtModuleOptions } from '@nestjs/jwt';
-import { AuthModuleAsyncOptions, IAuthModuleOptions } from '@nestjs/passport';
+import { DynamicModule, Module } from '@nestjs/common';
 import { AuthCoreModule } from './auth-core.module';
-import { AuthAsyncOptions } from './interfaces/module/auth-async-options.interface';
-import { AuthOptions } from './interfaces/module/auth-options.interface';
+import { AuthAsyncOptions, AuthOptions } from './interfaces';
 
 @Module({})
 export class AuthModule {

@@ -3,20 +3,15 @@ import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 import { buildSchema } from '@typegoose/typegoose';
-import { ACLGuard } from './acl/guards';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AUTH_OPTIONS, JWT_OPTIONS, PASSPORT_OPTIONS } from './constants';
-import { FacebookMiddleware } from './identity-provider/facebook/middlewares/facebook.middleware';
-
 import { JwtGuard } from './guards';
 import { AuthAsyncOptions, AuthOptions, AuthOptionsFactory } from './interfaces';
-import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { EmailNotification, RefreshToken, UserIdentity } from './models';
 import { EmailNotificationService } from './notification';
 import { JwtStrategy, LocalStrategy } from './strategies';
 import { AccessTokenService, RefreshTokenService, TokenService } from './token';
-import { UserIdentityService } from './identity-provider/user-identity/user-identity.service';
 import {
   GoogleController,
   GoogleGuard,
@@ -31,6 +26,9 @@ import {
   FacebookLinkStrategy,
   FacebookStrategy,
 } from './identity-provider/facebook';
+import { UserIdentityService } from './identity-provider';
+import { ACLGuard } from './acl';
+import { LoggerMiddleware } from './middlewares';
 
 @Module({
   imports: [
@@ -170,6 +168,5 @@ export class AuthCoreModule {
 
   public configure(consumer: MiddlewareConsumer) {
     consumer.apply(LoggerMiddleware).forRoutes(AuthController);
-    consumer.apply(FacebookMiddleware).forRoutes('facebook/*');
   }
 }

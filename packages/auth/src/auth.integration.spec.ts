@@ -404,7 +404,8 @@
 //       });
 //       done();
 //     });
-//     it('should warning a user that no identity exists but there is an account with the provided email', async done => {
+//     it('should warning a user that no identity exists
+// but there is an account with the provided email', async done => {
 //       const user = {
 //         email: 'user@email.com',
 //         password: 'myPassword',

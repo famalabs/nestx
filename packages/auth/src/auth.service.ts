@@ -7,20 +7,10 @@ import {
   InternalServerErrorException,
   BadRequestException,
 } from '@nestjs/common';
+import { AUTH_OPTIONS, EMAIL_ERRORS, LOGIN_ERRORS, RESET_PASSWORD_ERRORS, SIGNUP_ERRORS } from './constants';
+import { LoginDto, ResetPasswordDto, SignupDto, User } from './dto';
 import {
-  AUTH_OPTIONS,
-  EMAIL_ERRORS,
-  JWT_OPTIONS,
-  LOGIN_ERRORS,
-  RESET_PASSWORD_ERRORS,
-  SIGNUP_ERRORS,
-} from './constants';
-import { User } from './dto/user';
-import { LoginDto, ResetPasswordDto, SignupDto } from './dto';
-import { UserIdentityService } from './identity-provider/user-identity/user-identity.service';
-import { TokenService } from './token/token.service';
-import { EmailNotificationService, IEmailOptions } from './notification/email';
-import {
+  AuthOptions,
   IEmailNotification,
   IJwtPayload,
   ILoginResponse,
@@ -29,12 +19,13 @@ import {
   ITokens,
   IUsersService,
   NOTIFICATION_CATEGORY,
-  THIRD_PARTY_PROVIDER,
 } from './interfaces';
 import { v4 as uuidv4 } from 'uuid';
 import * as crypto from 'crypto';
 import { Request } from 'express';
-import { AuthOptions } from './interfaces/module/auth-options.interface';
+import { TokenService } from './token';
+import { UserIdentityService } from './identity-provider';
+import { EmailNotificationService, IEmailOptions } from './notification';
 
 @Injectable()
 export class AuthService {

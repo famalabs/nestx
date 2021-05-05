@@ -1,5 +1,5 @@
 import { LoggerService } from '@nestjs/common';
-import { JwtModuleOptions, JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
+import { JwtModuleOptions } from '@nestjs/jwt';
 import { IAuthModuleOptions } from '@nestjs/passport';
 import { ACLManager } from '../../acl';
 import { INotificationSender } from '../notifications/notification-sender.interface';

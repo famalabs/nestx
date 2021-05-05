@@ -1,11 +1,11 @@
 import { PassportStrategy } from '@nestjs/passport';
-import { Profile, Strategy, StrategyOptionsWithRequest, VerifyCallback } from 'passport-google-oauth20';
-import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { UserIdentityService } from '../../user-identity/user-identity.service';
+import { Profile, Strategy, StrategyOptionsWithRequest } from 'passport-google-oauth20';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import qs = require('qs');
 import { TokenService } from '../../../token';
 import { AuthOptions, IJwtSub, IThirdPartyUser, THIRD_PARTY_PROVIDER } from '../../../interfaces';
 import { AUTH_OPTIONS } from '../../../constants';
+import { UserIdentityService } from '../../user-identity';
 
 @Injectable()
 export class GoogleLinkStrategy extends PassportStrategy(Strategy, 'google-link') {

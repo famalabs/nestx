@@ -7,10 +7,7 @@ export class FacebookLinkGuard extends AuthGuard('facebook-link') {
   constructor(@Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions) {
     super();
   }
-  /**
-   * Reference for getAuthenticationOptions
-   * https://github.com/nestjs/passport/issues/322#issuecomment-642865500
-   */
+
   getAuthenticateOptions(context: ExecutionContext): IAuthModuleOptions {
     const request = context.switchToHttp().getRequest();
     const nestx_token = this._AuthOptions.constants.jwt.tokenFromRequestExtractor(request);

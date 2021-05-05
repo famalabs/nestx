@@ -1,7 +1,7 @@
-import { IEmailNotification, NOTIFICATION_CATEGORY } from '../interfaces/notifications/notification.interface';
 import { index, prop } from '@typegoose/typegoose';
 import { BaseModel } from '@famalabs/nestx-core';
 import { ApiProperty } from '@nestjs/swagger';
+import { IEmailNotification, NOTIFICATION_CATEGORY } from '../interfaces';
 
 @index({ to: 1, category: 1, token: 1 }, { unique: true })
 export class EmailNotification extends BaseModel implements IEmailNotification {
