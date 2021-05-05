@@ -1,13 +1,11 @@
 import { PassportStrategy } from '@nestjs/passport';
-import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Profile, Strategy } from 'passport-facebook';
-import { AUTH_OPTIONS, JWT_ERRORS } from '../../../constants';
-import { IThirdPartyUser, THIRD_PARTY_PROVIDER } from '../../../interfaces/oauth/third-party-user.interface';
+import { AUTH_OPTIONS } from '../../../constants';
+import { AuthOptions, IJwtSub, IThirdPartyUser, THIRD_PARTY_PROVIDER } from '../../../interfaces';
 import { UserIdentityService } from '../../user-identity/user-identity.service';
 import qs = require('qs');
 import { TokenService } from '../../../token/token.service';
-import { AuthOptions } from '../../../interfaces/module/auth-options.interface';
-import { IJwtSub } from 'packages/auth/src/interfaces';
 
 @Injectable()
 export class FacebookLinkStrategy extends PassportStrategy(Strategy, 'facebook-link') {
