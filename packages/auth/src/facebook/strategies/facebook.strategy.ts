@@ -1,9 +1,9 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { Inject, Injectable } from '@nestjs/common';
 import { Profile, Strategy } from 'passport-facebook';
-import { AUTH_OPTIONS } from '../../../constants';
-import { AuthOptions, IJwtSub, IThirdPartyUser, THIRD_PARTY_PROVIDER } from '../../../interfaces';
-import { AuthService } from '../../../auth.service';
+import { AUTH_OPTIONS } from '../../constants';
+import { AuthOptions, IJwtSub, IThirdPartyUser, THIRD_PARTY_PROVIDER } from '../../interfaces';
+import { AuthService } from '../../auth.service';
 
 @Injectable()
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {

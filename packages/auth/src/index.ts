@@ -10,5 +10,7 @@ export * from './strategies';
 export * from './token';
 export * from './constants';
 export * from './middlewares';
-export * from './identity-provider';
+export * from './google';
+export * from './facebook';
+export * from './user-identity';
 export * from './dto';

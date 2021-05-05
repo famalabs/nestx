@@ -12,23 +12,17 @@ import { EmailNotification, RefreshToken, UserIdentity } from './models';
 import { EmailNotificationService } from './notification';
 import { JwtStrategy, LocalStrategy } from './strategies';
 import { AccessTokenService, RefreshTokenService, TokenService } from './token';
-import {
-  GoogleController,
-  GoogleGuard,
-  GoogleLinkGuard,
-  GoogleLinkStrategy,
-  GoogleStrategy,
-} from './identity-provider/google';
+import { GoogleController, GoogleGuard, GoogleLinkGuard, GoogleLinkStrategy, GoogleStrategy } from './google';
 import {
   FacebookController,
   FacebookGuard,
   FacebookLinkGuard,
   FacebookLinkStrategy,
   FacebookStrategy,
-} from './identity-provider/facebook';
-import { UserIdentityService } from './identity-provider';
+} from './facebook';
 import { ACLGuard } from './acl';
 import { LoggerMiddleware } from './middlewares';
+import { UserIdentityService } from './user-identity';
 
 @Module({
   imports: [

@@ -24,8 +24,8 @@ import { v4 as uuidv4 } from 'uuid';
 import * as crypto from 'crypto';
 import { Request } from 'express';
 import { TokenService } from './token';
-import { UserIdentityService } from './identity-provider';
 import { EmailNotificationService, IEmailOptions } from './notification';
+import { UserIdentityService } from './user-identity';
 
 @Injectable()
 export class AuthService {

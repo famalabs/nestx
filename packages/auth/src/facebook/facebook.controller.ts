@@ -1,11 +1,11 @@
 import { Controller, Get, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ACL } from '../../acl/decorators';
-import { GRANT } from '../../acl/resolvers';
-import { AuthService } from '../../auth.service';
-import { LoginResponseDto } from '../../dto';
-import { JwtGuard } from '../../guards/jwt.guard';
-import { ReqWithUser } from '../../interfaces';
+import { ACL } from '../acl/decorators';
+import { GRANT } from '../acl/resolvers';
+import { AuthService } from '../auth.service';
+import { LoginResponseDto } from '../dto';
+import { JwtGuard } from '../guards/jwt.guard';
+import { ReqWithUser } from '../interfaces';
 import { FacebookGuard, FacebookLinkGuard } from './guards';
 
 @ACL(GRANT.ANY)
