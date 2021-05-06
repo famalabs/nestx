@@ -55,6 +55,9 @@ export class AuthService {
   async login(data: LoginDto): Promise<ILoginResponse> {
     const { email, password } = data;
     const user = await this.usersService.validateUser(email, password);
+    if (!user) {
+      throw new NotFoundException(LOGIN_ERRORS.WRONG_CREDENTIALS);
+    }
     if (this._AuthOptions.constants.blockNotVerifiedUser && !user.isVerified) {
       throw new UnauthorizedException(LOGIN_ERRORS.USER_NOT_VERIFIED);
     }
@@ -161,6 +164,7 @@ export class AuthService {
 
     return { accessToken, refreshToken };
   }
+
   async sendVerificationEmail(email: string): Promise<boolean> {
     const emailNotification = await this.createEmailNotification(email, NOTIFICATION_CATEGORY.ACCOUNT_VERIFICATION);
     if (!emailNotification) {
