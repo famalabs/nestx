@@ -14,18 +14,6 @@ export const SIGNUP_ERRORS = {
   USER_ALREADY_EXISTS: 'User already exists.',
   USER_NOT_FOUND: "This user doesn't exists.",
 };
-export const EMAIL_ERRORS = {
-  USER_NOT_FOUND: "This user doesn't exists.",
-  EMAIL_SENT_RECENTLY: 'Email sent recently.',
-  EMAIL_NOT_SENT: 'Error sending email.',
-  EMAIL_WRONG_VERIFY_CODE: 'Wrong verify code.',
-};
-export const RESET_PASSWORD_ERRORS = {
-  WRONG_CREDENTIALS: 'Wrong credentials.',
-  WRONG_TOKEN: 'Wrong token.',
-  TOKEN_EXPIRED: 'Token expired.',
-  RESET_ERROR: 'Reset password error.',
-};
 export const JWT_ERRORS = {
   TOKEN_BLACKLISTED: 'Token not valid.',
   WRONG_OWNER: 'Wrong owner.',

@@ -5,7 +5,6 @@ export * from './auth.controller';
 export * from './guards';
 export * from './interfaces';
 export * from './models';
-export * from './notification';
 export * from './strategies';
 export * from './token';
 export * from './constants';

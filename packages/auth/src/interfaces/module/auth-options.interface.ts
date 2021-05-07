@@ -2,7 +2,6 @@ import { LoggerService } from '@nestjs/common';
 import { JwtModuleOptions } from '@nestjs/jwt';
 import { IAuthModuleOptions } from '@nestjs/passport';
 import { ACLManager } from '../../acl';
-import { INotificationSender } from '../notifications/notification-sender.interface';
 import { IThirdPartyProviderOptions } from '../oauth/third-party-providers-options.interface';
 import { IUsersService } from '../user/users-service.interface';
 
@@ -18,11 +17,6 @@ export interface AuthOptions {
    * Service used to handle users auth
    */
   usersService: IUsersService;
-
-  /**
-   * Class used to send notify
-   */
-  notificationSender: INotificationSender;
 
   /**
    * Class used to handle permissions and resolvers.
@@ -55,21 +49,6 @@ export interface AuthOptions {
        * @returns accessToken or null
        */
       tokenFromRequestExtractor: JwtFromRequestFunction;
-    };
-    mail: {
-      /**
-       * The email address of the organization (the sender)
-       */
-      auth: {
-        user: string;
-      };
-      /**
-       * Link for redirect in email body
-       */
-      links: {
-        emailVerification: string;
-        forgotPassword: string;
-      };
     };
     social: {
       /**

@@ -30,9 +30,8 @@ export class AuthController {
 
   @Post('signup')
   @ApiOperation({ summary: 'Signup user' })
-  async signup(@Body() data: SignupDto): Promise<boolean> {
+  async signup(@Body() data: SignupDto): Promise<void> {
     await this.authService.signup(data);
-    return await this.authService.sendVerificationEmail(data.email);
   }
 
   @Post('token')
@@ -54,31 +53,6 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout' })
   async logout(@Req() req: ReqWithUser): Promise<void> {
     return await this.authService.logout(req.user.id);
-  }
-
-  @Post('email/verify')
-  @ApiOperation({ summary: 'Verify email' })
-  async verifyEmail(@Body() token: NotificationTokenDto): Promise<boolean> {
-    const res = await this.authService.verifyEmail(token.value);
-    return res;
-  }
-
-  @Post('email/resend-verification')
-  @ApiOperation({ summary: 'Resend verification email' })
-  async resendVerificationEmail(@Body() email: EmailDto): Promise<boolean> {
-    return await this.authService.resendVerificationEmail(email.value);
-  }
-
-  @Post('email/forgot-password')
-  @ApiOperation({ summary: 'Forgot password' })
-  async sendForgottenPasswordEmail(@Body() email: EmailDto): Promise<boolean> {
-    return await this.authService.sendForgottenPasswordEmail(email.value);
-  }
-
-  @Post('email/reset-password')
-  @ApiOperation({ summary: 'Reset password' })
-  async setNewPassord(@Body() resetPwd: ResetPasswordDto): Promise<boolean> {
-    return this.authService.resetPassword(resetPwd);
   }
 
   @Get('me')
