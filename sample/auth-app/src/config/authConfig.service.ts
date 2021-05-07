@@ -20,21 +20,11 @@ export class AuthConfigService implements AuthOptionsFactory {
 
       logger: new Logger(),
       aclManager: new ACLManager(),
-      notificationSender: new EmailSenderService(),
       constants: {
         blockNotVerifiedUser: false,
         jwt: {
           tokenFromRequestExtractor: ExtractJwt.fromAuthHeaderAsBearerToken(),
           refreshTokenTTL: parseInt(this.configService.get<string>('REFRESH_TOKEN_TTL')) || 30, // 30 Days
-        },
-        mail: {
-          auth: {
-            user: this.configService.get<string>('MAIL_AUTH_USER'),
-          },
-          links: {
-            emailVerification: 'http://localhost:3000',
-            forgotPassword: 'http://localhost:3000',
-          },
         },
         social: {
           facebook: {

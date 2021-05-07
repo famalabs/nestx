@@ -8,18 +8,11 @@ import { AuthService } from './auth.service';
 import { AUTH_OPTIONS, JWT_OPTIONS, PASSPORT_OPTIONS } from './constants';
 import { JwtGuard } from './guards';
 import { AuthAsyncOptions, AuthOptions, AuthOptionsFactory } from './interfaces';
-import { EmailNotification, RefreshToken, UserIdentity } from './models';
-import { EmailNotificationService } from './notification';
+import { RefreshToken, UserIdentity } from './models';
 import { JwtStrategy, LocalStrategy } from './strategies';
 import { AccessTokenService, RefreshTokenService, TokenService } from './token';
-import { GoogleController, GoogleGuard, GoogleLinkGuard, GoogleLinkStrategy, GoogleStrategy } from './google';
-import {
-  FacebookController,
-  FacebookGuard,
-  FacebookLinkGuard,
-  FacebookLinkStrategy,
-  FacebookStrategy,
-} from './facebook';
+import { GoogleGuard, GoogleLinkGuard, GoogleLinkStrategy, GoogleStrategy } from './google';
+import { FacebookGuard, FacebookLinkGuard, FacebookLinkStrategy, FacebookStrategy } from './facebook';
 import { ACLGuard } from './acl';
 import { LoggerMiddleware } from './middlewares';
 import { UserIdentityService } from './user-identity';
@@ -27,7 +20,6 @@ import { UserIdentityService } from './user-identity';
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: EmailNotification.name, schema: buildSchema(EmailNotification) },
       { name: RefreshToken.name, schema: buildSchema(RefreshToken) },
       { name: UserIdentity.name, schema: buildSchema(UserIdentity) },
     ]),
@@ -41,7 +33,6 @@ import { UserIdentityService } from './user-identity';
     LocalStrategy,
     UserIdentityService,
     JwtStrategy,
-    EmailNotificationService,
     JwtGuard,
     ACLGuard,
     GoogleGuard,
@@ -53,13 +44,12 @@ import { UserIdentityService } from './user-identity';
     FacebookLinkStrategy,
     FacebookStrategy,
   ],
-  controllers: [AuthController, GoogleController, FacebookController],
+  controllers: [],
   exports: [
     AuthService,
     TokenService,
     LocalStrategy,
     JwtStrategy,
-    EmailNotificationService,
     JwtGuard,
     ACLGuard,
     GoogleGuard,

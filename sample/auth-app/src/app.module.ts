@@ -7,7 +7,7 @@ import { HttpExceptionFilter } from './common/http-exception.filter';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { BooksModule } from './books/books.module';
 import { AuthConfigService, JwtConfigService, PassportConfigService } from './config';
-import { AuthModule, SuperGuard } from '@famalabs/nestx-auth';
+import { AuthController, AuthModule, FacebookController, GoogleController, SuperGuard } from '@famalabs/nestx-auth';
 
 @Module({
   imports: [
@@ -30,7 +30,7 @@ import { AuthModule, SuperGuard } from '@famalabs/nestx-auth';
     }),
     BooksModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, AuthController, GoogleController, FacebookController],
   providers: [
     PassportConfigService,
     JwtConfigService,
