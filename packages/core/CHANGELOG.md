@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.23](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.22...v0.1.0-alpha.23) (2021-05-07)
+
+**Note:** Version bump only for package @famalabs/nestx-core
+
+
+
+
+
+
 # [0.1.0-alpha.19](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.18...v0.1.0-alpha.19) (2020-11-29)
 
 

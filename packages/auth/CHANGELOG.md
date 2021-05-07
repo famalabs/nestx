@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.23](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.22...v0.1.0-alpha.23) (2021-05-07)
+
+
+### Bug Fixes
+
+* change folder structure for strange behaviour with barrel file ([6ac0d08](https://github.com/famalabs/nestx/commit/6ac0d0814143f9e14b5a9d999b904847bb8d090b))
+* fix imports ([bb0ca4d](https://github.com/famalabs/nestx/commit/bb0ca4db867dd41ee87fe210eb30eae022ad0036))
+* fix imports ([007adc0](https://github.com/famalabs/nestx/commit/007adc0e52192399e5951a65fec09993bbab4e49))
+* fix index.ts ([23b0535](https://github.com/famalabs/nestx/commit/23b05354b294edc94614678c3b234d76b3a1d764))
+* remove plugin module and change import interface ([2eb176f](https://github.com/famalabs/nestx/commit/2eb176ff293ca954f23f1ad8f4ad0c3fd4bf4f43))
+* remove unusued decorator ([b0ec657](https://github.com/famalabs/nestx/commit/b0ec6573d6a307f2e2d9f72218e145a594a3562e))
+* remove unusued decorator ([0d4bf15](https://github.com/famalabs/nestx/commit/0d4bf15a2159c546d72376ac6f039eca8fc5f2c3))
+
+
+### Features
+
+* init facebook refactor ([9b74b55](https://github.com/famalabs/nestx/commit/9b74b5537162e6f21b8c15999ebb55657bb31c07))
+* init google refactor ([91decad](https://github.com/famalabs/nestx/commit/91decad105ccbeb3ef313b5b78a1d2d91da372fc))
+* refactor token service ([09ea3ac](https://github.com/famalabs/nestx/commit/09ea3ac412c2374df6a9546579a5ca6f810f04c6))
+
+
+
+
+
+
 # [0.1.0-alpha.22](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.21...v0.1.0-alpha.22) (2020-12-06)
 
 
