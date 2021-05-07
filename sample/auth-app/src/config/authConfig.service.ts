@@ -4,7 +4,6 @@ import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ACLManager } from '@famalabs/nestx-auth';
 import { ExtractJwt } from 'passport-jwt';
-import { EmailSenderService } from '../notification-sender.service';
 import { UsersService } from '../users/user.service';
 
 @Injectable()
