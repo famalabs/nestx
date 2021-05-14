@@ -3,6 +3,7 @@ import { JwtService, JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
 import { AuthOptions, IJwtPayload } from '../interfaces';
 import { v4 as uuidv4 } from 'uuid';
 import { AUTH_OPTIONS, JWT_ERRORS } from '../constants';
+import { JwtTokenService } from './jwt-token.service';
 
 export interface IAccessTokenService {
   create(payload: IJwtPayload): Promise<string>;
@@ -11,24 +12,15 @@ export interface IAccessTokenService {
 
 @Injectable()
 export class AccessTokenService implements IAccessTokenService {
-  private signOptions: JwtSignOptions;
-  private verifyOptions: JwtVerifyOptions;
-  constructor(private jwtService: JwtService, @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions) {
-    this.signOptions = this._AuthOptions.jwtModuleConfig.signOptions;
-    this.verifyOptions = this._AuthOptions.jwtModuleConfig.verifyOptions;
-  }
+  constructor(private jwtTokenService: JwtTokenService, @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions) {}
 
   async create(payload: IJwtPayload): Promise<string> {
-    const signOptions = {} as JwtSignOptions;
-    Object.assign(signOptions, this.signOptions);
-    signOptions.jwtid = uuidv4();
-    const token = this.jwtService.sign(payload, signOptions);
-    return token;
+    return await this.jwtTokenService.create(payload);
   }
 
   async verify(token: string): Promise<IJwtPayload> {
     try {
-      return this.jwtService.verify<IJwtPayload>(token, this.verifyOptions);
+      return this.jwtTokenService.verify<IJwtPayload>(token);
     } catch (err) {
       throw new UnauthorizedException(JWT_ERRORS.TOKEN_NOT_VALID);
     }

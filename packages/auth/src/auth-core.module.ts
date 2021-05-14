@@ -16,6 +16,7 @@ import { FacebookGuard, FacebookLinkGuard, FacebookLinkStrategy, FacebookStrateg
 import { ACLGuard } from './acl';
 import { LoggerMiddleware } from './middlewares';
 import { UserIdentityService } from './user-identity';
+import { JwtTokenService } from './token/jwt-token.service';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { UserIdentityService } from './user-identity';
     FacebookLinkGuard,
     FacebookLinkStrategy,
     FacebookStrategy,
+    JwtTokenService,
   ],
   controllers: [],
   exports: [

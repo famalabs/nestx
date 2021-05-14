@@ -7,16 +7,21 @@ import { TestingModule, Test } from '@nestjs/testing';
 import { AUTH_OPTIONS, REFRESH_TOKEN_ERRORS } from '../constants';
 import { BadRequestException } from '@nestjs/common';
 import { RefreshTokenService } from './refresh-token.service';
+import { JwtTokenService } from './jwt-token.service';
+import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 
 describe('RefreshTokenService', () => {
   let service: RefreshTokenService;
   let options: AuthOptions;
   let model: ReturnModelType<AnyParamConstructor<RefreshToken>>;
+  const jwtConfig: JwtModuleOptions = { secret: 'secret', signOptions: { expiresIn: 900 }, verifyOptions: {} };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [JwtModule.register(jwtConfig)],
       providers: [
         RefreshTokenService,
+        JwtTokenService,
         {
           provide: getModelToken(RefreshToken.name),
           useValue: {
@@ -27,7 +32,7 @@ describe('RefreshTokenService', () => {
         },
         {
           provide: AUTH_OPTIONS,
-          useValue: { constants: { jwt: { refreshTokenTTL: 30 } } },
+          useValue: { constants: { jwt: { refreshTokenTTL: 30 } }, jwtModuleConfig: jwtConfig },
         },
       ],
     }).compile();

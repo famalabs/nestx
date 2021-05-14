@@ -4,6 +4,7 @@ import { TestingModule, Test } from '@nestjs/testing';
 import { AUTH_OPTIONS } from '../constants';
 import { AccessTokenService } from './access-token.service';
 import { UnauthorizedException } from '@nestjs/common';
+import { JwtTokenService } from './jwt-token.service';
 
 describe('AccessTokenService', () => {
   let service: AccessTokenService;
@@ -17,6 +18,7 @@ describe('AccessTokenService', () => {
       imports: [JwtModule.register(jwtConfig)],
       providers: [
         AccessTokenService,
+        JwtTokenService,
         {
           provide: AUTH_OPTIONS,
           useValue: { jwtModuleConfig: jwtConfig },

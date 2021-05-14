@@ -1,11 +1,11 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
-import { randomBytes } from 'crypto';
 import { CrudService } from '@famalabs/nestx-core';
 import { AuthOptions, IRefreshToken } from '../interfaces';
 import { RefreshToken } from '../models';
 import { AUTH_OPTIONS, REFRESH_TOKEN_ERRORS } from '../constants';
+import { JwtTokenService } from './jwt-token.service';
 
 export interface IRefreshTokenService {
   createTokenForUser(userId: string): Promise<IRefreshToken>;
@@ -21,6 +21,7 @@ export class RefreshTokenService extends CrudService<DocumentType<RefreshToken>>
     @InjectModel(RefreshToken.name)
     private readonly _tokenModel: ReturnModelType<typeof RefreshToken>,
     @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions,
+    private jwtTokenService: JwtTokenService,
   ) {
     super(_tokenModel);
     this.refreshTokenTtl = _AuthOptions.constants.jwt.refreshTokenTTL;
@@ -31,12 +32,10 @@ export class RefreshTokenService extends CrudService<DocumentType<RefreshToken>>
     if (!doc) {
       throw new NotFoundException(REFRESH_TOKEN_ERRORS.TOKEN_NOT_FOUND);
     }
-
     const currentDate = new Date();
     if (doc.expiresAt < currentDate) {
       throw new BadRequestException(REFRESH_TOKEN_ERRORS.TOKEN_EXPIRED);
     }
-
     await this.deleteById(doc.id);
     const refreshToken = await this.createTokenForUser(doc.userId);
     return refreshToken;
@@ -44,10 +43,13 @@ export class RefreshTokenService extends CrudService<DocumentType<RefreshToken>>
 
   async createTokenForUser(userId: string): Promise<IRefreshToken> {
     const date = new Date();
+    const refreshTokenDayTTL = this.refreshTokenTtl;
+    const refreshTokenExpiresIn = refreshTokenDayTTL * 24 * 60 * 60;
+    const jwtToken = await this.jwtTokenService.create({}, refreshTokenExpiresIn);
     const token: IRefreshToken = {
       userId: userId,
-      value: randomBytes(64).toString('hex'),
-      expiresAt: new Date(date.setDate(date.getDate() + this.refreshTokenTtl)),
+      value: jwtToken,
+      expiresAt: new Date(date.setDate(date.getDate() + refreshTokenDayTTL)),
     };
     const refreshToken = await this.create(token);
     return refreshToken;
