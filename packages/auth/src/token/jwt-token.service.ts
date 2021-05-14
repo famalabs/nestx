@@ -25,7 +25,6 @@ export class JwtTokenService implements JwtTokenService {
       signOptions.expiresIn = expiresIn;
     }
     signOptions.jwtid = uuidv4();
-    console.log(signOptions);
     const token = this.jwtService.sign(payload, signOptions);
     return token;
   }
