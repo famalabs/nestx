@@ -2,34 +2,16 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
-import { LoginResponseDto } from '@famalabs/nestx-auth/dto';
 import { User } from '../src/users/user.model';
-import { EmailService } from '@famalabs/nestx-auth/email/email.service';
-let loginResponse: LoginResponseDto;
-let user: User;
 
 describe('AppController (e2e)', () => {
   let server;
   let app: INestApplication;
-  let emailService = {
-    findOne: async () => Promise.resolve(null),
-    sendEmail: async () => Promise.resolve(true),
-    delete: () => null,
-    findOneAndUpdate: async () =>
-      Promise.resolve({
-        email: 'user@email.com',
-        emailToken: '123456',
-        timestamp: new Date(),
-      }),
-  };
 
   beforeAll(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    })
-      .overrideProvider(EmailService)
-      .useValue(emailService)
-      .compile();
+    }).compile();
 
     app = moduleRef.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidUnknownValues: true }));

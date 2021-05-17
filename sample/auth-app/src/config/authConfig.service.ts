@@ -23,7 +23,6 @@ export class AuthConfigService implements AuthOptionsFactory {
         blockNotVerifiedUser: false,
         jwt: {
           tokenFromRequestExtractor: ExtractJwt.fromAuthHeaderAsBearerToken(),
-          refreshTokenTTL: parseInt(this.configService.get<string>('REFRESH_TOKEN_TTL')) || 30, // 30 Days
           refreshTokenVerifyOptions: {
             secret: 'refresh_token_secret',
           },

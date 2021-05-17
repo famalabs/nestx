@@ -38,11 +38,6 @@ export interface AuthOptions {
      */
     blockNotVerifiedUser: boolean;
     jwt: {
-      /**
-       * Time-to-live for refresh token
-       */
-      refreshTokenTTL: number;
-
       refreshTokenVerifyOptions: JwtVerifyOptions;
       refreshTokenSignOptions: JwtSignOptions;
 

@@ -5,7 +5,7 @@ import { RefreshToken } from '../models';
 import { getModelToken } from '@nestjs/mongoose';
 import { TestingModule, Test } from '@nestjs/testing';
 import { AUTH_OPTIONS, REFRESH_TOKEN_ERRORS } from '../constants';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { RefreshTokenService } from './refresh-token.service';
 import { JwtTokenService } from './jwt-token.service';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
@@ -32,7 +32,15 @@ describe('RefreshTokenService', () => {
         },
         {
           provide: AUTH_OPTIONS,
-          useValue: { constants: { jwt: { refreshTokenTTL: 30 } }, jwtModuleConfig: jwtConfig },
+          useValue: {
+            constants: {
+              jwt: {
+                refreshTokenSignOptions: { secret: 'refresh_token_secret', expiresIn: 30 * 24 * 60 * 60 },
+                refreshTokenVerifyOptions: { secret: 'refresh_token_secret' },
+              },
+            },
+            jwtModuleConfig: jwtConfig,
+          },
         },
       ],
     }).compile();
@@ -53,22 +61,16 @@ describe('RefreshTokenService', () => {
   });
 
   describe('refresh', () => {
-    it('should not get new refresh token with an expired refresh token', async () => {
-      const addMinutes = function (dt: Date, minutes: number): Date {
-        return new Date(dt.getTime() + minutes * 60000);
-      };
-      const date = new Date();
-      const oldDate = addMinutes(date, -16);
-
+    it('should not get new refresh token with an invalid refresh token', async () => {
       const mockRefreshToken: IRefreshToken = {
         value: 'refreshToken',
-        expiresAt: oldDate,
+        expiresAt: new Date(),
         userId: 'userId',
       };
 
       jest.spyOn(service, 'findOne').mockImplementation(() => mockRefreshToken as any);
 
-      await expect(() => service.refresh(mockRefreshToken.value)).rejects.toThrow(BadRequestException);
+      await expect(() => service.refresh(mockRefreshToken.value)).rejects.toThrow(UnauthorizedException);
     });
   });
 });
