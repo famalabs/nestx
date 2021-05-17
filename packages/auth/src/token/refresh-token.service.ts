@@ -1,8 +1,8 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import { CrudService } from '@famalabs/nestx-core';
-import { AuthOptions, IJwtPayload, IRefreshToken } from '../interfaces';
+import { AuthOptions, IRefreshToken } from '../interfaces';
 import { RefreshToken } from '../models';
 import { AUTH_OPTIONS, REFRESH_TOKEN_ERRORS } from '../constants';
 import { JwtTokenService } from './jwt-token.service';
