@@ -1,9 +1,9 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService, JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
-import { AuthOptions, IJwtPayload } from '../interfaces';
+import * as jwt from 'jsonwebtoken';
+import { IJwtPayload } from '../interfaces';
 import { v4 as uuidv4 } from 'uuid';
-import { AUTH_OPTIONS, JWT_ERRORS } from '../constants';
-
+import { JWT_ERRORS } from '../constants';
 export interface IJwtTokenService {
   create(payload: IJwtPayload): Promise<string>;
   verify(token: string): Promise<IJwtPayload>;
@@ -11,27 +11,21 @@ export interface IJwtTokenService {
 
 @Injectable()
 export class JwtTokenService implements JwtTokenService {
-  private signOptions: JwtSignOptions;
-  private verifyOptions: JwtVerifyOptions;
-  constructor(private jwtService: JwtService, @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions) {
-    this.signOptions = this._AuthOptions.jwtModuleConfig.signOptions;
-    this.verifyOptions = this._AuthOptions.jwtModuleConfig.verifyOptions;
-  }
+  constructor(private jwtService: JwtService) {}
 
-  async create(payload: any, expiresIn?: number): Promise<string> {
+  async create(payload: any, options: JwtSignOptions): Promise<string> {
     const signOptions = {} as JwtSignOptions;
-    Object.assign(signOptions, this.signOptions);
-    if (expiresIn) {
-      signOptions.expiresIn = expiresIn;
-    }
+    Object.assign(signOptions, options);
     signOptions.jwtid = uuidv4();
     const token = this.jwtService.sign(payload, signOptions);
     return token;
   }
 
-  async verify<T extends Object>(token: string): Promise<T> {
+  async verify(token: string, options: JwtVerifyOptions): Promise<IJwtPayload> {
     try {
-      return this.jwtService.verify<T>(token, this.verifyOptions);
+      const verifyOptions = {} as JwtVerifyOptions;
+      Object.assign(verifyOptions, options);
+      return this.jwtService.verify<IJwtPayload>(token, verifyOptions);
     } catch (err) {
       throw new UnauthorizedException(JWT_ERRORS.TOKEN_NOT_VALID);
     }

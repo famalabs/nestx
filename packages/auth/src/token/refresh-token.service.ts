@@ -2,10 +2,11 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from '@nes
 import { InjectModel } from '@nestjs/mongoose';
 import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import { CrudService } from '@famalabs/nestx-core';
-import { AuthOptions, IRefreshToken } from '../interfaces';
+import { AuthOptions, IJwtPayload, IRefreshToken } from '../interfaces';
 import { RefreshToken } from '../models';
 import { AUTH_OPTIONS, REFRESH_TOKEN_ERRORS } from '../constants';
 import { JwtTokenService } from './jwt-token.service';
+import { JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
 
 export interface IRefreshTokenService {
   createTokenForUser(userId: string): Promise<IRefreshToken>;
@@ -15,8 +16,8 @@ export interface IRefreshTokenService {
 
 @Injectable()
 export class RefreshTokenService extends CrudService<DocumentType<RefreshToken>> implements IRefreshTokenService {
-  private refreshTokenTtl: number;
-
+  private verifyOptions: JwtVerifyOptions;
+  private signOptions: JwtSignOptions;
   constructor(
     @InjectModel(RefreshToken.name)
     private readonly _tokenModel: ReturnModelType<typeof RefreshToken>,
@@ -24,7 +25,8 @@ export class RefreshTokenService extends CrudService<DocumentType<RefreshToken>>
     private jwtTokenService: JwtTokenService,
   ) {
     super(_tokenModel);
-    this.refreshTokenTtl = _AuthOptions.constants.jwt.refreshTokenTTL;
+    this.signOptions = _AuthOptions.constants.jwt.refreshTokenSignOptions;
+    this.verifyOptions = _AuthOptions.constants.jwt.refreshTokenVerifyOptions;
   }
 
   async refresh(token: string): Promise<IRefreshToken> {
@@ -32,24 +34,20 @@ export class RefreshTokenService extends CrudService<DocumentType<RefreshToken>>
     if (!doc) {
       throw new NotFoundException(REFRESH_TOKEN_ERRORS.TOKEN_NOT_FOUND);
     }
-    const currentDate = new Date();
-    if (doc.expiresAt < currentDate) {
-      throw new BadRequestException(REFRESH_TOKEN_ERRORS.TOKEN_EXPIRED);
-    }
+    await this.jwtTokenService.verify(token, this.verifyOptions);
     await this.deleteById(doc.id);
     const refreshToken = await this.createTokenForUser(doc.userId);
     return refreshToken;
   }
 
   async createTokenForUser(userId: string): Promise<IRefreshToken> {
-    const date = new Date();
-    const refreshTokenDayTTL = this.refreshTokenTtl;
-    const refreshTokenExpiresIn = refreshTokenDayTTL * 24 * 60 * 60;
-    const jwtToken = await this.jwtTokenService.create({}, refreshTokenExpiresIn);
+    const jwtToken = await this.jwtTokenService.create({}, this.signOptions);
+    const payload = await this.jwtTokenService.verify(jwtToken, this.verifyOptions);
+    const expiresAt = new Date(payload.exp * 1000);
     const token: IRefreshToken = {
       userId: userId,
       value: jwtToken,
-      expiresAt: new Date(date.setDate(date.getDate() + refreshTokenDayTTL)),
+      expiresAt: expiresAt,
     };
     const refreshToken = await this.create(token);
     return refreshToken;

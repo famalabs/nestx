@@ -1,5 +1,5 @@
 import { LoggerService } from '@nestjs/common';
-import { JwtModuleOptions } from '@nestjs/jwt';
+import { JwtModuleOptions, JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
 import { IAuthModuleOptions } from '@nestjs/passport';
 import { ACLManager } from '../../acl';
 import { IThirdPartyProviderOptions } from '../oauth/third-party-providers-options.interface';
@@ -42,6 +42,10 @@ export interface AuthOptions {
        * Time-to-live for refresh token
        */
       refreshTokenTTL: number;
+
+      refreshTokenVerifyOptions: JwtVerifyOptions;
+      refreshTokenSignOptions: JwtSignOptions;
+
       /**
        * Function that extract the accessToken from a request
        *

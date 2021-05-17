@@ -24,6 +24,13 @@ export class AuthConfigService implements AuthOptionsFactory {
         jwt: {
           tokenFromRequestExtractor: ExtractJwt.fromAuthHeaderAsBearerToken(),
           refreshTokenTTL: parseInt(this.configService.get<string>('REFRESH_TOKEN_TTL')) || 30, // 30 Days
+          refreshTokenVerifyOptions: {
+            secret: 'refresh_token_secret',
+          },
+          refreshTokenSignOptions: {
+            expiresIn: 30 * 24 * 60 * 60,
+            secret: 'refresh_token_secret',
+          },
         },
         social: {
           facebook: {
