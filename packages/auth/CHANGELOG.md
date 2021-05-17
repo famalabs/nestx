@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.25](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.24...v0.1.0-alpha.25) (2021-05-17)
+
+
+### Bug Fixes
+
+* fix typo ([90e995d](https://github.com/famalabs/nestx/commit/90e995d9be15b9e0692c80b82d25a0568b8e0953))
+
+
+
+
+
 # [0.1.0-alpha.24](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.23...v0.1.0-alpha.24) (2021-05-17)
 
 
