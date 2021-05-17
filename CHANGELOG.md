@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.24](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.23...v0.1.0-alpha.24) (2021-05-17)
+
+
+### Bug Fixes
+
+* fix typo ([83efebe](https://github.com/famalabs/nestx/commit/83efebe56b6a0b8356e818c63d6becc9d35bb587))
+
+
+### Features
+
+* make refresh token a jwt ([c218162](https://github.com/famalabs/nestx/commit/c218162b48e09ea9307102efa89e6b7700d6b674))
+* refresh token is now a jwt with dedicated sign and verify options ([0e11d9a](https://github.com/famalabs/nestx/commit/0e11d9a620e3c4fd22045d3efa08a3b988d8b65f))
+
+
+
+
+
 # [0.1.0-alpha.23](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.22...v0.1.0-alpha.23) (2021-05-07)
 
 
