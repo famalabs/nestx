@@ -64,7 +64,7 @@ export class AuthService {
     return this.createLoginResponse(accessToken, refreshToken.value);
   }
 
-  private createLoginResponse(accessToken: string, refreshToken: string): ILoginResponse {
+  createLoginResponse(accessToken: string, refreshToken: string): ILoginResponse {
     const loginResponse: ILoginResponse = {
       accessToken: accessToken,
       expiresIn: this._AuthOptions.jwtModuleConfig.signOptions.expiresIn,
@@ -129,7 +129,7 @@ export class AuthService {
     return this._AuthOptions.constants.jwt.tokenFromRequestExtractor(req);
   }
 
-  private async createTokensForUser(userId: string, roles: string[]): Promise<ITokens> {
+  async createTokensForUser(userId: string, roles: string[]): Promise<ITokens> {
     const payload: IJwtPayload = {
       sub: {
         id: userId,
