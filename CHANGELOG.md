@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.26](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.25...v0.1.0-alpha.26) (2021-05-18)
+
+
+### Bug Fixes
+
+* make methods public ([3c79fbc](https://github.com/famalabs/nestx/commit/3c79fbc404aa51bc0badd7f5b970d66187163005))
+
+
+
+
+
 # [0.1.0-alpha.25](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.24...v0.1.0-alpha.25) (2021-05-17)
 
 
