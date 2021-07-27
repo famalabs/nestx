@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.27](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.26...v0.1.0-alpha.27) (2021-07-27)
+
+
+### Bug Fixes
+
+* change expiresIn to expires ([185955d](https://github.com/famalabs/nestx/commit/185955d856d95eb2e89961bf9031092cf29b4fbc))
+* fix typo ([7863fdf](https://github.com/famalabs/nestx/commit/7863fdf2943a3c1eacc5df8d0add7d482be520d9))
+* remove regeneration of refresh token after refresh token request ([1c9a37f](https://github.com/famalabs/nestx/commit/1c9a37f156921d4b7b0ca9901a9f606c2d6aa562))
+
+
+
+
+
 # [0.1.0-alpha.26](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.25...v0.1.0-alpha.26) (2021-05-18)
 
 
