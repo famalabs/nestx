@@ -14,7 +14,7 @@ export class LoginResponseDto implements ILoginResponse {
 
   @ApiProperty()
   @IsDefined()
-  expiresIn: string | number;
+  expires: number;
 
   @ApiPropertyOptional()
   @IsOptional()

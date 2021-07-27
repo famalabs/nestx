@@ -64,10 +64,12 @@ export class AuthService {
     return this.createLoginResponse(accessToken, refreshToken.value);
   }
 
-  createLoginResponse(accessToken: string, refreshToken: string): ILoginResponse {
+  async createLoginResponse(accessToken: string, refreshToken: string): Promise<ILoginResponse> {
+    const payload = await this.tokenService.verifyAccessToken(accessToken);
+    const expiresAt: number = new Date(payload.exp * 1000).getTime();
     const loginResponse: ILoginResponse = {
       accessToken: accessToken,
-      expiresIn: this._AuthOptions.jwtModuleConfig.signOptions.expiresIn,
+      expires: expiresAt,
       tokenType: 'Bearer',
       refreshToken: refreshToken,
     };

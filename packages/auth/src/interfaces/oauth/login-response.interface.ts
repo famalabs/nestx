@@ -9,7 +9,7 @@ export interface ILoginResponse extends IAccessToken {
 export interface IAccessToken {
   accessToken: string;
   tokenType: TokenType;
-  expiresIn: string | number;
+  expires: number;
 }
 
 export interface ITokens {

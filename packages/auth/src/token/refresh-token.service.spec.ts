@@ -64,7 +64,7 @@ describe('RefreshTokenService', () => {
     it('should not get new refresh token with an invalid refresh token', async () => {
       const mockRefreshToken: IRefreshToken = {
         value: 'refreshToken',
-        expiresAt: new Date(),
+        expires: new Date(),
         userId: 'userId',
       };
 

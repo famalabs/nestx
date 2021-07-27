@@ -47,7 +47,7 @@ export class RefreshTokenService extends CrudService<DocumentType<RefreshToken>>
     const token: IRefreshToken = {
       userId: userId,
       value: jwtToken,
-      expiresAt: expiresAt,
+      expires: expiresAt,
     };
     const refreshToken = await this.create(token);
     return refreshToken;
