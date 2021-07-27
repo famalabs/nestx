@@ -17,7 +17,7 @@ export class JwtTokenService implements JwtTokenService {
     const signOptions = {} as JwtSignOptions;
     Object.assign(signOptions, options);
     signOptions.jwtid = uuidv4();
-    const token = this.jwtService.sign(payload, signOptions);
+    const token = this.jwtService.sign({ ...payload, iat: Date.now() }, signOptions);
     return token;
   }
 

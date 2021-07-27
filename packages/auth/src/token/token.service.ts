@@ -4,7 +4,7 @@ import { AccessTokenService } from './access-token.service';
 import { RefreshTokenService } from './refresh-token.service';
 
 export interface ITokenService {
-  refresh(token: string): Promise<IRefreshToken>;
+  verifyRefreshToken(token: string): Promise<IRefreshToken>;
   deleteRefreshTokenForUser(userId: string): Promise<void>;
   createAccessToken(payload: IJwtPayload): Promise<string>;
   createRefreshToken(userId: string): Promise<IRefreshToken>;
@@ -18,8 +18,8 @@ export class TokenService implements ITokenService {
     private readonly refreshTokenService: RefreshTokenService,
   ) {}
 
-  async refresh(token: string): Promise<IRefreshToken> {
-    return await this.refreshTokenService.refresh(token);
+  async verifyRefreshToken(token: string): Promise<IRefreshToken> {
+    return await this.refreshTokenService.verify(token);
   }
 
   async deleteRefreshTokenForUser(userId: string): Promise<void> {

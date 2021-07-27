@@ -1,16 +1,16 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import { CrudService } from '@famalabs/nestx-core';
 import { AuthOptions, IRefreshToken } from '../interfaces';
 import { RefreshToken } from '../models';
-import { AUTH_OPTIONS, REFRESH_TOKEN_ERRORS } from '../constants';
+import { AUTH_OPTIONS, JWT_ERRORS, REFRESH_TOKEN_ERRORS } from '../constants';
 import { JwtTokenService } from './jwt-token.service';
 import { JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
 
 export interface IRefreshTokenService {
   createTokenForUser(userId: string): Promise<IRefreshToken>;
-  refresh(token: string): Promise<IRefreshToken>;
+  verify(token: string): Promise<IRefreshToken>;
   deleteRefreshTokenForUser(userId: string): Promise<void>;
 }
 
@@ -29,15 +29,17 @@ export class RefreshTokenService extends CrudService<DocumentType<RefreshToken>>
     this.verifyOptions = _AuthOptions.constants.jwt.refreshTokenVerifyOptions;
   }
 
-  async refresh(token: string): Promise<IRefreshToken> {
-    const doc = await this.findOne({ value: token });
-    if (!doc) {
-      throw new NotFoundException(REFRESH_TOKEN_ERRORS.TOKEN_NOT_FOUND);
+  async verify(token: string): Promise<IRefreshToken> {
+    try {
+      const doc = await this.findOne({ value: token });
+      if (!doc) {
+        throw new NotFoundException(REFRESH_TOKEN_ERRORS.TOKEN_NOT_FOUND);
+      }
+      await this.jwtTokenService.verify(token, this.verifyOptions);
+      return doc;
+    } catch (err) {
+      throw new UnauthorizedException(JWT_ERRORS.TOKEN_NOT_VALID);
     }
-    await this.jwtTokenService.verify(token, this.verifyOptions);
-    await this.deleteById(doc.id);
-    const refreshToken = await this.createTokenForUser(doc.userId);
-    return refreshToken;
   }
 
   async createTokenForUser(userId: string): Promise<IRefreshToken> {

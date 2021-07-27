@@ -47,7 +47,7 @@ export class AuthService {
   }
 
   async refresh(token: string): Promise<ILoginResponse> {
-    const refreshToken = await this.tokenService.refresh(token);
+    const refreshToken = await this.tokenService.verifyRefreshToken(token);
     const user = await this.usersService.findById(refreshToken.userId);
     const payload: IJwtPayload = {
       sub: {

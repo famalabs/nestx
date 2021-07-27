@@ -59,18 +59,4 @@ describe('RefreshTokenService', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
-
-  describe('refresh', () => {
-    it('should not get new refresh token with an invalid refresh token', async () => {
-      const mockRefreshToken: IRefreshToken = {
-        value: 'refreshToken',
-        expires: new Date(),
-        userId: 'userId',
-      };
-
-      jest.spyOn(service, 'findOne').mockImplementation(() => mockRefreshToken as any);
-
-      await expect(() => service.refresh(mockRefreshToken.value)).rejects.toThrow(UnauthorizedException);
-    });
-  });
 });
