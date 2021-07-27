@@ -11,7 +11,7 @@ export class RefreshToken extends BaseModel implements IRefreshToken {
   userId!: string;
 
   @prop({ required: true })
-  expires!: Date;
+  expires!: number;
 
   @ApiProperty({ type: Date })
   createdAt?: Date;

@@ -45,7 +45,7 @@ export class RefreshTokenService extends CrudService<DocumentType<RefreshToken>>
   async createTokenForUser(userId: string): Promise<IRefreshToken> {
     const jwtToken = await this.jwtTokenService.create({}, this.signOptions);
     const payload = await this.jwtTokenService.verify(jwtToken, this.verifyOptions);
-    const expiresAt = new Date(payload.exp * 1000);
+    const expiresAt = payload.exp;
     const token: IRefreshToken = {
       userId: userId,
       value: jwtToken,
