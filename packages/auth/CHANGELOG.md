@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.28](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.27...v0.1.0-alpha.28) (2021-08-01)
+
+
+### Features
+
+* better description for error messages about token ([592f575](https://github.com/famalabs/nestx/commit/592f575c35b6e192391db58bd61bf5f89d62b757))
+
+
+
+
+
 # [0.1.0-alpha.27](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.26...v0.1.0-alpha.27) (2021-07-27)
 
 
