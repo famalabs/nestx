@@ -15,11 +15,11 @@ export const SIGNUP_ERRORS = {
   USER_NOT_FOUND: "This user doesn't exists.",
 };
 export const JWT_ERRORS = {
-  TOKEN_BLACKLISTED: 'Token not valid.',
-  WRONG_OWNER: 'Wrong owner.',
   TOKEN_NOT_VALID: 'Token not valid.',
+  MISSING: 'Missing token.',
 };
 export const REFRESH_TOKEN_ERRORS = {
   TOKEN_NOT_FOUND: 'Refresh token not found',
   TOKEN_EXPIRED: 'Refresh token expired',
+  TOKEN_NOT_VALID: 'Refresh token not valid',
 };

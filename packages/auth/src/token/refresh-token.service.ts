@@ -38,7 +38,7 @@ export class RefreshTokenService extends CrudService<DocumentType<RefreshToken>>
       await this.jwtTokenService.verify(token, this.verifyOptions);
       return doc;
     } catch (err) {
-      throw new UnauthorizedException(JWT_ERRORS.TOKEN_NOT_VALID);
+      throw new UnauthorizedException(REFRESH_TOKEN_ERRORS.TOKEN_NOT_VALID);
     }
   }
 
