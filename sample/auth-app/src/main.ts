@@ -4,8 +4,11 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  const logger = new Logger('Main', true);
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
+  const logger = new Logger('Main');
+  app.useLogger(logger);
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidUnknownValues: true }));
   createSwaggerDoc(app);
   await app.listen(3000);
