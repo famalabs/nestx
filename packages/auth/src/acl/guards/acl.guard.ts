@@ -1,5 +1,4 @@
 import { Injectable, CanActivate, ExecutionContext, Inject, LoggerService } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core/injector/module-ref';
 import { Request } from 'express';
 import { ACLContext, ACLType, Resolver } from '../types';
 import { ACLManager } from '../acl-manager';
@@ -11,7 +10,7 @@ import { AUTH_OPTIONS } from '../../constants';
 export class ACLGuard implements CanActivate {
   aclManager: ACLManager;
   logger: LoggerService;
-  constructor(private readonly moduleRef: ModuleRef, @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions) {
+  constructor(@Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions) {
     this.aclManager = this._AuthOptions.aclManager;
     this.logger = this._AuthOptions.logger;
   }
@@ -72,8 +71,7 @@ export class ACLGuard implements CanActivate {
     const req = ctx.switchToHttp().getRequest<Request>();
     const user = req.user;
     const instance = req['instance'];
-    const controller = await this.moduleRef.get(classType, { strict: false }); // get controller reference
-    const aclCtx: ACLContext = { controller, handler, user, instance, req, acl };
+    const aclCtx: ACLContext = { handler, user, instance, req, acl };
     return aclCtx;
   }
 

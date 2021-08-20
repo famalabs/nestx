@@ -2,7 +2,6 @@ import { Instance } from '../middlewares/instance.middleware';
 import { Request } from 'express';
 
 export interface ACLContext {
-  controller: any;
   handler: Function;
   user: any;
   instance: Instance;

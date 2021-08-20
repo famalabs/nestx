@@ -1,4 +1,4 @@
-import { DynamicModule, HttpModule, MiddlewareConsumer, Module, Provider } from '@nestjs/common';
+import { DynamicModule, MiddlewareConsumer, Module, Provider } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
@@ -24,7 +24,6 @@ import { JwtTokenService } from './token/jwt-token.service';
       { name: RefreshToken.name, schema: buildSchema(RefreshToken) },
       { name: UserIdentity.name, schema: buildSchema(UserIdentity) },
     ]),
-    HttpModule,
   ],
   providers: [
     AuthService,

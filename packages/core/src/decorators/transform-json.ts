@@ -21,10 +21,10 @@ export function TransformJSON(
   transformOptions?: ClassTransformOptions,
 ): PropertyDecorator {
   return applyDecorators(
-    Transform((value, obj, transformationType: TransformationType) => {
-      if (transformationType === TransformationType.PLAIN_TO_CLASS) {
+    Transform(({ value, key, obj, type }) => {
+      if (type === TransformationType.PLAIN_TO_CLASS) {
         return toType(typeFn(), value, transformOptions);
-      } else if (transformationType === TransformationType.CLASS_TO_PLAIN) {
+      } else if (type === TransformationType.CLASS_TO_PLAIN) {
         return toString(value, transformOptions);
       } else {
         return value;

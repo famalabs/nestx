@@ -23,7 +23,7 @@ function authenticated(ctx: ACLContext): boolean {
 
 function owner(ctx: ACLContext): boolean {
   //extract ctx info
-  const { controller, handler, user, instance, req } = ctx;
+  const { handler, user, instance, req } = ctx;
 
   //if no req.user
   if (!user) {
