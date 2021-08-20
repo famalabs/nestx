@@ -13,13 +13,13 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@nestjs/common": "^7.5.5",
-    "@nestjs/core": "^7.5.5",
-    "@nestjs/swagger": "^4.7.5",
-    "@typegoose/typegoose": "^7.4.2",
-    "class-transformer": "^0.3.1",
-    "class-validator": "^0.12.2",
+    "@nestjs/common": "^8.0.6",
+    "@nestjs/core": "^8.0.6",
+    "@nestjs/swagger": "^5.0.9",
+    "@typegoose/typegoose": "^8.1.1",
+    "class-transformer": "^0.4.0",
+    "class-validator": "^0.13.1",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^6.6.3"
+    "rxjs": "^7.3.0"
   }
 }
