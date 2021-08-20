@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.29](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.28...v0.1.0-alpha.29) (2021-08-20)
+
+
+### Bug Fixes
+
+* "prettier/[@typescript-eslint](https://github.com/typescript-eslint)" has been merged into "prettier" in eslint-config-prettier 8.0.0 ([d1acb5d](https://github.com/famalabs/nestx/commit/d1acb5d228b6359bca08b326c467566c5471937b))
+* general fix for dep update ([b11c612](https://github.com/famalabs/nestx/commit/b11c612c5df6f835b8c60e3ecd5f35d2495c4a9e))
+
+
+
+
+
 # [0.1.0-alpha.28](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.27...v0.1.0-alpha.28) (2021-08-01)
 
 
