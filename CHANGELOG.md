@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.30](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.29...v0.1.0-alpha.30) (2021-08-29)
+
+
+### Features
+
+* add scope default config ([7d7310e](https://github.com/famalabs/nestx/commit/7d7310e21940bafbe737260e1e4e1f40707c39ca))
+* refactor config ([85707c6](https://github.com/famalabs/nestx/commit/85707c61286dc49deff72da6aa9039876baf6abe))
+
+
+
+
+
 # [0.1.0-alpha.29](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.28...v0.1.0-alpha.29) (2021-08-20)
 
 
