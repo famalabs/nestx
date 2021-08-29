@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.1.0-alpha.31](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.30...v0.1.0-alpha.31) (2021-08-29)
+
+
+### Features
+
+* add extra prop to provider config ([a743ab8](https://github.com/famalabs/nestx/commit/a743ab8fe861ecf640af6d23b70672da4b4dfb9c))
+
+
+
+
+
 # [0.1.0-alpha.30](https://github.com/famalabs/nestx/compare/v0.1.0-alpha.29...v0.1.0-alpha.30) (2021-08-29)
 
 
