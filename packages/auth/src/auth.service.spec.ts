@@ -41,9 +41,7 @@ describe('AuthService', () => {
               updateById: jest.fn(),
               setPassword: jest.fn().mockResolvedValue(true),
             },
-            constants: {
-              blockNotVerifiedUser: true,
-            },
+            blockNotVerifiedUser: true,
           },
         },
       ],
@@ -89,11 +87,11 @@ describe('AuthService', () => {
         updatedAt: date,
         id: '1234',
       };
-      const onSpyUsersService = jest.spyOn(usersService, 'validateUser').mockImplementationOnce(
-        async (): Promise<User> => {
+      const onSpyUsersService = jest
+        .spyOn(usersService, 'validateUser')
+        .mockImplementationOnce(async (): Promise<User> => {
           return notVerifiedUser as any;
-        },
-      );
+        });
       await expect(() => service.login(credentials)).rejects.toThrow(UnauthorizedException);
       expect(onSpyUsersService).toHaveBeenCalledWith(credentials.email, credentials.password);
     });

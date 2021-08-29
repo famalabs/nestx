@@ -11,17 +11,23 @@ describe('AccessTokenService', () => {
   let jwtService: JwtService;
   let options: AuthOptions;
 
-  const jwtConfig: JwtModuleOptions = { secret: 'secret', signOptions: { expiresIn: 900 }, verifyOptions: {} };
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [JwtModule.register(jwtConfig)],
+      imports: [JwtModule.register({})],
       providers: [
         AccessTokenService,
         JwtTokenService,
         {
           provide: AUTH_OPTIONS,
-          useValue: { jwtModuleConfig: jwtConfig },
+          useValue: {
+            accessTokenConfig: {
+              signOptions: {
+                expiresIn: 5 * 60,
+                secret: 'secret',
+              },
+              verifyOptions: { secret: 'secret' },
+            },
+          },
         },
       ],
     }).compile();
@@ -47,7 +53,7 @@ describe('AccessTokenService', () => {
       };
       const token = await service.create(payload);
       expect(token).toBeDefined();
-      const valid = jwtService.verify<IJwtPayload>(token);
+      const valid = await service.verify(token);
       expect(valid.sub.id).toBe('001');
     });
 

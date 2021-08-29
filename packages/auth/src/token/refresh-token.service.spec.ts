@@ -14,11 +14,10 @@ describe('RefreshTokenService', () => {
   let service: RefreshTokenService;
   let options: AuthOptions;
   let model: ReturnModelType<AnyParamConstructor<RefreshToken>>;
-  const jwtConfig: JwtModuleOptions = { secret: 'secret', signOptions: { expiresIn: 900 }, verifyOptions: {} };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [JwtModule.register(jwtConfig)],
+      imports: [JwtModule.register({})],
       providers: [
         RefreshTokenService,
         JwtTokenService,
@@ -33,13 +32,15 @@ describe('RefreshTokenService', () => {
         {
           provide: AUTH_OPTIONS,
           useValue: {
-            constants: {
-              jwt: {
-                refreshTokenSignOptions: { secret: 'refresh_token_secret', expiresIn: 30 * 24 * 60 * 60 },
-                refreshTokenVerifyOptions: { secret: 'refresh_token_secret' },
+            refreshTokenConfig: {
+              signOptions: {
+                expiresIn: 30 * 24 * 60 * 60,
+                secret: 'refresh_token_secret',
+              },
+              verifyOptions: {
+                secret: 'refresh_token_secret',
               },
             },
-            jwtModuleConfig: jwtConfig,
           },
         },
       ],
