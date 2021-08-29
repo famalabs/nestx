@@ -17,9 +17,10 @@ export class FacebookLinkStrategy extends PassportStrategy(Strategy, 'facebook-l
     super({
       clientID: _AuthOptions.providers.facebook.clientID,
       clientSecret: _AuthOptions.providers.facebook.clientSecret,
-      callbackURL: _AuthOptions.providers.facebook.linkIdentity.callbackURL,
+      callbackURL: _AuthOptions.providers.facebook.linkCallbackURL,
       profileFields: ['email'],
       passReqToCallback: true,
+      ..._AuthOptions.providers.facebook.strategyOptions,
     });
   }
   public async validate(req: any, accessToken: string, refreshToken: string, profile: Profile): Promise<IJwtSub> {

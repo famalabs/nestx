@@ -31,17 +31,13 @@ export class AuthConfigService implements AuthOptionsFactory {
           callbackURL: this.configService.get<string>('FACEBOOK_CALLBACK_URL'),
           clientID: this.configService.get<string>('FACEBOOK_CLIENT_ID'),
           clientSecret: this.configService.get<string>('FACEBOOK_CLIENT_SECRET'),
-          linkIdentity: {
-            callbackURL: this.configService.get<string>('FACEBOOK_LINK_CALLBACK_URL'),
-          },
+          linkCallbackURL: this.configService.get<string>('FACEBOOK_LINK_CALLBACK_URL'),
         },
         google: {
           callbackURL: this.configService.get<string>('GOOGLE_CALLBACK_URL'),
           clientID: this.configService.get<string>('GOOGLE_CLIENT_ID'),
           clientSecret: this.configService.get<string>('GOOGLE_SECRET'),
-          linkIdentity: {
-            callbackURL: this.configService.get<string>('GOOGLE_LINK_CALLBACK_URL'),
-          },
+          linkCallbackURL: this.configService.get<string>('GOOGLE_LINK_CALLBACK_URL'),
         },
       },
 

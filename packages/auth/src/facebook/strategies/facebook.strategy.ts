@@ -14,6 +14,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       callbackURL: _AuthOptions.providers.facebook.callbackURL,
       profileFields: ['email'],
       passReqToCallback: false,
+      ..._AuthOptions.providers.facebook.strategyOptions,
     });
   }
   public async validate(accessToken: string, refreshToken: string, profile: Profile): Promise<IJwtSub> {
