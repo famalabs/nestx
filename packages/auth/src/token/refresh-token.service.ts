@@ -4,7 +4,7 @@ import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import { CrudService } from '@famalabs/nestx-core';
 import { AuthOptions, IRefreshToken } from '../interfaces';
 import { RefreshToken } from '../models';
-import { AUTH_OPTIONS, JWT_ERRORS, REFRESH_TOKEN_ERRORS } from '../constants';
+import { AUTH_OPTIONS, REFRESH_TOKEN_ERRORS } from '../constants';
 import { JwtTokenService } from './jwt-token.service';
 import { JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
 
@@ -25,8 +25,8 @@ export class RefreshTokenService extends CrudService<DocumentType<RefreshToken>>
     private jwtTokenService: JwtTokenService,
   ) {
     super(_tokenModel);
-    this.signOptions = _AuthOptions.constants.jwt.refreshTokenSignOptions;
-    this.verifyOptions = _AuthOptions.constants.jwt.refreshTokenVerifyOptions;
+    this.signOptions = _AuthOptions.refreshTokenConfig.signOptions;
+    this.verifyOptions = _AuthOptions.refreshTokenConfig.verifyOptions;
   }
 
   async verify(token: string): Promise<IRefreshToken> {

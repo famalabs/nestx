@@ -15,9 +15,9 @@ export class GoogleLinkStrategy extends PassportStrategy(Strategy, 'google-link'
     @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions,
   ) {
     super({
-      clientID: _AuthOptions.constants.social.google.clientID,
-      clientSecret: _AuthOptions.constants.social.google.clientSecret,
-      callbackURL: _AuthOptions.constants.social.google.linkIdentity.callbackURL,
+      clientID: _AuthOptions.providers.google.clientID,
+      clientSecret: _AuthOptions.providers.google.clientSecret,
+      callbackURL: _AuthOptions.providers.google.linkIdentity.callbackURL,
       scope: ['email', 'profile'],
       passReqToCallback: true,
     } as StrategyOptionsWithRequest);
@@ -28,7 +28,6 @@ export class GoogleLinkStrategy extends PassportStrategy(Strategy, 'google-link'
       externalId: profile.id,
       email: profile.emails[0].value,
       accessToken: accessToken,
-      refreshToken: refreshToken,
       provider: THIRD_PARTY_PROVIDER.GOOGLE,
     };
 

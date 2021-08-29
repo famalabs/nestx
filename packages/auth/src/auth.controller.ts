@@ -4,15 +4,7 @@ import { AuthService } from './auth.service';
 import { ACL, GRANT } from './acl';
 import { ReqWithUser } from './interfaces';
 import { JwtGuard, LoginGuard } from './guards';
-import {
-  EmailDto,
-  LoginDto,
-  LoginResponseDto,
-  NotificationTokenDto,
-  RefreshTokenDto,
-  ResetPasswordDto,
-  SignupDto,
-} from './dto';
+import { LoginDto, LoginResponseDto, RefreshTokenDto, SignupDto } from './dto';
 
 @ACL(GRANT.ANY)
 @ApiTags('Auth')

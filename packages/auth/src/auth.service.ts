@@ -1,11 +1,13 @@
 import { Injectable, Inject, UnauthorizedException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { AUTH_OPTIONS, LOGIN_ERRORS, SIGNUP_ERRORS } from './constants';
 import { LoginDto, SignupDto, User } from './dto';
-import { AuthOptions, IJwtPayload, ILoginResponse, IThirdPartyUser, ITokens, IUsersService } from './interfaces';
 import * as crypto from 'crypto';
 import { Request } from 'express';
 import { TokenService } from './token';
 import { UserIdentityService } from './user-identity';
+import { AuthOptions } from './interfaces/module';
+import { IUsersService } from './interfaces/user';
+import { IJwtPayload, ILoginResponse, IThirdPartyUser, ITokens } from './interfaces/oauth';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +15,6 @@ export class AuthService {
   constructor(
     private readonly tokenService: TokenService,
     private readonly userIdentityService: UserIdentityService,
-
     @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions,
   ) {
     this.usersService = this._AuthOptions.usersService;
@@ -35,7 +36,7 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException(LOGIN_ERRORS.WRONG_CREDENTIALS);
     }
-    if (this._AuthOptions.constants.blockNotVerifiedUser && !user.isVerified) {
+    if (this._AuthOptions.blockNotVerifiedUser && !user.isVerified) {
       throw new UnauthorizedException(LOGIN_ERRORS.USER_NOT_VERIFIED);
     }
     const { accessToken, refreshToken } = await this.createTokensForUser(user._id, user.roles);
@@ -128,7 +129,7 @@ export class AuthService {
   }
 
   tokenFromRequestExtractor(req: Request) {
-    return this._AuthOptions.constants.jwt.tokenFromRequestExtractor(req);
+    return this._AuthOptions.accessTokenConfig.tokenFromRequestExtractor(req);
   }
 
   async createTokensForUser(userId: string, roles: string[]): Promise<ITokens> {

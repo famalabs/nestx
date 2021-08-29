@@ -22,7 +22,7 @@ export class UserIdentityService extends CrudService<DocumentType<UserIdentity>>
     @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions,
   ) {
     super(userIdentityModel);
-    this.logger = this._AuthOptions.logger;
+    this.logger = this._AuthOptions.logger || new Logger();
   }
 
   async linkIdentity(thirdPartyUser: IThirdPartyUser, userId: string): Promise<UserIdentity> {
@@ -35,7 +35,6 @@ export class UserIdentityService extends CrudService<DocumentType<UserIdentity>>
       externalId: thirdPartyUser.externalId,
       provider: thirdPartyUser.provider,
       accessToken: thirdPartyUser.accessToken,
-      refreshToken: thirdPartyUser.refreshToken,
       userId: userId,
     };
     return await this.create(userIdentity);

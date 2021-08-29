@@ -6,4 +6,8 @@ import { AuthGuard } from '@nestjs/passport';
  */
 
 @Injectable()
-export class FacebookGuard extends AuthGuard('facebook') {}
+export class FacebookGuard extends AuthGuard('facebook') {
+  constructor() {
+    super({ scope: ['public_profile', 'email'] });
+  }
+}

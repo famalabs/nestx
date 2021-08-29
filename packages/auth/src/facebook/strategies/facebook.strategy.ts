@@ -9,9 +9,9 @@ import { AuthService } from '../../auth.service';
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
   constructor(private readonly authService: AuthService, @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions) {
     super({
-      clientID: _AuthOptions.constants.social.facebook.clientID,
-      clientSecret: _AuthOptions.constants.social.facebook.clientSecret,
-      callbackURL: _AuthOptions.constants.social.facebook.callbackURL,
+      clientID: _AuthOptions.providers.facebook.clientID,
+      clientSecret: _AuthOptions.providers.facebook.clientSecret,
+      callbackURL: _AuthOptions.providers.facebook.callbackURL,
       profileFields: ['email'],
       passReqToCallback: false,
     });
@@ -21,7 +21,6 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       externalId: profile.id,
       email: profile.emails[0].value,
       accessToken: accessToken,
-      refreshToken: refreshToken,
       provider: THIRD_PARTY_PROVIDER.FACEBOOK,
     };
     const user = await this.authService.validateThirdPartyIdentity(thirdPartyUser);

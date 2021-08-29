@@ -5,19 +5,25 @@ import { ACLType } from '../types';
 import { ACLGuard } from './acl.guard';
 import { JwtGuard } from '../../guards/jwt.guard';
 import { AUTH_OPTIONS } from '../../constants';
-import { AuthOptions } from '../../interfaces/module/auth-options.interface';
+import { AuthOptions, JwtFromRequestFunction } from '../../interfaces/module/auth-options.interface';
+import { ExtractJwt } from 'passport-jwt';
 
 @Injectable()
 export class SuperGuard implements CanActivate {
+  tokenExtractor: JwtFromRequestFunction;
+
   constructor(
     @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions,
     private readonly jwtGuard: JwtGuard,
     private readonly aclGuard: ACLGuard,
-  ) {}
+  ) {
+    this.tokenExtractor =
+      _AuthOptions.accessTokenConfig.tokenFromRequestExtractor || ExtractJwt.fromAuthHeaderAsBearerToken();
+  }
 
   async canActivate(context: ExecutionContext) {
     const req = context.switchToHttp().getRequest();
-    const token = await this._AuthOptions.constants.jwt.tokenFromRequestExtractor(req);
+    const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
     const acl = this.getMetadataInfo<ACLType>(context, DECORATORS.ACL);
     if (!token || acl.includes(GRANT.ANY)) {
       return await this.aclGuard.canActivate(context);

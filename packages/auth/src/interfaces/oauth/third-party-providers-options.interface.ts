@@ -5,4 +5,5 @@ export interface IThirdPartyProviderOptions {
   linkIdentity: {
     callbackURL: string;
   };
+  scope?: string | string[] | undefined;
 }

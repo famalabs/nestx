@@ -3,17 +3,22 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { AUTH_OPTIONS, JWT_ERRORS } from '../constants';
 import { JsonWebTokenError } from 'jsonwebtoken';
-import { AuthOptions } from '..';
+import { AuthOptions, JwtFromRequestFunction } from '../interfaces/module/auth-options.interface';
+import { ExtractJwt } from 'passport-jwt';
 
 @Injectable()
 export class JwtGuard extends AuthGuard('jwt') {
+  tokenExtractor: JwtFromRequestFunction;
+
   constructor(@Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions) {
     super();
+    this.tokenExtractor =
+      _AuthOptions.accessTokenConfig.tokenFromRequestExtractor || ExtractJwt.fromAuthHeaderAsBearerToken();
   }
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
 
-    const bearerHeader = this._AuthOptions.constants.jwt.tokenFromRequestExtractor(request);
+    const bearerHeader = this.tokenExtractor(request);
     if (!bearerHeader) {
       throw new UnauthorizedException(JWT_ERRORS.MISSING);
     }

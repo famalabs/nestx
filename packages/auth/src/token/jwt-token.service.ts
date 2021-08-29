@@ -1,6 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService, JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
-import * as jwt from 'jsonwebtoken';
 import { IJwtPayload } from '../interfaces';
 import { v4 as uuidv4 } from 'uuid';
 import { JWT_ERRORS } from '../constants';

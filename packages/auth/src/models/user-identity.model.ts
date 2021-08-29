@@ -14,9 +14,6 @@ export class UserIdentity extends BaseModel implements IThirdPartyUser {
   @prop({ required: false })
   accessToken?: string;
 
-  @prop({ required: false })
-  refreshToken?: string;
-
   @prop({ required: true, enum: THIRD_PARTY_PROVIDER })
   provider: THIRD_PARTY_PROVIDER;
 

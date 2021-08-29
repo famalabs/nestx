@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext, Inject, LoggerService } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, Inject, LoggerService, Logger } from '@nestjs/common';
 import { Request } from 'express';
 import { ACLContext, ACLType, Resolver } from '../types';
 import { ACLManager } from '../acl-manager';
@@ -11,8 +11,8 @@ export class ACLGuard implements CanActivate {
   aclManager: ACLManager;
   logger: LoggerService;
   constructor(@Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions) {
-    this.aclManager = this._AuthOptions.aclManager;
-    this.logger = this._AuthOptions.logger;
+    this.aclManager = this._AuthOptions.aclManager || new ACLManager();
+    this.logger = this._AuthOptions.logger || new Logger();
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

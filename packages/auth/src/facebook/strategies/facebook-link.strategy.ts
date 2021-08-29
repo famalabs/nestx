@@ -15,9 +15,9 @@ export class FacebookLinkStrategy extends PassportStrategy(Strategy, 'facebook-l
     @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions,
   ) {
     super({
-      clientID: _AuthOptions.constants.social.facebook.clientID,
-      clientSecret: _AuthOptions.constants.social.facebook.clientSecret,
-      callbackURL: _AuthOptions.constants.social.facebook.linkIdentity.callbackURL,
+      clientID: _AuthOptions.providers.facebook.clientID,
+      clientSecret: _AuthOptions.providers.facebook.clientSecret,
+      callbackURL: _AuthOptions.providers.facebook.linkIdentity.callbackURL,
       profileFields: ['email'],
       passReqToCallback: true,
     });
@@ -27,7 +27,6 @@ export class FacebookLinkStrategy extends PassportStrategy(Strategy, 'facebook-l
       externalId: profile.id,
       email: profile.emails[0].value,
       accessToken: accessToken,
-      refreshToken: refreshToken,
       provider: THIRD_PARTY_PROVIDER.FACEBOOK,
     };
 

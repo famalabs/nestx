@@ -1,11 +1,11 @@
 import { DynamicModule, MiddlewareConsumer, Module, Provider } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtModuleAsyncOptions } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
-import { PassportModule } from '@nestjs/passport';
+import { AuthModuleAsyncOptions, PassportModule } from '@nestjs/passport';
 import { buildSchema } from '@typegoose/typegoose';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { AUTH_OPTIONS, JWT_OPTIONS, PASSPORT_OPTIONS } from './constants';
+import { AUTH_OPTIONS } from './constants';
 import { JwtGuard } from './guards';
 import { AuthAsyncOptions, AuthOptions, AuthOptionsFactory } from './interfaces';
 import { RefreshToken, UserIdentity } from './models';
@@ -17,7 +17,6 @@ import { ACLGuard } from './acl';
 import { LoggerMiddleware } from './middlewares';
 import { UserIdentityService } from './user-identity';
 import { JwtTokenService } from './token/jwt-token.service';
-
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -74,26 +73,10 @@ export class AuthCoreModule {
       useValue: options,
     };
 
-    const passportModuleOptions = {
-      provide: PASSPORT_OPTIONS,
-      useFactory: async (options: AuthOptions) => {
-        return options.passportModuleConfig;
-      },
-      inject: [AUTH_OPTIONS],
-    };
-
-    const jwtModuleOptions = {
-      provide: JWT_OPTIONS,
-      useFactory: async (options: AuthOptions) => {
-        return options.jwtModuleConfig;
-      },
-      inject: [AUTH_OPTIONS],
-    };
-
-    const providers = [authModuleOptions, passportModuleOptions, jwtModuleOptions];
+    const providers = [authModuleOptions];
     return {
       module: AuthCoreModule,
-      imports: [PassportModule.register(options.passportModuleConfig), JwtModule.register(options.jwtModuleConfig)],
+      imports: [PassportModule, JwtModule.register({})],
       providers: [...providers],
       exports: [...providers],
     };
@@ -108,11 +91,7 @@ export class AuthCoreModule {
 
     return {
       module: AuthCoreModule,
-      imports: [
-        ...options.imports,
-        PassportModule.registerAsync(options.passportModuleConfig),
-        JwtModule.registerAsync(options.jwtModuleConfig),
-      ],
+      imports: [...options.imports, PassportModule, JwtModule.register({})],
       providers: [...providers],
       exports: [...providers],
     };

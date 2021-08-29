@@ -1,5 +1,5 @@
 import { PassportStrategy } from '@nestjs/passport';
-import { Profile, Strategy, VerifyCallback } from 'passport-google-oauth20';
+import { Profile, Strategy } from 'passport-google-oauth20';
 import { Inject, Injectable } from '@nestjs/common';
 import { AuthOptions, IThirdPartyUser, THIRD_PARTY_PROVIDER } from '../../interfaces';
 import { AuthService } from '../../auth.service';
@@ -9,9 +9,9 @@ import { AUTH_OPTIONS } from '../../constants';
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private readonly authService: AuthService, @Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions) {
     super({
-      clientID: _AuthOptions.constants.social.google.clientID,
-      clientSecret: _AuthOptions.constants.social.google.clientSecret,
-      callbackURL: _AuthOptions.constants.social.google.callbackURL,
+      clientID: _AuthOptions.providers.google.clientID,
+      clientSecret: _AuthOptions.providers.google.clientSecret,
+      callbackURL: _AuthOptions.providers.google.callbackURL,
       scope: ['email', 'profile'],
       passReqToCallback: false,
     });
@@ -22,7 +22,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       externalId: profile.id,
       email: profile.emails[0].value,
       accessToken: accessToken,
-      refreshToken: refreshToken,
       provider: THIRD_PARTY_PROVIDER.GOOGLE,
     };
     const user = await this.authService.validateThirdPartyIdentity(thirdPartyUser);
