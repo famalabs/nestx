@@ -12,7 +12,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientID: _AuthOptions.providers.google.clientID,
       clientSecret: _AuthOptions.providers.google.clientSecret,
       callbackURL: _AuthOptions.providers.google.callbackURL,
-      scope: ['email', 'profile'],
+      scope: _AuthOptions.providers.google.scope || ['email', 'profile'],
       passReqToCallback: false,
     });
   }

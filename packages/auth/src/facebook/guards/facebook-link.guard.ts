@@ -8,7 +8,7 @@ export class FacebookLinkGuard extends AuthGuard('facebook-link') {
   tokenExtractor: JwtFromRequestFunction;
 
   constructor(@Inject(AUTH_OPTIONS) private _AuthOptions: AuthOptions) {
-    super({ scope: ['public_profile', 'email'] });
+    super({ scope: _AuthOptions.providers.facebook.scope || ['public_profile', 'email'] });
     this.tokenExtractor =
       _AuthOptions.accessTokenConfig.tokenFromRequestExtractor || ExtractJwt.fromAuthHeaderAsBearerToken();
   }
