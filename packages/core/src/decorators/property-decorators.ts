@@ -19,7 +19,7 @@ export function DateStringProperty(
     ApiProperty({ type: String, example: example_date, ...metadata }),
     IsDate(validationOptions),
     Type(() => Date) as PropertyDecorator,
-    Transform(({ value }) => value && value.toISOString(), { toPlainOnly: true }) as PropertyDecorator,
+    Transform(value => value && value.toISOString(), { toPlainOnly: true }) as PropertyDecorator,
   );
 }
 
